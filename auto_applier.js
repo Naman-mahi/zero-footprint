@@ -9,8 +9,8 @@
  * - 🔍 Dynamic Polling Resolver: Waits up to 10-12s for React/Next.js DOM hydration so NO button is missed.
  * - 🪟 Dual-Tab Auto-Closer: Opens Job Page (Tab 1), clicks apply, handles redirect (Tab 2), and closes BOTH tabs cleanly.
  * - 🛡️ Advanced Anti-Detection: 9-step human pointer cascade, deceleration scroll, and Gaussian spatial jitter.
- * - 🧹 Smart Session & Tracker Cleaner: Full domain cookie & storage wipe with safe state preservation.
- * - ⏱️ 50-Job Batch Pacing: Automatic cooldown break & storage purge at batch milestones (50, 100, 150...).
+ * - 🧹 1-Click Storage & Cookie Purge Button: Wipes domain cookies, localStorage & sessionStorage instantly.
+ * - ⏱️ 50-Job Batch Pacing: Configurable Auto-Continue with 30s human cooldown or Pause & Wait.
  * - 💾 Session Resume: Saves progress in localStorage so you can pause/resume anytime without losing your place.
  * - 🎨 Ultra-Clean Light-Theme HUD: Positioned at top-right (zero overlap with chat widget), vector SVG icons, and step-by-step instructions.
  */
@@ -1029,7 +1029,8 @@
   let isRunning = false;
   let isPaused = false;
   let speedMode = "normal"; // fast (3-4.5s), normal (5-7.5s), stealth (8-12s)
-  const BATCH_MILESTONE = 50; // Pause & purge every 50 jobs
+  let batchBehavior = "auto"; // "auto" (cooldown 30s & continue), "pause" (stop & wait for click)
+  const BATCH_SIZE = 50;
 
   // =========================================================================
   // 🛡️ ADVANCED HUMAN EVENT & ANTI-DETECTION ENGINE
@@ -1159,7 +1160,7 @@
   // =========================================================================
   function wipeAllStorageAndCookies(isQuiet = false) {
     if (!isQuiet) {
-      console.log("%c[Cleanup] Clearing domain cookies and local storage...", "color: #2563eb; font-weight: bold;");
+      console.log("%c[Cleanup] Clearing domain cookies, sessionStorage, and localStorage...", "color: #2563eb; font-weight: bold;");
     }
 
     const savedState = { ...state };
@@ -1182,15 +1183,15 @@
       localStorage.clear();
     } catch (e) {}
 
-    // Restore our bot progress index
+    // Restore bot progress index
     saveState(savedState);
     if (!isQuiet) {
-      log("🧹 Purged tracking cookies & domain storage. Clean slate initialized.", "#059669");
+      log("Wiped all cookies, localStorage & sessionStorage cleanly!", "#059669");
     }
   }
 
   // =========================================================================
-  // 🎨 PURE WHITE LIGHT THEME HUD (VECTOR SVG ICONS & INSTRUCTIONS)
+  // 🎨 PURE WHITE LIGHT THEME HUD (VECTOR SVG ICONS)
   // =========================================================================
   const oldHud = document.getElementById("zero-footprint-light-hud");
   if (oldHud) oldHud.remove();
@@ -1203,11 +1204,12 @@
     pause: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>',
     skip: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>',
     reset: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>',
-    broom: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>',
+    broom: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>',
     shield: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>',
     minimize: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
     close: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
-    info: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>'
+    info: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
+    trash: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>'
   };
 
   const hud = document.createElement("div");
@@ -1218,7 +1220,7 @@
       top: 20px;
       right: 20px;
       z-index: 99999999;
-      width: 395px;
+      width: 400px;
       background: #ffffff;
       border: 1px solid #e2e8f0;
       border-radius: 20px;
@@ -1257,30 +1259,40 @@
         </div>
 
         <!-- Metrics Card -->
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; font-size: 11px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; line-height: 1.5;">
-          <div>Queue: <b id="zfp-progress-text" style="color: #2563eb; font-weight: 700;">${state.currentIndex} / ${jobQueue.length}</b></div>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 14px; margin-bottom: 10px; font-size: 11px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; line-height: 1.5;">
+          <div>Progress: <b id="zfp-progress-text" style="color: #2563eb; font-weight: 700;">${state.currentIndex} / ${jobQueue.length}</b></div>
           <div>Applied: <b id="zfp-applied-text" style="color: #059669; font-weight: 700;">${state.completedCount}</b></div>
           <div style="grid-column: span 2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #64748b;">
             Active: <span id="zfp-target-text" style="color: #0f172a; font-weight: 600;">Ready to start</span>
           </div>
+          <div style="grid-column: span 2; font-size: 10px; color: #64748b; border-top: 1px dashed #e2e8f0; padding-top: 4px; margin-top: 2px;">
+            Batch: <span id="zfp-batch-text" style="color: #2563eb; font-weight: 600;">Batch ${Math.floor(state.currentIndex / BATCH_SIZE) + 1} of ${Math.ceil(jobQueue.length / BATCH_SIZE)} (Jobs ${state.currentIndex + 1}–${Math.min(jobQueue.length, state.currentIndex + BATCH_SIZE)})</span>
+          </div>
         </div>
 
-        <!-- Pacing Selector & Cleaner -->
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; font-size: 11px;">
+        <!-- Pacing Options -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 11px;">
+          <span style="color: #64748b; font-size: 10.5px; font-weight: 500;">Pacing:</span>
           <div style="display: flex; gap: 4px;">
-            <button class="zfp-speed-btn" data-speed="fast" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 7px; padding: 4px 8px; font-size: 10px; cursor: pointer; font-weight: 500;">Fast (3s)</button>
-            <button class="zfp-speed-btn" data-speed="normal" style="background: #2563eb; color: #ffffff; border: 1px solid #2563eb; border-radius: 7px; padding: 4px 8px; font-size: 10px; cursor: pointer; font-weight: 700; box-shadow: 0 2px 4px rgba(37,99,235,0.2);">Normal (5s)</button>
-            <button class="zfp-speed-btn" data-speed="stealth" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 7px; padding: 4px 8px; font-size: 10px; cursor: pointer; font-weight: 500;">Stealth (10s)</button>
+            <button class="zfp-speed-btn" data-speed="fast" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 7px; padding: 3px 8px; font-size: 10px; cursor: pointer; font-weight: 500;">Fast (3s)</button>
+            <button class="zfp-speed-btn" data-speed="normal" style="background: #2563eb; color: #ffffff; border: 1px solid #2563eb; border-radius: 7px; padding: 3px 8px; font-size: 10px; cursor: pointer; font-weight: 700; box-shadow: 0 2px 4px rgba(37,99,235,0.2);">Normal (5s)</button>
+            <button class="zfp-speed-btn" data-speed="stealth" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 7px; padding: 3px 8px; font-size: 10px; cursor: pointer; font-weight: 500;">Stealth (10s)</button>
           </div>
-          <button id="zfp-clean-btn" title="Purge tracking cookies & domain storage" style="display: flex; align-items: center; gap: 4px; background: #f8fafc; color: #475569; border: 1px solid #e2e8f0; border-radius: 7px; padding: 4px 8px; font-size: 10px; cursor: pointer; font-weight: 500;">
-            ${ICONS.broom} Clean
-          </button>
+        </div>
+
+        <!-- Milestone Mode Selector (What to do at 50) -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 11px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 9px; padding: 6px 10px;">
+          <span style="color: #475569; font-size: 10.5px; font-weight: 600;">At 50 Milestone:</span>
+          <div style="display: flex; gap: 4px;">
+            <button id="zfp-milestone-auto-btn" title="Purge cookies, pause 30s for rest, and auto-continue" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 6px; padding: 2px 7px; font-size: 10px; cursor: pointer; font-weight: 700;">Auto-Continue</button>
+            <button id="zfp-milestone-pause-btn" title="Purge cookies and pause for manual resume" style="background: #ffffff; color: #64748b; border: 1px solid #cbd5e1; border-radius: 6px; padding: 2px 7px; font-size: 10px; cursor: pointer; font-weight: 500;">Pause & Wait</button>
+          </div>
         </div>
 
         <!-- Action Control Buttons -->
-        <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+        <div style="display: flex; gap: 6px; margin-bottom: 8px;">
           <button id="zfp-main-action-btn" style="
-            flex: 2;
+            flex: 2.2;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1289,7 +1301,7 @@
             color: #ffffff;
             border: none;
             border-radius: 10px;
-            padding: 10px 14px;
+            padding: 10px 12px;
             font-size: 12px;
             font-weight: 700;
             cursor: pointer;
@@ -1305,12 +1317,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 5px;
+            gap: 4px;
             background: #f8fafc;
             color: #334155;
             border: 1px solid #cbd5e1;
             border-radius: 10px;
-            padding: 10px 8px;
+            padding: 10px 6px;
             font-size: 11px;
             font-weight: 600;
             cursor: pointer;
@@ -1326,22 +1338,43 @@
             color: #e11d48;
             border: 1px solid #fecdd3;
             border-radius: 10px;
-            padding: 10px 12px;
+            padding: 10px 10px;
             cursor: pointer;
           ">
             ${ICONS.reset}
           </button>
         </div>
 
+        <!-- Dedicated Purge Storage & Cookies Button -->
+        <button id="zfp-full-purge-btn" style="
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          background: #f8fafc;
+          color: #475569;
+          border: 1px dashed #cbd5e1;
+          border-radius: 9px;
+          padding: 7px 10px;
+          font-size: 10.5px;
+          font-weight: 600;
+          cursor: pointer;
+          margin-bottom: 8px;
+          transition: all 0.2s;
+        ">
+          ${ICONS.broom} Wipe All Cookies, Session & Local Storage
+        </button>
+
         <!-- Real-Time Activity Log Stream -->
         <div id="zfp-log" style="
           font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
           font-size: 10px;
           color: #475569;
-          max-height: 70px;
+          max-height: 65px;
           overflow-y: auto;
           background: #f8fafc;
-          padding: 8px 10px;
+          padding: 7px 10px;
           border-radius: 9px;
           line-height: 1.45;
           border: 1px solid #e2e8f0;
@@ -1359,12 +1392,11 @@
           line-height: 1.5;
         ">
           <div style="display: flex; align-items: center; gap: 4px; font-weight: 700; color: #1e293b; margin-bottom: 2px;">
-            ${ICONS.info} How It Works:
+            ${ICONS.info} After 50 Jobs Workflow:
           </div>
-          <div>1. Opens 1 tab at a time (0% lag).</div>
-          <div>2. Dynamic poller finds & clicks Apply.</div>
-          <div>3. Automatically closes both tabs.</div>
-          <div>4. Auto-cleans cookies every 50 jobs & resumes!</div>
+          <div>• <b>Auto-Purge:</b> Clears all tracking cookies & storage at every 50 jobs.</div>
+          <div>• <b>Next Batch:</b> Takes 30s rest & continues (Jobs 51–100, 101–150...).</div>
+          <div>• <b>Manual Wipe:</b> Click button above anytime for an instant clean slate!</div>
         </div>
       </div>
     </div>
@@ -1375,6 +1407,7 @@
   const progressText = document.getElementById("zfp-progress-text");
   const appliedText = document.getElementById("zfp-applied-text");
   const targetText = document.getElementById("zfp-target-text");
+  const batchText = document.getElementById("zfp-batch-text");
   const mainActionBtn = document.getElementById("zfp-main-action-btn");
   const btnIcon = document.getElementById("zfp-btn-icon");
   const btnLabel = document.getElementById("zfp-btn-label");
@@ -1386,6 +1419,13 @@
     if (progressBar) progressBar.style.width = percent + "%";
     if (progressText) progressText.innerText = state.currentIndex + " / " + jobQueue.length + " (" + percent + "%)";
     if (appliedText) appliedText.innerText = state.completedCount;
+    if (batchText) {
+      const curBatch = Math.floor(state.currentIndex / BATCH_SIZE) + 1;
+      const totalBatches = Math.ceil(jobQueue.length / BATCH_SIZE);
+      const startJob = state.currentIndex + 1;
+      const endJob = Math.min(jobQueue.length, curBatch * BATCH_SIZE);
+      batchText.innerText = "Batch " + curBatch + " of " + totalBatches + " (Jobs " + startJob + "–" + endJob + ")";
+    }
   }
   updateUI();
 
@@ -1404,23 +1444,33 @@
     if (!isRunning || isPaused) return;
 
     // Check if reached milestone (every 50 jobs)
-    if (state.currentIndex > 0 && state.currentIndex % BATCH_MILESTONE === 0 && !state._milestonePassed) {
+    if (state.currentIndex > 0 && state.currentIndex % BATCH_SIZE === 0 && !state._milestonePassed) {
       state._milestonePassed = true;
       saveState(state);
 
       console.log(
-        "%c🎉 [MILESTONE REACHED] Completed " + state.currentIndex + " jobs! Purging session & cooling down 30s...",
+        "%c🎉 [MILESTONE REACHED] Completed Batch of " + state.currentIndex + " jobs! Purging storage & cookies...",
         "background: #065f46; color: #34d399; font-size: 13px; font-weight: bold; padding: 4px 8px; border-radius: 4px;"
       );
-      log("🎉 Milestone (" + state.currentIndex + " jobs)! Purging cookies & pausing 30s for human break...", "#059669");
       
       wipeAllStorageAndCookies(true);
 
-      if (statusDot) statusDot.style.background = "#f59e0b";
-      await sleep(30000);
-      if (statusDot) statusDot.style.background = "#10b981";
-      log("Continuing to next batch (Job " + (state.currentIndex + 1) + ")...", "#2563eb");
-    } else if (state.currentIndex % BATCH_MILESTONE !== 0) {
+      if (batchBehavior === "pause") {
+        isPaused = true;
+        if (btnLabel) btnLabel.innerText = "Start Batch " + (Math.floor(state.currentIndex / BATCH_SIZE) + 1);
+        if (btnIcon) btnIcon.innerHTML = ICONS.play;
+        if (mainActionBtn) mainActionBtn.style.background = "#2563eb";
+        if (statusDot) statusDot.style.background = "#f59e0b";
+        log("🎉 Milestone (" + state.currentIndex + " jobs)! Wiped cookies & storage. Paused for next batch.", "#059669");
+        return;
+      } else {
+        log("🎉 Milestone (" + state.currentIndex + " jobs)! Wiped cookies. Pausing 30s for organic human break...", "#059669");
+        if (statusDot) statusDot.style.background = "#f59e0b";
+        await sleep(30000);
+        if (statusDot) statusDot.style.background = "#10b981";
+        log("Resuming next batch (Job " + (state.currentIndex + 1) + ")...", "#2563eb");
+      }
+    } else if (state.currentIndex % BATCH_SIZE !== 0) {
       state._milestonePassed = false;
     }
 
@@ -1481,11 +1531,9 @@
       
       let match = null;
       try {
-        // Initial settle delay (1.5s)
         await sleep(1500);
         match = await waitForApplyButton(tab1.document, 9000);
       } catch (pollErr) {
-        // Cross-origin if instant redirect occurred
         log("Page redirected automatically. Capturing response...", "#64748b");
       }
 
@@ -1620,7 +1668,39 @@
   mainActionBtn.addEventListener("click", toggleMainAction);
   document.getElementById("zfp-skip-btn").addEventListener("click", skipJob);
   document.getElementById("zfp-reset-btn").addEventListener("click", resetProgress);
-  document.getElementById("zfp-clean-btn").addEventListener("click", () => wipeAllStorageAndCookies(false));
+  document.getElementById("zfp-full-purge-btn").addEventListener("click", () => wipeAllStorageAndCookies(false));
+
+  // Milestone Behavior Toggle (Auto-Continue vs Pause & Wait)
+  const milestoneAutoBtn = document.getElementById("zfp-milestone-auto-btn");
+  const milestonePauseBtn = document.getElementById("zfp-milestone-pause-btn");
+
+  milestoneAutoBtn.addEventListener("click", () => {
+    batchBehavior = "auto";
+    milestoneAutoBtn.style.background = "#eff6ff";
+    milestoneAutoBtn.style.color = "#2563eb";
+    milestoneAutoBtn.style.borderColor = "#bfdbfe";
+    milestoneAutoBtn.style.fontWeight = "700";
+
+    milestonePauseBtn.style.background = "#ffffff";
+    milestonePauseBtn.style.color = "#64748b";
+    milestonePauseBtn.style.borderColor = "#cbd5e1";
+    milestonePauseBtn.style.fontWeight = "500";
+    log("At 50 milestone: Auto-continue with 30s break", "#2563eb");
+  });
+
+  milestonePauseBtn.addEventListener("click", () => {
+    batchBehavior = "pause";
+    milestonePauseBtn.style.background = "#eff6ff";
+    milestonePauseBtn.style.color = "#2563eb";
+    milestonePauseBtn.style.borderColor = "#bfdbfe";
+    milestonePauseBtn.style.fontWeight = "700";
+
+    milestoneAutoBtn.style.background = "#ffffff";
+    milestoneAutoBtn.style.color = "#64748b";
+    milestoneAutoBtn.style.borderColor = "#cbd5e1";
+    milestoneAutoBtn.style.fontWeight = "500";
+    log("At 50 milestone: Pause and wait for click", "#2563eb");
+  });
 
   // Speed Mode Buttons
   document.querySelectorAll(".zfp-speed-btn").forEach((btn) => {
@@ -1694,7 +1774,7 @@
     "%c📋 Total Queued: %c" + jobQueue.length + " openings\n" +
     "%c💾 Saved Progress: %cJob " + (state.currentIndex + 1) + " of " + jobQueue.length + " (Applied: " + state.completedCount + ")\n" +
     "%c🔍 Dynamic Polling: %cUp to 10s wait for React/Next.js button hydration\n" +
-    "%c🧹 Smart Cleaner: %cAuto-purges tracking cookies every 50 jobs\n" +
+    "%c🧹 Storage Purge: %cDedicated purge button on controller to wipe cookies & storage anytime\n" +
     "%c💡 Instructions: Click 'Start 1-by-1 Queue' on the floating HUD or call window.__AUTO_APPLIER__.start()",
     "color: #64748b; font-weight: bold;", "color: #2563eb; font-weight: bold;",
     "color: #64748b; font-weight: bold;", "color: #059669; font-weight: bold;",

@@ -1,43 +1,75 @@
 # ⚡ High-Performance 1-by-1 Sequential Auto-Applier (`auto_applier.js`)
 
-This guide explains [`auto_applier.js`](file:///d:/DEVELOPMENT/all-bots/auto_applier.js), our high-performance in-browser automation engine featuring an **ultra-clean Light Frosted Glass UI**, **vector SVG icons**, **advanced anti-detection heuristics**, and a **Smart Session & Tracker Cleaner**.
+This guide explains [`auto_applier.js`](file:///d:/DEVELOPMENT/all-bots/auto_applier.js), our flagship in-browser automation engine featuring a **Pure White Light-Theme HUD**, **vector SVG icons**, **1-Click Cookie/Storage Purge Button**, and **intelligent 50-Job Batch Milestone Handling**.
 
 ---
 
-## ✨ What Makes This Version Advanced
+## 🏛️ Architecture & Workflow
 
 ```mermaid
-flowchart LR
-    A[Embedded 974 Queue] --> B[1-by-1 Sequential Tab Orchestration]
-    B --> C[Tab 1: Job Details Page]
-    C --> D[Smooth Deceleration Scroll]
-    D --> E[Gaussian Spatial Coordinate Jitter]
-    E --> F[9-Stage Authentic Pointer Cascade]
-    F --> G[Tab 2: Intercept Affiliate Redirect]
-    G --> H[Dual-Tab Auto-Closer: Close Tab 1 & Tab 2]
-    H --> I[Smart Tracker Cleaner]
-    I --> J[Save Progress in localStorage]
-    J --> K[Safe Human Pacing Delay 3s-7s]
+flowchart TD
+    A[Start 1-by-1 Queue] --> B[Open Job N: Tab 1]
+    B --> C[Dynamic Poller: Wait up to 10s for React DOM]
+    C --> D[Dispatch 9-Stage Human Pointer Cascade]
+    D --> E[Intercept Tab 2: Affiliate Redirect]
+    E --> F[Cleanly Close Tab 2 and Tab 1]
+    F --> G[Save Progress in localStorage]
+    G --> H{Is Job Multiple of 50?}
+    H -->|Yes| I[Milestone: Auto-Purge Cookies & Storage]
+    I --> J{Milestone Mode}
+    J -->|Auto-Continue| K[Pause 30s for Human Rest -> Start Job 51+]
+    J -->|Pause & Wait| L[Pause Queue -> Wait for User Click]
+    H -->|No| M[Human Pacing Delay 3s-7s]
+    M --> B
     K --> B
 ```
 
-### 1. 🎨 Ultra-Clean Light Frosted Glass HUD
-- **Modern Light Design**: White/slate frosted glass (`backdrop-filter: blur(20px) saturate(180%)`) with clean borders and subtle depth shadows.
-- **Vector SVG Icons**: Clean Lucide-style vector icons for Play, Pause, Skip, Reset, Clean, Shield, Minimize, and Close—zero emojis in the UI.
-- **Real-Time Indicators**: Live animated gradient progress bar, active job title, success counter, and execution stream.
+---
 
-### 2. 🛡️ Advanced Anti-Detection Heuristics
-- **Natural Deceleration Scrolling**: Smoothly centers the target button before mouse interaction.
-- **Gaussian Spatial Jitter ($\pm 5\text{px}$)**: Eliminates robotic center clicks by introducing organic cursor offsets.
-- **9-Stage Pointer Cascade**: Sequentially dispatches:
-  `pointerover` $\rightarrow$ `mouseover` $\rightarrow$ `pointerenter` $\rightarrow$ `pointerdown` $\rightarrow$ `mousedown` $\rightarrow$ `focus()` $\rightarrow$ `pointerup` $\rightarrow$ `mouseup` $\rightarrow$ `click`.
-- **Active Button Bitmasks**: Dispatches genuine `buttons: 1, which: 1` properties matching hardware mouse clicks.
+## ✨ Key Capabilities
 
-### 3. 🧹 Smart Session, Cookie & Storage Management
-One common concern with automated applications is whether cookies, sessions, and localStorage are corrupted:
-- **Authentication Preserved**: Your active login session tokens (`auth_token`, `_artha_session`, `session`, `user_id`) remain 100% untouched so you never get logged out.
-- **Tracker & Affiliate Bloat Cleared**: Built-in **Tracker Cleaner** (`window.__AUTO_APPLIER__.cleanTracking()`) purges third-party telemetry cookies (e.g. `_ga`, `_gid`, `_intercom`, `sentry_*`, `mp_*`, `amplitude_*`) to prevent cross-job tracking accumulation.
-- **Isolated Storage**: Progress state is safely stored in a dedicated key (`__ZERO_FOOTPRINT_APPLIER_STATE__`), leaving all website data intact.
+### 1. 🧹 1-Click Cookie, SessionStorage & LocalStorage Purge
+A dedicated button is available right on the HUD:
+- **`🧹 Wipe All Cookies, Session & Local Storage`**
+- Instantly purges domain tracking cookies (`_ga`, `_gid`, `_intercom`, `sentry_*`, `mp_*`, `_utm*`), clears `localStorage`, and flushes `sessionStorage`.
+- Automatically backs up and restores your bot queue progress so you don't lose your place!
+
+### 2. 🛑 What Happens After Reaching 50 Jobs?
+You have full control over what happens at every 50-job milestone (50, 100, 150, ..., 974):
+
+| Milestone Setting | Behavior | Best Use Case |
+| :--- | :--- | :--- |
+| **`Auto-Continue`** *(Default)* | Purges all cookies/storage, takes a **30-second organic human break**, and automatically resumes with Job 51–100. | Hands-free background queue execution |
+| **`Pause & Wait`** | Purges all cookies/storage, pauses execution, and waits for you to click **"Start Batch 2"**. | Controlled manual oversight per batch |
+
+---
+
+## 🎛️ HUD Controller Layout
+
+```text
+┌────────────────────────────────────────────────────────┐
+│ 🛡️ ZERO-FOOTPRINT PRO                           _  ✕  │
+│   Autonomous 1-by-1 Job Applier       🟢 (Active Dot)  │
+├────────────────────────────────────────────────────────┤
+│ [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░] 50%                   │
+│ Progress: 50 / 974 (5%)    Applied: 48                 │
+│ Active:   [51/974] Senior Data Engineer                │
+│ Batch:    Batch 2 of 20 (Jobs 51–100)                  │
+├────────────────────────────────────────────────────────┤
+│ Pacing:         [Fast (3s)]  [[ Normal (5s) ]] [Stealth]│
+│ At 50 Jobs:     [[ Auto-Continue ]]   [Pause & Wait]   │
+├────────────────────────────┬─────────────┬─────────────┤
+│ [▶ Start 1-by-1 Queue]     │ [⏭ Skip]   │ [↺ Reset]   │
+├────────────────────────────┴─────────────┴─────────────┤
+│ [🧹 Wipe All Cookies, Session & Local Storage]         │
+├────────────────────────────────────────────────────────┤
+│ 💡 How It Works:                                       │
+│ 1. Opens 1 tab at a time (0% lag).                     │
+│ 2. Dynamic poller finds & clicks Apply (up to 10s).    │
+│ 3. Automatically closes both tabs cleanly.             │
+│ 4. Auto-cleans cookies every 50 jobs & resumes!        │
+└────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -63,62 +95,26 @@ javascript:(function(){const s=document.createElement('script');s.src='https://c
 
 ---
 
-## 🎛️ Control Panel Features
-
-```text
-┌────────────────────────────────────────────────────────┐
-│ 🛡️ ZERO-FOOTPRINT  (1-by-1 Auto Applier)           _ ✕ │
-├────────────────────────────────────────────────────────┤
-│ [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░] 45%                   │
-│ Progress: 438 / 974 (45%)   Applied: 432               │
-│ Active:   [439/974] Senior Data Engineer               │
-├────────────────────────────────────────────────────────┤
-│ [Fast (3s)]  [[ Normal (5s) ]]  [Stealth (10s)]  [🧹 Clean]│
-├────────────────────────────┬─────────────┬─────────────┤
-│ [▶ Start 1-by-1 Queue]     │ [⏭ Skip]   │ [↺ Reset]   │
-├────────────────────────────┴─────────────┴─────────────┤
-│ Tab 1 opened. Waiting 3.5s for page hydration...       │
-└────────────────────────────────────────────────────────┘
-```
-
-- **▶ Start / ⏸ Pause**: Toggle sequential application processing with zero lag.
-- **⏭ Skip**: Skip the current position in the queue.
-- **↺ Reset**: Reset application progress back to Job #1.
-- **🧹 Clean**: Instantly purge analytics cookies and tracking telemetry.
-- **Pacing Presets**: `Fast (3s)`, `Normal (5s)`, or `Stealth (10s)`.
-- **_ Minimize**: Collapse HUD into a mini floating pill.
-
----
-
 ## 🌐 Global Developer Controls (`window.__AUTO_APPLIER__`)
 
-Interact with the engine programmatically from the console:
+Control the engine programmatically from the console:
 
 ```javascript
-// Start / Resume application queue
+// Start or resume queue
 window.__AUTO_APPLIER__.start();
 
 // Pause queue
 window.__AUTO_APPLIER__.pause();
 
-// Skip active job
+// Skip current job
 window.__AUTO_APPLIER__.skip();
 
 // Reset progress back to 1
 window.__AUTO_APPLIER__.reset();
 
-// Purge tracking cookies without affecting login session
-window.__AUTO_APPLIER__.cleanTracking();
+// Wipe all cookies, localStorage, and sessionStorage
+window.__AUTO_APPLIER__.wipeStorage();
 
-// Inspect persistent state
+// Inspect progress state
 console.log(window.__AUTO_APPLIER__.getState());
 ```
-
----
-
-## 📚 Related Documentation
-
-- [Anti-Detection Architecture Guide](file:///d:/DEVELOPMENT/all-bots/docs/anti-detection.md)
-- [Main Repository README](file:///d:/DEVELOPMENT/all-bots/README.md)
-- [GitHub & jsDelivr CDN Setup](file:///d:/DEVELOPMENT/all-bots/docs/cdn-and-github-guide.md)
-- [Data Feed Schema Guide](file:///d:/DEVELOPMENT/all-bots/docs/data-schema.md)
