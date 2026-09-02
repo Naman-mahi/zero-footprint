@@ -1,43 +1,37 @@
 # 🌐 GitHub & jsDelivr CDN Deployment & Execution Guide
 
-This guide provides end-to-end instructions for hosting the **All-Bots** project on **GitHub** and serving [`browser_bot.js`](file:///d:/DEVELOPMENT/all-bots/browser_bot.js) globally via the **jsDelivr CDN** with zero infrastructure costs, high availability, and instant execution.
+This guide provides end-to-end instructions for hosting the **Zero-Footprint** project on **GitHub** ([Naman-mahi/zero-footprint](https://github.com/Naman-mahi/zero-footprint)) and serving [`browser_bot.js`](file:///d:/DEVELOPMENT/all-bots/browser_bot.js) globally via the **jsDelivr CDN** with zero infrastructure costs, high availability, and instant execution.
 
 ---
 
-## 🏗️ 1. Publishing to GitHub
+## 🏗️ 1. Repository Details
 
-To make your repository accessible via jsDelivr, initialize Git and publish to a public GitHub repository:
+- **GitHub Repository**: [https://github.com/Naman-mahi/zero-footprint](https://github.com/Naman-mahi/zero-footprint)
+- **Primary Branch**: `master`
+- **Clone URL (SSH)**: `git@github.com:Naman-mahi/zero-footprint.git`
+- **Clone URL (HTTPS)**: `https://github.com/Naman-mahi/zero-footprint.git`
 
-### Step-by-Step GitHub Setup:
+### Git Workflow Commands:
 
 ```bash
-# 1. Navigate to the project folder
-cd d:/DEVELOPMENT/all-bots
+# Check status of local changes
+git status
 
-# 2. Initialize Git repository
-git init
-
-# 3. Add all project files and docs
+# Stage updated files and docs
 git add .
 
-# 4. Create initial commit
-git commit -m "feat: initial release of all-bots undetectable automation suite"
+# Commit updates
+git commit -m "docs: update guides and repo links"
 
-# 5. Set main branch
-git branch -M main
-
-# 6. Add your GitHub remote (replace with your repository URL)
-git remote add origin https://github.com/<YOUR_GITHUB_USERNAME>/<YOUR_REPOSITORY_NAME>.git
-
-# 7. Push to GitHub
-git push -u origin main
+# Push directly to master branch
+git push origin master
 ```
 
 ---
 
-## ⚡ 2. jsDelivr CDN URL Structure
+## ⚡ 2. jsDelivr CDN Endpoints
 
-jsDelivr provides an automated, free global CDN for all public GitHub repositories. As soon as you push code to GitHub, it is immediately accessible worldwide.
+jsDelivr provides an automated, free global CDN for all public GitHub repositories. Every commit pushed to GitHub is immediately accessible worldwide.
 
 ### Standard URL Syntax:
 
@@ -45,12 +39,12 @@ jsDelivr provides an automated, free global CDN for all public GitHub repositori
 https://cdn.jsdelivr.net/gh/<USER>/<REPO>@<VERSION>/<FILE>
 ```
 
-| Type | URL Pattern | Best Use Case |
+| Type | URL Pattern | Live URL |
 | :--- | :--- | :--- |
-| **Latest on `main` Branch** | `https://cdn.jsdelivr.net/gh/USER/REPO@main/browser_bot.js` | Rapid development / continuous updates |
-| **Version Release Tag** | `https://cdn.jsdelivr.net/gh/USER/REPO@v1.0.0/browser_bot.js` | Production stability (immutable caching) |
-| **Specific Commit SHA** | `https://cdn.jsdelivr.net/gh/USER/REPO@4a7b3c8/browser_bot.js` | Exact code audit / frozen execution |
-| **Automatic Minification** | `https://cdn.jsdelivr.net/gh/USER/REPO@main/browser_bot.js` | Fast loading over cellular/slow networks |
+| **Latest on `master` Branch** | `https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js` | [Open CDN Script](https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js) |
+| **Data Feed via CDN** | `https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/data.json` | [Open CDN Data](https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/data.json) |
+| **Release Tag (e.g. v1.0.0)** | `https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@v1.0.0/browser_bot.js` | Immutable production tag |
+| **Instant Cache Purge** | `https://purge.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js` | [Purge Cache](https://purge.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js) |
 
 ---
 
@@ -58,12 +52,12 @@ https://cdn.jsdelivr.net/gh/<USER>/<REPO>@<VERSION>/<FILE>
 
 ### Method A: Browser DevTools Console One-Liner
 
-Open Developer Tools (`F12` -> Console) on your target page and run:
+Open Developer Tools (`F12` -> Console) on your target page (e.g., `https://artha.link`) and run:
 
 ```javascript
-fetch(`https://cdn.jsdelivr.net/gh/USER/REPO@main/browser_bot.js?_t=${Date.now()}`)
+fetch(`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js?_t=${Date.now()}`)
   .then(res => res.text())
-  .then(code => { eval(code); console.log("✅ Bot loaded from jsDelivr CDN!"); })
+  .then(code => { eval(code); console.log("✅ Zero-Footprint Bot loaded from jsDelivr CDN!"); })
   .catch(err => console.error("❌ Failed to load bot:", err));
 ```
 
@@ -74,13 +68,13 @@ fetch(`https://cdn.jsdelivr.net/gh/USER/REPO@main/browser_bot.js?_t=${Date.now()
 A bookmarklet allows you to launch the bot on any webpage without opening DevTools:
 
 #### Setup Instructions:
-1. Open your browser Bookmarks Manager (`Ctrl + Shift + O` or `Cmd + Option + B`).
+1. Open your browser Bookmarks Manager (`Ctrl + Shift + O` on Chrome/Edge or `Cmd + Option + B` on macOS).
 2. Click **Add New Bookmark**.
 3. Name: `⚡ Launch Apply Bot`.
-4. URL / Location: Paste the following code:
+4. URL / Location: Paste the following single-line code:
 
 ```javascript
-javascript:(function(){const s=document.createElement('script');s.type='text/javascript';s.src='https://cdn.jsdelivr.net/gh/USER/REPO@main/browser_bot.js?t='+Date.now();document.head.appendChild(s);})();
+javascript:(function(){const s=document.createElement('script');s.type='text/javascript';s.src='https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js?t='+Date.now();document.head.appendChild(s);})();
 ```
 
 5. Click **Save**.
@@ -94,11 +88,11 @@ For automated loading every time you visit the target site:
 
 ```javascript
 // ==UserScript==
-// @name         All-Bots Auto Loader (jsDelivr CDN)
-// @namespace    https://github.com/USER/REPO
+// @name         Zero-Footprint Auto Loader (jsDelivr CDN)
+// @namespace    https://github.com/Naman-mahi/zero-footprint
 // @version      1.0.0
 // @description  Loads the latest undetectable apply bot from jsDelivr CDN
-// @author       You
+// @author       Naman-mahi
 // @match        https://artha.link/*
 // @grant        none
 // @run-at       document-idle
@@ -106,13 +100,13 @@ For automated loading every time you visit the target site:
 
 (function() {
     'use strict';
-    // Prevent multiple script tags
+    // Prevent duplicate injections
     if (document.getElementById('artha-bot-cdn-script')) return;
 
     const script = document.createElement('script');
     script.id = 'artha-bot-cdn-script';
     script.type = 'text/javascript';
-    script.src = `https://cdn.jsdelivr.net/gh/USER/REPO@main/browser_bot.js?_t=${Date.now()}`;
+    script.src = `https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js?_t=${Date.now()}`;
     document.body.appendChild(script);
 })();
 ```
@@ -122,32 +116,32 @@ For automated loading every time you visit the target site:
 ## 🔄 4. Cache Management & Instant Purge
 
 jsDelivr caches files aggressively to optimize global performance:
-- **Branch references (`@main`)**: Cached at edge servers for up to **12 hours** to 24 hours.
+- **Branch references (`@master`)**: Cached at edge servers for up to **12 hours** to 24 hours.
 - **Release tags (`@v1.0.0`)**: Cached **permanently** (immutable).
 
 ### How to Force an Instant Cache Purge
 
-When you push updates to `main` and need changes to reflect immediately:
+When you push updates to `master` and need changes to reflect immediately:
 
 #### 1. Via Purge API URL:
 Prefix the jsDelivr URL with `purge.` instead of `cdn.`:
 ```text
-https://purge.jsdelivr.net/gh/USER/REPO@main/browser_bot.js
+https://purge.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js
 ```
-Open that URL in your browser; jsDelivr will return a JSON response confirming the edge cache has been cleared:
+Open that URL in your browser or make a GET request; jsDelivr will return a JSON confirmation:
 ```json
 {
   "status": "finished",
   "paths": {
-    "/gh/USER/REPO@main/browser_bot.js": { "purged": true }
+    "/gh/Naman-mahi/zero-footprint@master/browser_bot.js": { "purged": true }
   }
 }
 ```
 
 #### 2. Via Client-Side Cache Busting Parameter:
-Append `?_t=${Date.now()}` or `?v=1.0.1` to bypass local browser and proxy caches:
+Append `?_t=${Date.now()}` to bypass local browser and proxy caches:
 ```javascript
-const cdnUrl = `https://cdn.jsdelivr.net/gh/USER/REPO@main/browser_bot.js?_t=${Date.now()}`;
+const cdnUrl = `https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js?_t=${Date.now()}`;
 ```
 
 ---
@@ -164,3 +158,4 @@ const cdnUrl = `https://cdn.jsdelivr.net/gh/USER/REPO@main/browser_bot.js?_t=${D
 - [Anti-Detection Architecture](file:///d:/DEVELOPMENT/all-bots/docs/anti-detection.md)
 - [Browser Bot Engine Reference](file:///d:/DEVELOPMENT/all-bots/docs/browser-bot.md)
 - [Data Feed Schema Guide](file:///d:/DEVELOPMENT/all-bots/docs/data-schema.md)
+- [Docs Central Hub](file:///d:/DEVELOPMENT/all-bots/docs/README.md)

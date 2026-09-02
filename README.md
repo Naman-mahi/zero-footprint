@@ -1,6 +1,7 @@
-# 🕶️ All-Bots: Undetectable In-Browser Automation Suite
+# 🕶️ Zero-Footprint: Undetectable In-Browser Automation Suite
 
-[![jsDelivr CDN](https://data.jsdelivr.com/v1/package/gh/USER/REPO/badge)](https://www.jsdelivr.com/package/gh/USER/REPO)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Naman--mahi%2Fzero--footprint-blue?logo=github)](https://github.com/Naman-mahi/zero-footprint)
+[![jsDelivr CDN](https://data.jsdelivr.com/v1/package/gh/Naman-mahi/zero-footprint/badge)](https://www.jsdelivr.com/package/gh/Naman-mahi/zero-footprint)
 [![Anti-Detection](https://img.shields.io/badge/Anti--Detection-100%25%20Undetectable-brightgreen.svg)](#-why-it-is-100-undetectable)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Chrome%20%7C%20Brave%20%7C%20Edge%20%7C%20Firefox-orange.svg)](#)
@@ -45,7 +46,7 @@ Unlike traditional automation frameworks (Puppeteer, Playwright, Selenium) which
 
 Modern web platforms detect bots through automated browser fingerprinting and behavioral telemetry. Here is how this bot bypasses all detection layers:
 
-| Detection Vector | Selenium / Puppeteer / Playwright | All-Bots In-Browser Bot |
+| Detection Vector | Selenium / Puppeteer / Playwright | Zero-Footprint In-Browser Bot |
 | :--- | :--- | :--- |
 | **`navigator.webdriver`** | ❌ `true` (Flags bot immediately) | ✅ `false` (Native browser state) |
 | **Runtime Flags** | ❌ Chrome DevTools Protocol (CDP) hooks exposed | ✅ Zero CDP hooks or instrumentation |
@@ -81,9 +82,8 @@ Create a browser bookmark to launch the bot on any page with one click:
 3. Set the **URL** field to the following javascript payload:
 
 ```javascript
-javascript:(function(){const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/USER/REPO@main/browser_bot.js?t='+Date.now();document.head.appendChild(s);})();
+javascript:(function(){const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js?t='+Date.now();document.head.appendChild(s);})();
 ```
-*(Replace `USER/REPO` with your GitHub username and repository name).*
 
 ---
 
@@ -92,7 +92,7 @@ javascript:(function(){const s=document.createElement('script');s.src='https://c
 Execute the latest version directly in your browser console without copying thousands of lines of code:
 
 ```javascript
-fetch(`https://cdn.jsdelivr.net/gh/USER/REPO@main/browser_bot.js?_t=${Date.now()}`)
+fetch(`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js?_t=${Date.now()}`)
   .then(res => res.text())
   .then(code => eval(code));
 ```
@@ -105,11 +105,11 @@ For complete automation on every visit, create a userscript:
 
 ```javascript
 // ==UserScript==
-// @name         Artha Job Application Bot
-// @namespace    https://github.com/USER/REPO
+// @name         Zero-Footprint Artha Bot
+// @namespace    https://github.com/Naman-mahi/zero-footprint
 // @version      1.0.0
 // @description  100% undetectable in-browser auto applier
-// @author       You
+// @author       Naman-mahi
 // @match        https://artha.link/*
 // @grant        none
 // ==/UserScript==
@@ -117,7 +117,7 @@ For complete automation on every visit, create a userscript:
 (function() {
     'use strict';
     const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/gh/USER/REPO@main/browser_bot.js';
+    script.src = 'https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js';
     document.body.appendChild(script);
 })();
 ```
@@ -127,7 +127,7 @@ For complete automation on every visit, create a userscript:
 ## 📁 Repository & File Structure
 
 ```text
-all-bots/
+zero-footprint/
 ├── README.md                      # Main repository documentation & guide
 ├── browser_bot.js                 # Primary in-browser undetectable automation engine
 ├── data.json                      # Scraped & enriched job feeds with full metadata
@@ -180,20 +180,15 @@ await sleep(waitSec * 1000);
 
 ## 🌐 GitHub + jsDelivr CDN Integration
 
-When you push this repository to GitHub, jsDelivr automatically provides high-speed global CDN distribution.
+This repository is published on GitHub at [**Naman-mahi/zero-footprint**](https://github.com/Naman-mahi/zero-footprint). jsDelivr automatically provides global edge distribution for the codebase.
 
-### CDN URL Format:
-```text
-https://cdn.jsdelivr.net/gh/<GITHUB_USERNAME>/<REPOSITORY_NAME>@<BRANCH_OR_TAG>/<FILE_PATH>
-```
-
-### Live Examples:
-- **Latest code on main branch:**  
-  `https://cdn.jsdelivr.net/gh/your-username/all-bots@main/browser_bot.js`
-- **Specific Version/Tag (Recommended for stability):**  
-  `https://cdn.jsdelivr.net/gh/your-username/all-bots@v1.0.0/browser_bot.js`
-- **Instant Cache Purge:**  
-  `https://purge.jsdelivr.net/gh/your-username/all-bots@main/browser_bot.js`
+### Live CDN Endpoints:
+- **Latest Code (Master Branch):**  
+  [`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js`](https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js)
+- **Data Feed via CDN:**  
+  [`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/data.json`](https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/data.json)
+- **Instant Cache Purge API:**  
+  [`https://purge.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js`](https://purge.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js)
 
 > 📖 For full CDN configuration, version pinning, and bookmarklet instructions, see [`docs/cdn-and-github-guide.md`](file:///d:/DEVELOPMENT/all-bots/docs/cdn-and-github-guide.md).
 

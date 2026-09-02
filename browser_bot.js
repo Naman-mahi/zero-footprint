@@ -1,7 +1,13 @@
 /**
- * 🕶️ 100% Undetectable In-Browser Application Bot
+ * 🕶️ Zero-Footprint: 100% Undetectable In-Browser Application Bot
+ * GitHub: https://github.com/Naman-mahi/zero-footprint
+ * CDN: https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js
  *
- * HOW TO USE:
+ * HOW TO USE (Option 1 - jsDelivr CDN Loader):
+ * Paste into DevTools Console:
+ * fetch(`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js?_t=${Date.now()}`).then(r=>r.text()).then(eval);
+ *
+ * HOW TO USE (Option 2 - Direct Paste):
  * 1. Open your browser on any page (e.g. https://artha.link)
  * 2. Press F12 -> Go to the "Console" tab
  * 3. Copy and paste this entire code and press ENTER

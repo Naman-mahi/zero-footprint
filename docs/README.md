@@ -1,6 +1,6 @@
-# 📚 All-Bots Documentation Hub
+# 📚 Zero-Footprint Documentation Hub
 
-Welcome to the comprehensive documentation suite for **All-Bots**. This hub provides detailed guides on architecture, anti-detection mechanisms, file references, data schemas, and deployment via GitHub and jsDelivr CDN.
+Welcome to the comprehensive documentation suite for **Zero-Footprint** ([GitHub Repository](https://github.com/Naman-mahi/zero-footprint)). This hub provides detailed guides on architecture, anti-detection mechanisms, file references, data schemas, and deployment via GitHub and jsDelivr CDN.
 
 ---
 
@@ -42,8 +42,8 @@ Complete specification of the enriched job database:
 
 ### 4. 🌐 [GitHub & jsDelivr CDN Deployment Guide](file:///d:/DEVELOPMENT/all-bots/docs/cdn-and-github-guide.md)
 How to host, distribute, and execute the bot with zero setup:
-- **Repository Setup**: Initializing and pushing to GitHub.
-- **jsDelivr CDN Architecture**: URL patterns, branch vs. release tags, and automatic caching.
+- **Repository Setup**: Live at `https://github.com/Naman-mahi/zero-footprint`.
+- **jsDelivr CDN Architecture**: URL patterns, `master` branch access, and automatic caching.
 - **Deployment Methods**: 
   - Console dynamic import snippet.
   - One-click browser bookmarklet (`javascript:` URI).
@@ -76,3 +76,5 @@ flowchart TD
 - [Back to Project Root README](file:///d:/DEVELOPMENT/all-bots/README.md)
 - [Main Automation Script: `browser_bot.js`](file:///d:/DEVELOPMENT/all-bots/browser_bot.js)
 - [Data Feed: `data.json`](file:///d:/DEVELOPMENT/all-bots/data.json)
+- [GitHub Repository: Naman-mahi/zero-footprint](https://github.com/Naman-mahi/zero-footprint)
+- [jsDelivr CDN Endpoint](https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js)
