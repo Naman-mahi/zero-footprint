@@ -1097,48 +1097,58 @@
   // =========================================================================
   // 🔍 DYNAMIC POLLING RESOLVER (Waits up to 10-12s for React/Next.js DOM)
   // =========================================================================
-  async function waitForApplyButton(doc, maxWaitMs = 10000) {
+  async function waitForApplyButton(tabWin, maxWaitMs = 10000) {
     const startTime = Date.now();
     while (Date.now() - startTime < maxWaitMs) {
-      if (!doc) break;
+      if (!tabWin || tabWin.closed) break;
 
+      let doc = null;
       try {
-        // Tier 1: Canonical Apply Trigger ID
-        const byId = doc.getElementById("creator-job-details-apply-job-trigger");
-        if (byId && byId.offsetParent !== null) {
-          return { el: byId, strategy: "ID (#creator-job-details-apply-job-trigger)" };
-        }
+        doc = tabWin.document;
+      } catch (crossOriginErr) {
+        // Tab redirected to external employer site
+        return null;
+      }
 
-        // Tier 2: Experiment attribute
-        const byExp = doc.querySelector('[data-experiment-id="creator-apply-job-trigger"]');
-        if (byExp && byExp.offsetParent !== null) {
-          return { el: byExp, strategy: "Experiment Attribute" };
-        }
+      if (doc) {
+        try {
+          // Tier 1: Canonical Apply Trigger ID
+          const byId = doc.getElementById("creator-job-details-apply-job-trigger");
+          if (byId && byId.offsetParent !== null) {
+            return { el: byId, strategy: "ID (#creator-job-details-apply-job-trigger)" };
+          }
 
-        // Tier 3: Direct redirect links
-        const byRedirect = doc.querySelector('a[href*="/redirect/"], a[href*="r.artha.link"]');
-        if (byRedirect && byRedirect.offsetParent !== null) {
-          return { el: byRedirect, strategy: "Direct Redirect Link" };
-        }
+          // Tier 2: Experiment attribute
+          const byExp = doc.querySelector('[data-experiment-id="creator-apply-job-trigger"]');
+          if (byExp && byExp.offsetParent !== null) {
+            return { el: byExp, strategy: "Experiment Attribute" };
+          }
 
-        // Tier 4: Heuristic semantic text match
-        const clickables = Array.from(doc.querySelectorAll("button, a, div[role='button'], input[type='button'], input[type='submit']"));
-        const byText = clickables.find((el) => {
-          if (el.offsetParent === null) return false;
-          const txt = (el.innerText || el.textContent || "").trim().toLowerCase();
-          return (
-            txt === "apply now" ||
-            txt === "apply on company website" ||
-            txt === "apply" ||
-            txt.includes("apply now") ||
-            (txt.startsWith("apply") && !txt.includes("notify"))
-          );
-        });
+          // Tier 3: Direct redirect links
+          const byRedirect = doc.querySelector('a[href*="/redirect/"], a[href*="r.artha.link"]');
+          if (byRedirect && byRedirect.offsetParent !== null) {
+            return { el: byRedirect, strategy: "Direct Redirect Link" };
+          }
 
-        if (byText) {
-          return { el: byText, strategy: "Text Heuristic ('" + (byText.innerText || byText.textContent || "").trim() + "')" };
-        }
-      } catch (e) {}
+          // Tier 4: Heuristic semantic text match
+          const clickables = Array.from(doc.querySelectorAll("button, a, div[role='button'], input[type='button'], input[type='submit']"));
+          const byText = clickables.find((el) => {
+            if (el.offsetParent === null) return false;
+            const txt = (el.innerText || el.textContent || "").trim().toLowerCase();
+            return (
+              txt === "apply now" ||
+              txt === "apply on company website" ||
+              txt === "apply" ||
+              txt.includes("apply now") ||
+              (txt.startsWith("apply") && !txt.includes("notify"))
+            );
+          });
+
+          if (byText) {
+            return { el: byText, strategy: "Text Heuristic ('" + (byText.innerText || byText.textContent || "").trim() + "')" };
+          }
+        } catch (e) {}
+      }
 
       await sleep(250);
     }
@@ -1516,14 +1526,14 @@
     let tab2 = null;
 
     try {
-      // 1. Open Tab 1: The Job Details Page on artha.link
-      tab1 = window.open(currentUrl, "_blank", "width=1280,height=850");
+      // 1. Open Tab 1: The Job Details Page on artha.link (Standard new tab)
+      tab1 = window.open(currentUrl, "_blank");
 
-      if (!tab1) {
-        console.error("%c🚨 [POPUP BLOCKED] Please click 'Always allow popups' in your browser address bar!", "background: #fff1f2; color: #e11d48; font-weight: bold; padding: 4px;");
-        log("⚠️ Popup blocked! Please allow popups in address bar.", "#e11d48");
+      if (!tab1 || tab1.closed || typeof tab1.closed === "undefined") {
+        console.error("%c🚨 [POPUP BLOCKED] Please click the popup icon in your Chrome URL bar and select 'Always allow popups on artha.link'!", "background: #fff1f2; color: #e11d48; font-weight: bold; padding: 4px;");
+        log("⚠️ Popups blocked by Chrome! Allow popups in URL bar & click Start.", "#e11d48");
         isRunning = false;
-        if (btnLabel) btnLabel.innerText = "Allow Popups & Retry";
+        if (btnLabel) btnLabel.innerText = "Allow Popups & Click Start";
         return;
       }
 
@@ -1542,7 +1552,7 @@
       let match = null;
       try {
         await sleep(1500);
-        match = await waitForApplyButton(tab1.document, 9000);
+        match = await waitForApplyButton(tab1, 9000);
       } catch (pollErr) {
         log("Page redirected automatically. Capturing response...", "#64748b");
       }
