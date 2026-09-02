@@ -16,6 +16,7 @@ Unlike traditional automation frameworks (Puppeteer, Playwright, Selenium) which
 
 - [✨ Key Features](#-key-features)
 - [🛡️ Why It Is 100% Undetectable](#️-why-it-is-100-undetectable)
+- [⚡ High-Performance 1-by-1 Auto-Applier (`auto_applier.js`)](#-high-performance-1-by-1-auto-applier-auto_applierjs)
 - [🚀 Quick Start Guide](#-quick-start-guide)
   - [Method 1: Direct Browser Console (Zero Install)](#method-1-direct-browser-console-zero-install)
   - [Method 2: One-Click Bookmarklet](#method-2-one-click-bookmarklet)
@@ -32,13 +33,32 @@ Unlike traditional automation frameworks (Puppeteer, Playwright, Selenium) which
 ## ✨ Key Features
 
 - **🛡️ 100% Undetectable Execution**: Zero automation flags (`navigator.webdriver === false`), native human execution context.
-- **🎯 Full Human Event Cascade**: Dispatches `pointerover`, `mouseover`, `pointerenter`, `pointerdown`, `mousedown`, `focus`, `pointerup`, `mouseup`, and `click` with randomized coordinate jitter.
-- **⏱️ Human Micro-Jitter Delays**: Organic delays between steps (40ms-130ms) and job transitions (5s-8s) mimicking human decision-making.
-- **🖥️ Floating Glassmorphic Control Panel (HUD)**: Sleek real-time HUD with active status, progress counter, batch toggle, and activity logs.
-- **⚡ Dual Operation Modes**:
-  - **Single Apply Mode**: Auto-detects and triggers the application process on any active job page.
-  - **Batch Queue Mode**: Sequentially processes job queues in controlled background tabs.
+- **⚡ 1-by-1 Sequential Processing (`auto_applier.js`)**: Protects your machine's CPU & RAM by running strictly 1 tab at a time for 500 to 1,000+ job queues.
+- **🪟 Dual-Tab Auto-Closing**: Opens the job page (Tab 1), clicks apply, catches the employer redirect (Tab 2), and closes **both tabs** cleanly.
+- **🎯 Full Human Event Cascade**: Dispatches `pointerover`, `mouseover`, `pointerenter`, `pointerdown`, `mousedown`, `focus`, `pointerup`, `mouseup`, and `click` with randomized coordinate jitter ($\pm 4\text{px}$).
+- **💾 Session Resume (`localStorage`)**: Never lose your place when running large batches—resume seamlessly from where you stopped.
+- **🖥️ Floating Glassmorphic Control Dashboard (HUD)**: Sleek real-time HUD with progress bar, active job info, pause/skip/reset buttons, and pacing speed selectors.
 - **📦 Cloud & CDN Ready**: Load and run anywhere with a single-line snippet via **jsDelivr CDN**.
+
+---
+
+## ⚡ High-Performance 1-by-1 Auto-Applier (`auto_applier.js`)
+
+For high-volume application queues (500 to 1,000+ jobs from `out_*.json`), use [`auto_applier.js`](file:///d:/DEVELOPMENT/all-bots/auto_applier.js).
+
+### Single-Line Console Loader:
+```javascript
+fetch(`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js?_t=${Date.now()}`)
+  .then(r => r.text())
+  .then(eval);
+```
+
+### 1-Click Bookmarklet:
+```javascript
+javascript:(function(){const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js?t='+Date.now();document.head.appendChild(s);})();
+```
+
+> 📖 Read the full [Auto-Applier Reference Guide](file:///d:/DEVELOPMENT/all-bots/docs/auto-applier.md) for complete details.
 
 ---
 
@@ -53,7 +73,7 @@ Modern web platforms detect bots through automated browser fingerprinting and be
 | **Fingerprint Matching** | ❌ Synthetic canvas/WebGL/audio fingerprints | ✅ Uses your genuine personal browser profile |
 | **Event Verification** | ❌ `isTrusted: false` synthetic `click()` only | ✅ Complete pointer cascade + focus + coordinates |
 | **Coordinate Telemetry** | ❌ (0, 0) or exact mathematical center clicks | ✅ Random offset jitter ($\pm 4\text{px}$) around button center |
-| **Interaction Cadence** | ❌ Instantaneous / static timing (0ms - 50ms) | ✅ Gaussian-distributed micro-delays (4s - 8s) |
+| **Interaction Cadence** | ❌ Instantaneous / static timing (0ms - 50ms) | ✅ Gaussian-distributed micro-delays (3s - 8s) |
 | **Authentication & CAPTCHAs** | ❌ Blocked by Cloudflare Turnstile / reCAPTCHA | ✅ Runs inside already-authenticated session |
 
 > 📚 For a full technical deep dive into detection vectors and mitigation algorithms, see [`docs/anti-detection.md`](file:///d:/DEVELOPMENT/all-bots/docs/anti-detection.md).
@@ -67,9 +87,9 @@ Modern web platforms detect bots through automated browser fingerprinting and be
 1. Open your target website (e.g. [https://artha.link](https://artha.link)) in Chrome, Brave, Edge, or Firefox.
 2. Ensure you are logged into your account.
 3. Open Developer Tools: Press **`F12`** (or **`Ctrl + Shift + I`** on Windows / **`Cmd + Option + I`** on macOS) and navigate to the **Console** tab.
-4. Copy the entire contents of [`browser_bot.js`](file:///d:/DEVELOPMENT/all-bots/browser_bot.js) and paste it into the console.
+4. Copy the entire contents of [`auto_applier.js`](file:///d:/DEVELOPMENT/all-bots/auto_applier.js) and paste it into the console.
 5. Press **`Enter`**.
-6. The floating control panel will appear in the bottom-right corner. Click **🚀 Start Batch** or **⚡ Apply Current Page**.
+6. The floating control panel will appear in the bottom-right corner. Click **🚀 Start 1-by-1 Queue**.
 
 ---
 
@@ -78,11 +98,11 @@ Modern web platforms detect bots through automated browser fingerprinting and be
 Create a browser bookmark to launch the bot on any page with one click:
 
 1. Press `Ctrl + D` (or `Cmd + D`) to create a bookmark in your browser bar.
-2. Name it: `⚡ Apply Bot`.
+2. Name it: `⚡ 1-by-1 Auto Applier`.
 3. Set the **URL** field to the following javascript payload:
 
 ```javascript
-javascript:(function(){const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js?t='+Date.now();document.head.appendChild(s);})();
+javascript:(function(){const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js?t='+Date.now();document.head.appendChild(s);})();
 ```
 
 ---
@@ -92,7 +112,7 @@ javascript:(function(){const s=document.createElement('script');s.src='https://c
 Execute the latest version directly in your browser console without copying thousands of lines of code:
 
 ```javascript
-fetch(`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js?_t=${Date.now()}`)
+fetch(`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js?_t=${Date.now()}`)
   .then(res => res.text())
   .then(code => eval(code));
 ```
@@ -105,10 +125,10 @@ For complete automation on every visit, create a userscript:
 
 ```javascript
 // ==UserScript==
-// @name         Zero-Footprint Artha Bot
+// @name         Zero-Footprint Auto-Applier
 // @namespace    https://github.com/Naman-mahi/zero-footprint
-// @version      1.0.0
-// @description  100% undetectable in-browser auto applier
+// @version      2.0.0
+// @description  100% undetectable sequential 1-by-1 auto applier
 // @author       Naman-mahi
 // @match        https://artha.link/*
 // @grant        none
@@ -117,7 +137,7 @@ For complete automation on every visit, create a userscript:
 (function() {
     'use strict';
     const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js';
+    script.src = 'https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js';
     document.body.appendChild(script);
 })();
 ```
@@ -129,10 +149,16 @@ For complete automation on every visit, create a userscript:
 ```text
 zero-footprint/
 ├── README.md                      # Main repository documentation & guide
-├── browser_bot.js                 # Primary in-browser undetectable automation engine
+├── auto_applier.js                # High-performance 1-by-1 sequential auto-applier (974+ jobs)
+├── browser_bot.js                 # Primary in-browser undetectable automation engine (16 jobs)
+├── fetch-jobs.js                  # API fetch utility generating clean job URL lists
+├── jobs_queue.json                # Combined deduplicated 974 job URLs queue
+├── out_20260902_133307.json       # Batch 1 (500 clean URLs)
+├── out_20260902_133816.json       # Batch 2 (500 clean URLs)
 ├── data.json                      # Scraped & enriched job feeds with full metadata
 └── docs/                          # Comprehensive technical documentation suite
     ├── README.md                  # Documentation hub and navigation index
+    ├── auto-applier.md            # Reference guide for 1-by-1 dual tab closer engine
     ├── anti-detection.md          # In-depth guide on anti-detection mechanics & evasion
     ├── browser-bot.md             # Architecture, HUD, selectors, and engine reference
     ├── data-schema.md             # Complete JSON schema, fields, and extraction guide
@@ -143,38 +169,11 @@ zero-footprint/
 
 | File | Purpose | Documentation |
 | :--- | :--- | :--- |
+| [`auto_applier.js`](file:///d:/DEVELOPMENT/all-bots/auto_applier.js) | 1-by-1 high-volume applier with dual-tab closing and session resume. | [Read Docs](file:///d:/DEVELOPMENT/all-bots/docs/auto-applier.md) |
 | [`browser_bot.js`](file:///d:/DEVELOPMENT/all-bots/browser_bot.js) | Standalone client-side bot with HUD, event simulator, and queue processor. | [Read Docs](file:///d:/DEVELOPMENT/all-bots/docs/browser-bot.md) |
-| [`data.json`](file:///d:/DEVELOPMENT/all-bots/data.json) | Comprehensive database of scraped job listings, company profiles, and redirect links. | [Read Docs](file:///d:/DEVELOPMENT/all-bots/docs/data-schema.md) |
+| [`jobs_queue.json`](file:///d:/DEVELOPMENT/all-bots/jobs_queue.json) | Combined, deduplicated list of 974 clean target job URLs. | [Read Docs](file:///d:/DEVELOPMENT/all-bots/docs/data-schema.md) |
+| [`fetch-jobs.js`](file:///d:/DEVELOPMENT/all-bots/fetch-jobs.js) | Node.js pagination fetcher that queries the public API and extracts clean URLs. | [Read Code](file:///d:/DEVELOPMENT/all-bots/fetch-jobs.js) |
 | [`docs/`](file:///d:/DEVELOPMENT/all-bots/docs/) | In-depth technical guides covering anti-detection, CDN deployment, and schemas. | [Browse Docs](file:///d:/DEVELOPMENT/all-bots/docs/README.md) |
-
----
-
-## ⚙️ Configuration & Customization
-
-### Modifying the Target Job Queue
-
-In [`browser_bot.js`](file:///d:/DEVELOPMENT/all-bots/browser_bot.js#L29-L46), locate the `JOB_QUEUE` array and customize your target job URLs:
-
-```javascript
-const JOB_QUEUE = [
-  { title: "Senior Backend Engineer @ micro1", url: "https://artha.link/@ritu_singh_647119359/jobs/senior-backend-engineer-micro1-56b8b236" },
-  { title: "Lead Engineer @ GE Vernova", url: "https://artha.link/@ritu_singh_647119359/jobs/lead-engineer-electrical-component-ge-vernova-noida-ab79ca02" },
-  // Add your custom URLs here...
-];
-```
-
-### Adjusting Human Delays
-
-To make operations faster or more conservative, adjust the delay ranges in [`browser_bot.js`](file:///d:/DEVELOPMENT/all-bots/browser_bot.js#L254-L278):
-
-```javascript
-// Delay between opening tab and scanning for button (Default: 4000ms - 5500ms)
-await sleep(randomDelay(4000, 5500));
-
-// Safe human pause between sequential jobs (Default: 5s - 8s)
-const waitSec = randomDelay(5, 8);
-await sleep(waitSec * 1000);
-```
 
 ---
 
@@ -183,38 +182,27 @@ await sleep(waitSec * 1000);
 This repository is published on GitHub at [**Naman-mahi/zero-footprint**](https://github.com/Naman-mahi/zero-footprint). jsDelivr automatically provides global edge distribution for the codebase.
 
 ### Live CDN Endpoints:
-- **Latest Code (Master Branch):**  
+- **Auto-Applier Script (1-by-1 Engine):**  
+  [`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js`](https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js)
+- **Browser Bot Script:**  
   [`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js`](https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js)
-- **Data Feed via CDN:**  
-  [`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/data.json`](https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/data.json)
+- **Combined 974 Job Queue JSON:**  
+  [`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/jobs_queue.json`](https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/jobs_queue.json)
 - **Instant Cache Purge API:**  
-  [`https://purge.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js`](https://purge.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js)
-
-> 📖 For full CDN configuration, version pinning, and bookmarklet instructions, see [`docs/cdn-and-github-guide.md`](file:///d:/DEVELOPMENT/all-bots/docs/cdn-and-github-guide.md).
-
----
-
-## 📖 Detailed Documentation
-
-Explore our comprehensive guides in the [`/docs`](file:///d:/DEVELOPMENT/all-bots/docs/) directory:
-
-- 🛡️ **[Anti-Detection Architecture](file:///d:/DEVELOPMENT/all-bots/docs/anti-detection.md)**: How the human event cascade, random coordinate jitter, and in-browser execution defeat bot defenses.
-- 🤖 **[Browser Bot Technical Reference](file:///d:/DEVELOPMENT/all-bots/docs/browser-bot.md)**: Deep dive into the HUD interface, button selector strategies, lifecycle hooks, and single-instance locks.
-- 📊 **[Data Schema & Feeds Guide](file:///d:/DEVELOPMENT/all-bots/docs/data-schema.md)**: Data structure of `data.json`, field definitions, company metadata, and queue extraction scripts.
-- 🚀 **[GitHub & jsDelivr CDN Setup](file:///d:/DEVELOPMENT/all-bots/docs/cdn-and-github-guide.md)**: Step-by-step repository setup, versioning, CDN links, and bookmarklet integration.
+  [`https://purge.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js`](https://purge.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js)
 
 ---
 
 ## ⚠️ Troubleshooting & FAQs
 
-### Q: The batch starts, but tabs don't open?
-**A:** Browsers block multi-tab popups by default. Look at the right side of your browser address bar for a blocked popup icon. Click **"Always allow popups and redirects from this site"** and re-trigger the batch.
+### Q: Why run 1-by-1 instead of opening all 500+ tabs at once?
+**A:** Opening dozens of browser tabs simultaneously exhausts RAM, spikes CPU usage to 100%, and triggers rate-limits or bot blocks. Running 1-by-1 ensures your browser stays ultra-responsive, consumes minimal memory, and applies with natural human timing.
 
-### Q: How do I stop an active batch?
-**A:** Click the **⏹️ Stop Batch** button on the floating HUD, or close the HUD using the **✕** button.
+### Q: How does the dual-tab closer work?
+**A:** When `auto_applier.js` opens Tab 1 and clicks the apply button, the platform triggers an affiliate redirect (Tab 2). The script intercepts and closes Tab 2 as soon as the tracking beacon is registered, then closes Tab 1 and moves to the next job.
 
-### Q: Does this work on sites with Cloudflare Turnstile or CAPTCHAs?
-**A:** Yes! Because this runs directly in your existing authenticated browser session with genuine mouse events, Cloudflare and bot telemetry detect authentic human context and pass without triggering challenges.
+### Q: Can I pause and resume later?
+**A:** Yes! Progress is saved in `localStorage`. If you pause, reload, or close your browser, you can resume right where you left off.
 
 ---
 
