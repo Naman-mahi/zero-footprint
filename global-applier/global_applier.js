@@ -1563,25 +1563,32 @@
         state.skippedCount++;
       }
 
-      // 4. Wait 2.5s for redirect (Tab 2) and network telemetry to finalize
-      log("Waiting 2.5s for tracking beacon & redirect...", "#64748b");
-      await sleep(randomDelay(2000, 3000));
+      // 4. Wait 10s for employer page to fully hydrate and beacons to deliver
+      log("Waiting 10s for destination page hydration & affiliate telemetry...", "#64748b");
+      await sleep(randomDelay(10000, 11500));
 
-      // 5. Dual Tab Close: Cleanly close Tab 2 (if spawned) and Tab 1
-      log("Closing Tab 2 and Tab 1...", "#7c3aed");
+      // 5. Dual Tab Close: Cleanly wipe storage and close Tab 2 (if spawned) and Tab 1
+      log("Purging storage & closing windows...", "#7c3aed");
       try {
         if (tab2 && !tab2.closed) {
+          try { tab2.localStorage.clear(); } catch (e) {}
+          try { tab2.sessionStorage.clear(); } catch (e) {}
           tab2.close();
-          console.log("%c🚪 Tab 2 (Redirect/Employer Tab) closed cleanly.", "color: #64748b; font-size: 11px;");
+          console.log("%c🚪 Tab 2 (Redirect/Employer Tab) storage wiped & closed cleanly.", "color: #64748b; font-size: 11px;");
         }
       } catch (e) {}
 
       try {
         if (tab1 && !tab1.closed) {
+          try { tab1.localStorage.clear(); } catch (e) {}
+          try { tab1.sessionStorage.clear(); } catch (e) {}
           tab1.close();
-          console.log("%c🚪 Tab 1 (Job Page Tab) closed cleanly.", "color: #64748b; font-size: 11px;");
+          console.log("%c🚪 Tab 1 (Job Page Tab) storage wiped & closed cleanly.", "color: #64748b; font-size: 11px;");
         }
       } catch (e) {}
+
+      // Wipe cookies & session between jobs
+      wipeAllStorageAndCookies(true);
 
     } catch (err) {
       console.warn("Job step notice:", err);

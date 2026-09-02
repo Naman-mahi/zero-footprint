@@ -3,29 +3,37 @@
  * 
  * FEATURES:
  * - 🌍 5 Regional Location Profiles (US, UK, India, Canada, Germany/EU + Auto-Rotate).
+ * - ⏳ Extended 10-Second Minimum Page Load Wait for full destination rendering.
+ * - 🧹 Complete Storage & Cookie Wipe (localStorage, sessionStorage, cookies) before closing each tab.
+ * - 🔌 Native Proxy Support (--proxy-server, --proxy-username, --proxy-password).
+ * - 🧪 Client-Side Geo Route Interception (--mock-geo) for testing & staging environments.
+ * - 📁 Location-Specific JSON Queue Auto-Detection (jobs_us.json, jobs_uk.json, jobs_in.json, etc.).
  * - 🎯 Configurable Batch Sizes (50 or 100 applications per run).
- * - ⏳ Extended Close Timer (4.5s–6.0s) for affiliate beacons & redirect finalization.
  * - 🛡️ 9-Stage Human Pointer Simulation & Anti-Bot Evasion.
  * - 💾 State Persistence: Graceful Ctrl+C shutdown saving progress to progress_state.json.
- * - 🧹 Automated Context & Storage Purge between batches.
  * - 📊 Detailed Execution Summary Report exported to results_<timestamp>.json.
  * 
  * USAGE:
  *   node playwright_applier.js [options]
  * 
  * OPTIONS:
- *   --batch <number>        Batch size: 50 or 100 (Default: 50)
- *   --location <code|all>   Location preset: US, UK, IN, CA, DE, or ROTATE (Default: US)
- *   --start <number>        Starting index in queue (Default: 0)
- *   --resume                Resume from last saved progress_state.json
- *   --headed                Run with visible browser window (Default: headless)
- *   --close-wait <ms>       Milliseconds to wait before closing redirect tab (Default: 5000)
- *   --speed <mode>          fast (3s), normal (5s), stealth (8s) (Default: normal)
+ *   --location <code|all>       Location preset: US, UK, IN, CA, DE, or ROTATE (Default: IN)
+ *   --batch <number>            Batch size: 50 or 100 (Default: 50)
+ *   --queue <filename>          Custom queue JSON file path (e.g., jobs_in.json)
+ *   --start <number>            Starting index in queue (Default: 0)
+ *   --close-wait <ms>           Milliseconds to wait for destination page to finish loading (Default: 10000 = 10s)
+ *   --proxy-server <url>        HTTP/SOCKS5 proxy server (e.g., http://proxy.example.com:8080)
+ *   --proxy-username <user>     Proxy authentication username
+ *   --proxy-password <pass>     Proxy authentication password
+ *   --mock-geo                  Intercept client-side geo API calls for local test environments
+ *   --resume                    Resume from last saved progress_state.json
+ *   --headed                    Run with visible browser window (Default: headless)
+ *   --speed <mode>              fast (3s), normal (5s), stealth (8s) (Default: normal)
  * 
  * EXAMPLES:
- *   node playwright_applier.js --location US --batch 50 --headed
- *   node playwright_applier.js --location UK --batch 50 --close-wait 6000
- *   node playwright_applier.js --location ROTATE --batch 100 --start 0
+ *   node playwright_applier.js --location IN --batch 50 --headed
+ *   node playwright_applier.js --location IN --batch 50 --close-wait 12000 --headed
+ *   node playwright_applier.js --location US --proxy-server "http://us-proxy.example.com:8080" --batch 50
  *   node playwright_applier.js --resume --headed
  */
 
@@ -39,6 +47,7 @@ const LOCATION_PROFILES = {
   US: {
     code: 'US',
     name: 'United States (New York)',
+    queueFile: 'jobs_us.json',
     geolocation: { latitude: 40.7128, longitude: -74.0060 },
     timezoneId: 'America/New_York',
     locale: 'en-US',
@@ -47,6 +56,7 @@ const LOCATION_PROFILES = {
   UK: {
     code: 'UK',
     name: 'United Kingdom (London)',
+    queueFile: 'jobs_uk.json',
     geolocation: { latitude: 51.5074, longitude: -0.1278 },
     timezoneId: 'Europe/London',
     locale: 'en-GB',
@@ -55,6 +65,7 @@ const LOCATION_PROFILES = {
   GB: {
     code: 'GB',
     name: 'United Kingdom (London)',
+    queueFile: 'jobs_uk.json',
     geolocation: { latitude: 51.5074, longitude: -0.1278 },
     timezoneId: 'Europe/London',
     locale: 'en-GB',
@@ -63,6 +74,7 @@ const LOCATION_PROFILES = {
   IN: {
     code: 'IN',
     name: 'India (Hyderabad / Bengaluru)',
+    queueFile: 'jobs_in.json',
     geolocation: { latitude: 17.3850, longitude: 78.4867 },
     timezoneId: 'Asia/Kolkata',
     locale: 'en-IN',
@@ -71,6 +83,7 @@ const LOCATION_PROFILES = {
   CA: {
     code: 'CA',
     name: 'Canada (Toronto)',
+    queueFile: 'jobs_ca.json',
     geolocation: { latitude: 43.6532, longitude: -79.3832 },
     timezoneId: 'America/Toronto',
     locale: 'en-CA',
@@ -79,6 +92,7 @@ const LOCATION_PROFILES = {
   DE: {
     code: 'DE',
     name: 'Germany / Europe (Frankfurt)',
+    queueFile: 'jobs_de.json',
     geolocation: { latitude: 50.1109, longitude: 8.6821 },
     timezoneId: 'Europe/Berlin',
     locale: 'de-DE',
@@ -100,18 +114,37 @@ function getArg(name, defaultValue) {
 
 const isHeaded = args.includes('--headed');
 const isResume = args.includes('--resume');
+const isMockGeo = args.includes('--mock-geo');
 const batchSize = Number(getArg('batch', 50));
-const closeWaitMs = Number(getArg('close-wait', 5000));
+// Minimum 10-second wait for full destination page load & beacon delivery
+const closeWaitMs = Math.max(10000, Number(getArg('close-wait', 10000)));
 const speedMode = getArg('speed', 'normal');
-const requestedLocation = (getArg('location', 'US')).toUpperCase();
+const requestedLocation = (getArg('location', 'IN')).toUpperCase();
 const isRotateLocation = requestedLocation === 'ROTATE' || requestedLocation === 'ALL' || requestedLocation === 'MULTI';
+const customQueueArg = getArg('queue', null);
 
-// State File & Queue File paths
+// Proxy configuration
+const proxyServer = getArg('proxy-server', null);
+const proxyUsername = getArg('proxy-username', null);
+const proxyPassword = getArg('proxy-password', null);
+
+// Determine Queue File
+let queueFileName = 'jobs_queue.json';
+if (customQueueArg) {
+  queueFileName = customQueueArg;
+} else if (!isRotateLocation && LOCATION_PROFILES[requestedLocation]) {
+  const candidateFile = LOCATION_PROFILES[requestedLocation].queueFile;
+  if (fs.existsSync(path.join(__dirname, candidateFile))) {
+    queueFileName = candidateFile;
+  }
+}
+
+const queueFilePath = path.isAbsolute(queueFileName) ? queueFileName : path.join(__dirname, queueFileName);
 const stateFilePath = path.join(__dirname, 'progress_state.json');
-const queueFilePath = path.join(__dirname, 'jobs_queue.json');
 
 if (!fs.existsSync(queueFilePath)) {
-  console.error(`❌ Error: Missing jobs_queue.json at ${queueFilePath}`);
+  console.error(`❌ Error: Queue file not found at ${queueFilePath}`);
+  console.error(`💡 Tip: Fetch jobs first using: node fetch_by_location.js ${requestedLocation} 500`);
   process.exit(1);
 }
 
@@ -153,7 +186,7 @@ function getLocationProfile(index) {
     const key = LOCATION_KEYS[index % LOCATION_KEYS.length];
     return LOCATION_PROFILES[key];
   }
-  return LOCATION_PROFILES[requestedLocation] || LOCATION_PROFILES.US;
+  return LOCATION_PROFILES[requestedLocation] || LOCATION_PROFILES.IN;
 }
 
 function saveState(currentIndex, completedCount, skippedCount) {
@@ -162,6 +195,7 @@ function saveState(currentIndex, completedCount, skippedCount) {
       currentIndex,
       completedCount,
       skippedCount,
+      queueFile: queueFileName,
       timestamp: new Date().toISOString()
     }, null, 2), 'utf8');
   } catch (e) {}
@@ -170,6 +204,7 @@ function saveState(currentIndex, completedCount, skippedCount) {
 // Execution stats
 const results = {
   startedAt: new Date().toISOString(),
+  queueFile: queueFileName,
   totalQueued: queue.length,
   batchSize,
   appliedCount: 0,
@@ -217,23 +252,42 @@ process.on('SIGTERM', handleGracefulExit);
   console.log('\n======================================================');
   console.log('🕶️ ZERO-FOOTPRINT PRO: PLAYWRIGHT BATCH APPLIER');
   console.log('======================================================');
-  console.log(`📋 Total in Queue:      ${queue.length} openings`);
+  console.log(`📁 Active Queue File:   ${path.basename(queueFilePath)} (${queue.length} jobs)`);
   console.log(`🎯 Batch Size:           ${batchSize} jobs per run`);
   console.log(`🏁 Starting Index:       Job ${startIndex + 1} / ${queue.length}`);
-  console.log(`🌍 Location Mode:        ${isRotateLocation ? '🔄 Multi-Country Auto-Rotation (US, UK, IN, CA, DE)' : (LOCATION_PROFILES[requestedLocation]?.name || requestedLocation)}`);
-  console.log(`⏳ Close Wait Timer:     ${(closeWaitMs / 1000).toFixed(1)} seconds (Tracking finalization)`);
+  console.log(`🌍 Location Profile:     ${isRotateLocation ? '🔄 Multi-Country Auto-Rotation (US, UK, IN, CA, DE)' : (LOCATION_PROFILES[requestedLocation]?.name || requestedLocation)}`);
+  if (proxyServer) {
+    console.log(`🔌 Network Proxy:        ${proxyServer}`);
+  }
+  if (isMockGeo) {
+    console.log(`🧪 Geo Interception:     ACTIVE (Mocking client-side geo endpoints)`);
+  }
+  console.log(`⏳ Page Load & Wait:    ${(closeWaitMs / 1000).toFixed(1)} seconds (Full load & beacon finalization)`);
+  console.log(`🧹 Storage Cleansing:    Enabled (Clears cookies, localStorage & sessionStorage on every job)`);
   console.log(`🖥️ Browser Display:      ${isHeaded ? 'Headed (Visible GUI)' : 'Headless (Silent)'}`);
   console.log(`⏱️ Human Pacing:         ${speedMode.toUpperCase()}`);
   console.log('======================================================\n');
 
-  globalBrowser = await chromium.launch({
+  const launchOptions = {
     headless: !isHeaded,
     args: [
       '--disable-blink-features=AutomationControlled',
       '--no-sandbox',
       '--disable-web-security'
     ]
-  });
+  };
+
+  if (proxyServer) {
+    launchOptions.proxy = {
+      server: proxyServer
+    };
+    if (proxyUsername && proxyPassword) {
+      launchOptions.proxy.username = proxyUsername;
+      launchOptions.proxy.password = proxyPassword;
+    }
+  }
+
+  globalBrowser = await chromium.launch(launchOptions);
 
   let currentIndex = startIndex;
 
@@ -245,7 +299,8 @@ process.on('SIGTERM', handleGracefulExit);
 
     console.log(`\n┌──────────────────────────────────────────────────────────────┐`);
     console.log(`│ 🚀 STARTING BATCH ${currentBatchNum} / ${totalBatches} (Jobs ${currentIndex + 1} to ${batchEndIndex})`);
-    console.log(`│ 🌍 Location Profile: ${batchProfile.name}`);
+    console.log(`│ 🌍 Profile:          ${batchProfile.name}`);
+    console.log(`│ 📁 Queue File:       ${path.basename(queueFilePath)}`);
     console.log(`└──────────────────────────────────────────────────────────────┘\n`);
 
     // Create fresh, isolated browser context for this batch
@@ -258,6 +313,33 @@ process.on('SIGTERM', handleGracefulExit);
       locale: batchProfile.locale,
       extraHTTPHeaders: batchProfile.httpHeaders
     });
+
+    // Optional client-side geo route mocking for test environments
+    if (isMockGeo) {
+      await context.route('**/*geo*/**', async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            success: true,
+            message: 'Geo fetched successfully',
+            data: {
+              ip: '203.0.113.20',
+              geo: {
+                lat: batchProfile.geolocation.latitude,
+                lng: batchProfile.geolocation.longitude,
+                city: batchProfile.name.split('(')[1]?.replace(')', '') || 'City',
+                country: batchProfile.code,
+                timezone: batchProfile.timezoneId,
+                isVpn: false,
+                isProxy: false,
+                isHosting: false
+              }
+            }
+          })
+        }).catch(() => route.continue());
+      });
+    }
 
     for (; currentIndex < batchEndIndex && !isTerminating; currentIndex++) {
       currentProcessingIndex = currentIndex;
@@ -278,7 +360,7 @@ process.on('SIGTERM', handleGracefulExit);
 
       try {
         // 1. Navigate to Job Details Page
-        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 35000 });
         await sleep(1800);
 
         // 2. Dynamic Polling for Apply Trigger (waits up to 10s for React DOM hydration)
@@ -311,9 +393,9 @@ process.on('SIGTERM', handleGracefulExit);
           await sleep(randomDelay(300, 500));
 
           // 3. Listen for Child Redirect Window (Tab 2)
-          const popupPromise = page.waitForEvent('popup', { timeout: 4500 }).catch(() => null);
+          const popupPromise = page.waitForEvent('popup', { timeout: 6000 }).catch(() => null);
 
-          // 4. Dispatch human click
+          // 4. Dispatch authentic human click
           await applyBtn.click({ delay: randomDelay(60, 120) });
           spawnedPopup = await popupPromise;
 
@@ -321,14 +403,27 @@ process.on('SIGTERM', handleGracefulExit);
           results.appliedCount++;
           isApplied = true;
 
-          // 5. Extended Close Wait Timer for tracking beacons & affiliate redirect
-          console.log(`⏳ Waiting ${(closeWaitMs / 1000).toFixed(1)}s for tracking beacons & employer redirect...`);
+          // 5. Extended Minimum 10-Second Wait & Full Page Hydration
+          if (spawnedPopup) {
+            console.log(`🌐 Destination page opened. Waiting for full network & DOM load...`);
+            try {
+              await spawnedPopup.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
+            } catch (e) {}
+          }
+
+          console.log(`⏳ Holding open for ${(closeWaitMs / 1000).toFixed(1)}s to guarantee full page load & tracking beacon completion...`);
           await sleep(closeWaitMs);
 
-          // 6. Cleanly close Child Tab (if spawned)
+          // 6. Purge Storage & Cleanly Close Child Tab (Tab 2)
           if (spawnedPopup && !spawnedPopup.isClosed()) {
+            try {
+              await spawnedPopup.evaluate(() => {
+                try { localStorage.clear(); } catch (e) {}
+                try { sessionStorage.clear(); } catch (e) {}
+              });
+            } catch (e) {}
             await spawnedPopup.close().catch(() => {});
-            console.log(`🚪 Closed redirect window cleanly.`);
+            console.log(`🚪 Cleared storage & closed destination window cleanly.`);
           }
         } else {
           console.log(`⚠️ Apply button timed out in DOM. Moving to next.`);
@@ -338,10 +433,21 @@ process.on('SIGTERM', handleGracefulExit);
         console.warn(`⚠️ Notice: ${err.message}`);
         results.failedCount++;
       } finally {
+        // 7. Purge Storage & Cleanly Close Job Page (Tab 1)
         if (!page.isClosed()) {
+          try {
+            await page.evaluate(() => {
+              try { localStorage.clear(); } catch (e) {}
+              try { sessionStorage.clear(); } catch (e) {}
+            });
+          } catch (e) {}
           await page.close().catch(() => {});
-          console.log(`🚪 Closed job details window.`);
+          console.log(`🚪 Cleared storage & closed job details window.`);
         }
+
+        // 8. Wipe All Domain & Tracking Cookies from Context
+        await context.clearCookies().catch(() => {});
+        console.log(`🧹 Purged context cookies & telemetry tokens for Job ${currentIndex + 1}.`);
       }
 
       results.history.push({
@@ -363,7 +469,7 @@ process.on('SIGTERM', handleGracefulExit);
     }
 
     // End of Batch Cleanup
-    console.log(`\n🧹 [BATCH ${currentBatchNum} FINISHED] Purging browser context, cookies, and local cache...`);
+    console.log(`\n🧹 [BATCH ${currentBatchNum} FINISHED] Full purge of browser context, cache & session data...`);
     await context.close().catch(() => {});
 
     if (currentIndex < queue.length && !isTerminating) {

@@ -14,8 +14,8 @@ flowchart TD
     D --> E[Dynamic Polling Resolver: Wait up to 10s for React DOM]
     E --> F[Simulate Authentic Human Click]
     F --> G[Capture Child Redirect Popup Tab 2]
-    G --> H[Extended 5.0s Tracking Finalization Wait]
-    H --> I[Cleanly Close Popup Tab 2 and Tab 1]
+    G --> H[Extended 10.0s Full Page Load & Tracking Wait]
+    H --> I[Wipe localStorage, sessionStorage, cookies & Cleanly Close Tabs]
     I --> J[Save Progress State to progress_state.json]
     J --> K{Batch Complete 50/100?}
     K -->|Yes| L[Purge Context Storage & Cookies -> 30s Human Cooldown -> Next Batch]
