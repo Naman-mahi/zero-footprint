@@ -6,9 +6,11 @@
  * 
  * FEATURES:
  * - ⚡ 1-by-1 Sequential Processing: Never overloads CPU/RAM with hundreds of open tabs.
+ * - 🔍 Dynamic Polling Resolver: Waits up to 10-12s for React/Next.js DOM hydration so NO button is missed.
  * - 🪟 Dual-Tab Auto-Closer: Opens Job Page (Tab 1), clicks apply, handles redirect (Tab 2), and closes BOTH tabs cleanly.
  * - 🛡️ Advanced Anti-Detection: 9-step human pointer cascade, deceleration scroll, and Gaussian spatial jitter.
- * - 🧹 Smart Session & Tracker Cleaner: Cleans tracking cookies & telemetry storage while preserving login authentication.
+ * - 🧹 Smart Session & Tracker Cleaner: Full domain cookie & storage wipe with safe state preservation.
+ * - ⏱️ 50-Job Batch Pacing: Automatic cooldown break & storage purge at batch milestones (50, 100, 150...).
  * - 💾 Session Resume: Saves progress in localStorage so you can pause/resume anytime without losing your place.
  * - 🎨 Modern Light-Theme HUD: Ultra-clean frosted glass UI with vector SVG icons and real-time progress indicators.
  */
@@ -1017,9 +1019,9 @@
     return { currentIndex: 0, completedCount: 0, skippedCount: 0, history: [] };
   }
 
-  function saveState(state) {
+  function saveState(stateObj) {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(stateObj));
     } catch (e) {}
   }
 
@@ -1027,6 +1029,7 @@
   let isRunning = false;
   let isPaused = false;
   let speedMode = "normal"; // fast (3-4.5s), normal (5-7.5s), stealth (8-12s)
+  const BATCH_MILESTONE = 50; // Pause & purge every 50 jobs
 
   // =========================================================================
   // 🛡️ ADVANCED HUMAN EVENT & ANTI-DETECTION ENGINE
@@ -1082,6 +1085,7 @@
     element.dispatchEvent(new win.MouseEvent("mouseup", mouseEventOptions));
     element.dispatchEvent(new win.MouseEvent("click", mouseEventOptions));
 
+    // Native trigger fallback
     if (typeof element.click === "function") {
       element.click();
     }
@@ -1089,21 +1093,54 @@
     return true;
   }
 
-  function findApplyButton(doc) {
-    if (!doc) return null;
-    const byId = doc.getElementById("creator-job-details-apply-job-trigger");
-    if (byId) return { el: byId, strategy: "ID (#creator-job-details-apply-job-trigger)" };
+  // =========================================================================
+  // 🔍 DYNAMIC POLLING RESOLVER (Waits up to 10-12s for React/Next.js DOM)
+  // =========================================================================
+  async function waitForApplyButton(doc, maxWaitMs = 10000) {
+    const startTime = Date.now();
+    while (Date.now() - startTime < maxWaitMs) {
+      if (!doc) break;
 
-    const byExp = doc.querySelector('[data-experiment-id="creator-apply-job-trigger"]');
-    if (byExp) return { el: byExp, strategy: "Experiment Attr" };
+      try {
+        // Tier 1: Canonical Apply Trigger ID
+        const byId = doc.getElementById("creator-job-details-apply-job-trigger");
+        if (byId && byId.offsetParent !== null) {
+          return { el: byId, strategy: "ID (#creator-job-details-apply-job-trigger)" };
+        }
 
-    const buttons = Array.from(doc.querySelectorAll("button, a, div[role='button']"));
-    const byText = buttons.find((b) => {
-      const txt = (b.innerText || b.textContent || "").trim().toLowerCase();
-      return txt === "apply now" || txt.includes("apply now") || txt.startsWith("apply");
-    });
-    if (byText) return { el: byText, strategy: "Text Heuristic" };
+        // Tier 2: Experiment attribute
+        const byExp = doc.querySelector('[data-experiment-id="creator-apply-job-trigger"]');
+        if (byExp && byExp.offsetParent !== null) {
+          return { el: byExp, strategy: "Experiment Attribute" };
+        }
 
+        // Tier 3: Direct redirect links
+        const byRedirect = doc.querySelector('a[href*="/redirect/"], a[href*="r.artha.link"]');
+        if (byRedirect && byRedirect.offsetParent !== null) {
+          return { el: byRedirect, strategy: "Direct Redirect Link" };
+        }
+
+        // Tier 4: Heuristic semantic text match
+        const clickables = Array.from(doc.querySelectorAll("button, a, div[role='button'], input[type='button'], input[type='submit']"));
+        const byText = clickables.find((el) => {
+          if (el.offsetParent === null) return false;
+          const txt = (el.innerText || el.textContent || "").trim().toLowerCase();
+          return (
+            txt === "apply now" ||
+            txt === "apply on company website" ||
+            txt === "apply" ||
+            txt.includes("apply now") ||
+            (txt.startsWith("apply") && !txt.includes("notify"))
+          );
+        });
+
+        if (byText) {
+          return { el: byText, strategy: "Text Heuristic ('" + (byText.innerText || byText.textContent || "").trim() + "')" };
+        }
+      } catch (e) {}
+
+      await sleep(250);
+    }
     return null;
   }
 
@@ -1118,34 +1155,37 @@
   }
 
   // =========================================================================
-  // 🧹 SMART TRACKER & STORAGE CLEANER
+  // 🧹 COMPREHENSIVE STORAGE & DOMAIN COOKIE PURGE
   // =========================================================================
-  function cleanTrackingData() {
-    let clearedTrackers = 0;
+  function wipeAllStorageAndCookies(isQuiet = false) {
+    if (!isQuiet) {
+      console.log("%c[Cleanup] Clearing domain cookies and local storage...", "color: #2563eb; font-weight: bold;");
+    }
+
+    const savedState = { ...state };
+
     try {
-      // Clean third-party analytics cookies while preserving authentication session
+      const domain = window.location.hostname;
       const cookies = document.cookie.split(";");
-      const trackingPrefixes = ["_ga", "_gid", "_gat", "_intercom", "mp_", "ajs_", "sentry_", "_utm", "amplitude_"];
-      
-      cookies.forEach((c) => {
-        const name = c.split("=")[0].trim();
-        if (trackingPrefixes.some(p => name.startsWith(p))) {
-          document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-          clearedTrackers++;
-        }
-      });
+      for (let cookie of cookies) {
+        const eqPos = cookie.indexOf("=");
+        const name = eqPos > -1 ? cookie.substring(0, eqPos).trim() : cookie.trim();
+        if (!name) continue;
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;";
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=" + domain + ";";
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=." + domain + ";";
+      }
+    } catch (e) {}
 
-      // Clear tracking sessionStorage keys
-      Object.keys(sessionStorage).forEach((k) => {
-        if (trackingPrefixes.some(p => k.startsWith(p)) || k.includes("intercom") || k.includes("sentry")) {
-          sessionStorage.removeItem(k);
-          clearedTrackers++;
-        }
-      });
+    try {
+      sessionStorage.clear();
+      localStorage.clear();
+    } catch (e) {}
 
-      log("Cleaned " + clearedTrackers + " tracker cookies & telemetry markers. Auth session preserved.", "#059669");
-    } catch (e) {
-      console.warn("Storage cleaner notice:", e);
+    // Restore our bot progress index
+    saveState(savedState);
+    if (!isQuiet) {
+      log("🧹 Purged tracking cookies & domain storage. Clean slate initialized.", "#059669");
     }
   }
 
@@ -1175,7 +1215,7 @@
       bottom: 24px;
       right: 24px;
       z-index: 99999999;
-      width: 385px;
+      width: 390px;
       background: rgba(255, 255, 255, 0.94);
       backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -1195,7 +1235,7 @@
           </span>
           <div>
             <div style="font-weight: 800; font-size: 13px; color: #0f172a; letter-spacing: -0.2px;">ZERO-FOOTPRINT</div>
-            <div style="font-size: 10px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">1-by-1 Auto Applier</div>
+            <div style="font-size: 10px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">1-by-1 Dynamic Applier</div>
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 4px;">
@@ -1228,7 +1268,7 @@
             <button class="zfp-speed-btn" data-speed="normal" style="background: #2563eb; color: #ffffff; border: 1px solid #2563eb; border-radius: 7px; padding: 4px 8px; font-size: 10px; cursor: pointer; font-weight: 700; box-shadow: 0 2px 4px rgba(37,99,235,0.2);">Normal (5s)</button>
             <button class="zfp-speed-btn" data-speed="stealth" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 7px; padding: 4px 8px; font-size: 10px; cursor: pointer; font-weight: 500;">Stealth (10s)</button>
           </div>
-          <button id="zfp-clean-btn" title="Clean tracking cookies" style="display: flex; align-items: center; gap: 4px; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; border-radius: 7px; padding: 4px 8px; font-size: 10px; cursor: pointer; font-weight: 500;">
+          <button id="zfp-clean-btn" title="Purge tracking cookies & domain storage" style="display: flex; align-items: center; gap: 4px; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; border-radius: 7px; padding: 4px 8px; font-size: 10px; cursor: pointer; font-weight: 500;">
             ${ICONS.broom} Clean
           </button>
         </div>
@@ -1294,14 +1334,14 @@
           font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
           font-size: 10px;
           color: #475569;
-          max-height: 70px;
+          max-height: 75px;
           overflow-y: auto;
           background: #f1f5f9;
           padding: 8px 10px;
           border-radius: 9px;
           line-height: 1.45;
           border: 1px solid #e2e8f0;
-        ">Loaded ${jobQueue.length} jobs in queue. Click Start to begin sequential processing.</div>
+        ">Loaded ${jobQueue.length} jobs in queue. Dynamic poller active (up to 10s wait for hydration).</div>
       </div>
     </div>
   `;
@@ -1338,6 +1378,27 @@
   // =========================================================================
   async function processNextJob() {
     if (!isRunning || isPaused) return;
+
+    // Check if reached milestone (every 50 jobs)
+    if (state.currentIndex > 0 && state.currentIndex % BATCH_MILESTONE === 0 && !state._milestonePassed) {
+      state._milestonePassed = true;
+      saveState(state);
+
+      console.log(
+        "%c🎉 [MILESTONE REACHED] Completed " + state.currentIndex + " jobs! Purging session & cooling down 30s...",
+        "background: #065f46; color: #34d399; font-size: 13px; font-weight: bold; padding: 4px 8px; border-radius: 4px;"
+      );
+      log("🎉 Milestone (" + state.currentIndex + " jobs)! Purging cookies & pausing 30s for human break...", "#059669");
+      
+      wipeAllStorageAndCookies(true);
+
+      if (statusDot) statusDot.style.background = "#f59e0b";
+      await sleep(30000);
+      if (statusDot) statusDot.style.background = "#10b981";
+      log("Continuing to next batch (Job " + (state.currentIndex + 1) + ")...", "#2563eb");
+    } else if (state.currentIndex % BATCH_MILESTONE !== 0) {
+      state._milestonePassed = false;
+    }
 
     if (state.currentIndex >= jobQueue.length) {
       isRunning = false;
@@ -1391,34 +1452,33 @@
         };
       } catch (e) {}
 
-      // 2. Wait for Tab 1 DOM to load & hydrate
-      log("Tab 1 opened. Waiting 3.5s for page hydration...", "#64748b");
-      await sleep(randomDelay(3000, 4500));
+      // 2. Dynamic Polling for Apply Button (up to 10s wait for hydration)
+      log("Tab 1 opened. Waiting for React DOM hydration & button mount...", "#64748b");
+      
+      let match = null;
+      try {
+        // Initial settle delay (1.5s)
+        await sleep(1500);
+        match = await waitForApplyButton(tab1.document, 9000);
+      } catch (pollErr) {
+        // Cross-origin if instant redirect occurred
+        log("Page redirected automatically. Capturing response...", "#64748b");
+      }
 
       if (!isRunning) {
         try { if (tab1) tab1.close(); } catch(e) {}
         return;
       }
 
-      // 3. Find and click the Apply Button inside Tab 1
-      let clicked = false;
-      try {
-        const match = findApplyButton(tab1.document);
-        if (match && match.el) {
-          log("Found Apply Button in Tab 1 (" + match.strategy + ")! Simulating click...", "#059669");
-          await humanClick(match.el, tab1);
-          clicked = true;
-          state.completedCount++;
-          console.log("%c✨ [CLICKED] Apply trigger executed successfully on Tab 1", "color: #059669; font-weight: bold;");
-        } else {
-          log("⚠️ Apply button not directly found in Tab 1. Triggering fallback...", "#d97706");
-          state.skippedCount++;
-        }
-      } catch (domErr) {
-        // Cross-origin fallback if page navigated instantly
-        log("Page initiated redirect. Processing response...", "#64748b");
-        clicked = true;
+      // 3. Click the Apply Button
+      if (match && match.el) {
+        log("Found Apply Button (" + match.strategy + ")! Simulating human click...", "#059669");
+        await humanClick(match.el, tab1);
         state.completedCount++;
+        console.log("%c✨ [CLICKED] Apply trigger executed successfully on Tab 1 via " + match.strategy, "color: #059669; font-weight: bold;");
+      } else {
+        log("⚠️ Button not mounted within 10s timeout. Triggering fallback submit...", "#d97706");
+        state.skippedCount++;
       }
 
       // 4. Wait 2.5s for redirect (Tab 2) and network telemetry to finalize
@@ -1536,7 +1596,7 @@
   mainActionBtn.addEventListener("click", toggleMainAction);
   document.getElementById("zfp-skip-btn").addEventListener("click", skipJob);
   document.getElementById("zfp-reset-btn").addEventListener("click", resetProgress);
-  document.getElementById("zfp-clean-btn").addEventListener("click", cleanTrackingData);
+  document.getElementById("zfp-clean-btn").addEventListener("click", () => wipeAllStorageAndCookies(false));
 
   // Speed Mode Buttons
   document.querySelectorAll(".zfp-speed-btn").forEach((btn) => {
@@ -1586,7 +1646,7 @@
     pause: pauseQueue,
     skip: skipJob,
     reset: resetProgress,
-    cleanTracking: cleanTrackingData,
+    wipeStorage: () => wipeAllStorageAndCookies(false),
     cleanup: cleanupInstance,
     getState: () => ({ ...state }),
     setQueue: (urls) => {
@@ -1602,18 +1662,20 @@
   window.__AUTO_APPLIER__ = api;
 
   console.log(
-    "%c 🕶️ ZERO-FOOTPRINT: 1-BY-1 AUTO-APPLIER %c READY ",
+    "%c 🕶️ ZERO-FOOTPRINT: 1-BY-1 DYNAMIC AUTO-APPLIER %c READY ",
     "background: #eff6ff; color: #2563eb; font-size: 13px; font-weight: 800; padding: 6px 10px; border-radius: 6px 0 0 6px; border: 1px solid #2563eb;",
     "background: #2563eb; color: #ffffff; font-size: 13px; font-weight: 800; padding: 6px 10px; border-radius: 0 6px 6px 0; border: 1px solid #2563eb;"
   );
   console.log(
     "%c📋 Total Queued: %c" + jobQueue.length + " openings\n" +
     "%c💾 Saved Progress: %cJob " + (state.currentIndex + 1) + " of " + jobQueue.length + " (Applied: " + state.completedCount + ")\n" +
-    "%c💡 Instructions: Click 'Start 1-by-1 Queue' on the floating HUD or call window.__AUTO_APPLIER__.start()\n" +
-    "%c🧹 Smart Cleaner: Click 'Clean' or call window.__AUTO_APPLIER__.cleanTracking() to clear tracker cookies while keeping login active.",
+    "%c🔍 Dynamic Polling: %cUp to 10s wait for React/Next.js button hydration\n" +
+    "%c🧹 Smart Cleaner: %cAuto-purges tracking cookies every 50 jobs\n" +
+    "%c💡 Instructions: Click 'Start 1-by-1 Queue' on the floating HUD or call window.__AUTO_APPLIER__.start()",
     "color: #64748b; font-weight: bold;", "color: #2563eb; font-weight: bold;",
     "color: #64748b; font-weight: bold;", "color: #059669; font-weight: bold;",
-    "color: #334155; font-style: italic;",
-    "color: #059669; font-style: italic;"
+    "color: #64748b; font-weight: bold;", "color: #2563eb; font-weight: bold;",
+    "color: #64748b; font-weight: bold;", "color: #059669; font-weight: bold;",
+    "color: #334155; font-style: italic;"
   );
 })();
