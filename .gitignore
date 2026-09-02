@@ -1,0 +1,31 @@
+# Node.js Dependencies
+node_modules/
+package-lock.json
+
+# Logs & Temporary Files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Playwright Test Results & Cache
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+.ms-playwright/
+
+# OS Specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Generated Batch Results & State Files
+progress_state.json
+results_*.json
+scratch/
