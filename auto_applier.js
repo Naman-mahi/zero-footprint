@@ -9,10 +9,10 @@
  * - 🔍 Dynamic Polling Resolver: Waits up to 10-12s for React/Next.js DOM hydration so NO button is missed.
  * - 🪟 Dual-Tab Auto-Closer: Opens Job Page (Tab 1), clicks apply, handles redirect (Tab 2), and closes BOTH tabs cleanly.
  * - 🛡️ Advanced Anti-Detection: 9-step human pointer cascade, deceleration scroll, and Gaussian spatial jitter.
+ * - ⏩ Batch Navigator (50 Jobs per Batch): Easy Next/Prev batch controls (Batches 1–20 across all 974 jobs).
  * - 🧹 1-Click Storage & Cookie Purge Button: Wipes domain cookies, localStorage & sessionStorage instantly.
- * - ⏱️ 50-Job Batch Pacing: Configurable Auto-Continue with 30s human cooldown or Pause & Wait.
  * - 💾 Session Resume: Saves progress in localStorage so you can pause/resume anytime without losing your place.
- * - 🎨 Ultra-Clean Light-Theme HUD: Positioned at top-right (zero overlap with chat widget), vector SVG icons, and step-by-step instructions.
+ * - 🎨 Ultra-Clean Pure White HUD: Top-right positioning (zero overlap with chat widget), vector SVGs, and step-by-step instructions.
  */
 
 (function () {
@@ -1005,6 +1005,7 @@
 ];
 
   let jobQueue = DEFAULT_QUEUE;
+  const BATCH_SIZE = 50;
 
   // =========================================================================
   // 💾 STATE MANAGEMENT & LOCAL STORAGE PERSISTENCE
@@ -1029,8 +1030,6 @@
   let isRunning = false;
   let isPaused = false;
   let speedMode = "normal"; // fast (3-4.5s), normal (5-7.5s), stealth (8-12s)
-  let batchBehavior = "auto"; // "auto" (cooldown 30s & continue), "pause" (stop & wait for click)
-  const BATCH_SIZE = 50;
 
   // =========================================================================
   // 🛡️ ADVANCED HUMAN EVENT & ANTI-DETECTION ENGINE
@@ -1146,6 +1145,7 @@
   }
 
   function formatSlug(url) {
+    if (!url) return "Job Opening";
     try {
       const parts = url.split("/jobs/");
       if (parts.length > 1) {
@@ -1209,7 +1209,8 @@
     minimize: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
     close: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
     info: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
-    trash: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>'
+    chevronRight: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>',
+    chevronLeft: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>'
   };
 
   const hud = document.createElement("div");
@@ -1260,14 +1261,26 @@
 
         <!-- Metrics Card -->
         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 14px; margin-bottom: 10px; font-size: 11px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; line-height: 1.5;">
-          <div>Progress: <b id="zfp-progress-text" style="color: #2563eb; font-weight: 700;">${state.currentIndex} / ${jobQueue.length}</b></div>
+          <div>Queue: <b id="zfp-progress-text" style="color: #2563eb; font-weight: 700;">${state.currentIndex} / ${jobQueue.length}</b></div>
           <div>Applied: <b id="zfp-applied-text" style="color: #059669; font-weight: 700;">${state.completedCount}</b></div>
           <div style="grid-column: span 2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #64748b;">
-            Active: <span id="zfp-target-text" style="color: #0f172a; font-weight: 600;">Ready to start</span>
+            Active: <span id="zfp-target-text" style="color: #0f172a; font-weight: 600;">${jobQueue[state.currentIndex] ? formatSlug(jobQueue[state.currentIndex]) : 'Ready to start'}</span>
           </div>
-          <div style="grid-column: span 2; font-size: 10px; color: #64748b; border-top: 1px dashed #e2e8f0; padding-top: 4px; margin-top: 2px;">
-            Batch: <span id="zfp-batch-text" style="color: #2563eb; font-weight: 600;">Batch ${Math.floor(state.currentIndex / BATCH_SIZE) + 1} of ${Math.ceil(jobQueue.length / BATCH_SIZE)} (Jobs ${state.currentIndex + 1}–${Math.min(jobQueue.length, state.currentIndex + BATCH_SIZE)})</span>
+        </div>
+
+        <!-- Batch Navigation Selector (Next / Prev Batch Controls) -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 6px 10px;">
+          <button id="zfp-prev-batch-btn" title="Go to Previous Batch" style="display: flex; align-items: center; gap: 3px; background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; padding: 3px 8px; font-size: 10px; cursor: pointer; font-weight: 600;">
+            ${ICONS.chevronLeft} Prev 50
+          </button>
+          
+          <div id="zfp-batch-badge" style="font-size: 11px; font-weight: 700; color: #2563eb;">
+            Batch ${Math.floor(state.currentIndex / BATCH_SIZE) + 1} / ${Math.ceil(jobQueue.length / BATCH_SIZE)}
           </div>
+
+          <button id="zfp-next-batch-btn" title="Move to Next Batch" style="display: flex; align-items: center; gap: 3px; background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 6px; padding: 3px 8px; font-size: 10px; cursor: pointer; font-weight: 700;">
+            Next 50 ${ICONS.chevronRight}
+          </button>
         </div>
 
         <!-- Pacing Options -->
@@ -1277,15 +1290,6 @@
             <button class="zfp-speed-btn" data-speed="fast" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 7px; padding: 3px 8px; font-size: 10px; cursor: pointer; font-weight: 500;">Fast (3s)</button>
             <button class="zfp-speed-btn" data-speed="normal" style="background: #2563eb; color: #ffffff; border: 1px solid #2563eb; border-radius: 7px; padding: 3px 8px; font-size: 10px; cursor: pointer; font-weight: 700; box-shadow: 0 2px 4px rgba(37,99,235,0.2);">Normal (5s)</button>
             <button class="zfp-speed-btn" data-speed="stealth" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 7px; padding: 3px 8px; font-size: 10px; cursor: pointer; font-weight: 500;">Stealth (10s)</button>
-          </div>
-        </div>
-
-        <!-- Milestone Mode Selector (What to do at 50) -->
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 11px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 9px; padding: 6px 10px;">
-          <span style="color: #475569; font-size: 10.5px; font-weight: 600;">At 50 Milestone:</span>
-          <div style="display: flex; gap: 4px;">
-            <button id="zfp-milestone-auto-btn" title="Purge cookies, pause 30s for rest, and auto-continue" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 6px; padding: 2px 7px; font-size: 10px; cursor: pointer; font-weight: 700;">Auto-Continue</button>
-            <button id="zfp-milestone-pause-btn" title="Purge cookies and pause for manual resume" style="background: #ffffff; color: #64748b; border: 1px solid #cbd5e1; border-radius: 6px; padding: 2px 7px; font-size: 10px; cursor: pointer; font-weight: 500;">Pause & Wait</button>
           </div>
         </div>
 
@@ -1309,7 +1313,7 @@
             transition: all 0.2s;
           ">
             <span id="zfp-btn-icon">${ICONS.play}</span>
-            <span id="zfp-btn-label">Start 1-by-1 Queue</span>
+            <span id="zfp-btn-label">Start Batch ${Math.floor(state.currentIndex / BATCH_SIZE) + 1}</span>
           </button>
 
           <button id="zfp-skip-btn" title="Skip to next job" style="
@@ -1379,7 +1383,7 @@
           line-height: 1.45;
           border: 1px solid #e2e8f0;
           margin-bottom: 8px;
-        ">Loaded ${jobQueue.length} jobs in queue. Dynamic poller active (waits up to 10s for DOM hydration).</div>
+        ">Ready. Loaded ${jobQueue.length} jobs across ${Math.ceil(jobQueue.length / BATCH_SIZE)} batches. Click Start or Next 50 to begin.</div>
 
         <!-- Step-by-Step Instructions Card -->
         <div style="
@@ -1392,11 +1396,11 @@
           line-height: 1.5;
         ">
           <div style="display: flex; align-items: center; gap: 4px; font-weight: 700; color: #1e293b; margin-bottom: 2px;">
-            ${ICONS.info} After 50 Jobs Workflow:
+            ${ICONS.info} Batch Navigation Guide:
           </div>
-          <div>• <b>Auto-Purge:</b> Clears all tracking cookies & storage at every 50 jobs.</div>
-          <div>• <b>Next Batch:</b> Takes 30s rest & continues (Jobs 51–100, 101–150...).</div>
-          <div>• <b>Manual Wipe:</b> Click button above anytime for an instant clean slate!</div>
+          <div>• <b>Next 50 ▶:</b> Jump directly to Batch 2 (51–100), Batch 3 (101–150)...</div>
+          <div>• <b>Auto-Closer:</b> Opens tab, clicks Apply, and closes both tabs.</div>
+          <div>• <b>Storage Wipe:</b> Click button above to clear all tracking cookies anytime!</div>
         </div>
       </div>
     </div>
@@ -1407,7 +1411,7 @@
   const progressText = document.getElementById("zfp-progress-text");
   const appliedText = document.getElementById("zfp-applied-text");
   const targetText = document.getElementById("zfp-target-text");
-  const batchText = document.getElementById("zfp-batch-text");
+  const batchBadge = document.getElementById("zfp-batch-badge");
   const mainActionBtn = document.getElementById("zfp-main-action-btn");
   const btnIcon = document.getElementById("zfp-btn-icon");
   const btnLabel = document.getElementById("zfp-btn-label");
@@ -1415,16 +1419,21 @@
   const statusDot = document.getElementById("zfp-status-dot");
 
   function updateUI() {
-    const percent = Math.min(100, Math.round((state.currentIndex / jobQueue.length) * 100));
+    const totalJobs = jobQueue.length;
+    const curIndex = state.currentIndex;
+    const curBatch = Math.floor(curIndex / BATCH_SIZE) + 1;
+    const totalBatches = Math.ceil(totalJobs / BATCH_SIZE);
+    const percent = Math.min(100, Math.round((curIndex / totalJobs) * 100));
+
     if (progressBar) progressBar.style.width = percent + "%";
-    if (progressText) progressText.innerText = state.currentIndex + " / " + jobQueue.length + " (" + percent + "%)";
+    if (progressText) progressText.innerText = curIndex + " / " + totalJobs + " (" + percent + "%)";
     if (appliedText) appliedText.innerText = state.completedCount;
-    if (batchText) {
-      const curBatch = Math.floor(state.currentIndex / BATCH_SIZE) + 1;
-      const totalBatches = Math.ceil(jobQueue.length / BATCH_SIZE);
-      const startJob = state.currentIndex + 1;
-      const endJob = Math.min(jobQueue.length, curBatch * BATCH_SIZE);
-      batchText.innerText = "Batch " + curBatch + " of " + totalBatches + " (Jobs " + startJob + "–" + endJob + ")";
+    if (batchBadge) batchBadge.innerText = "Batch " + curBatch + " / " + totalBatches;
+    if (targetText) {
+      targetText.innerText = jobQueue[curIndex] ? ("[" + (curIndex + 1) + "/" + totalJobs + "] " + formatSlug(jobQueue[curIndex])) : "Queue Finished!";
+    }
+    if (!isRunning && btnLabel) {
+      btnLabel.innerText = "Start Batch " + curBatch;
     }
   }
   updateUI();
@@ -1443,52 +1452,49 @@
   async function processNextJob() {
     if (!isRunning || isPaused) return;
 
-    // Check if reached milestone (every 50 jobs)
+    // Check if reached milestone (end of a 50-job batch)
     if (state.currentIndex > 0 && state.currentIndex % BATCH_SIZE === 0 && !state._milestonePassed) {
       state._milestonePassed = true;
       saveState(state);
 
+      const curBatch = Math.floor(state.currentIndex / BATCH_SIZE);
+      const nextBatch = curBatch + 1;
+      const totalBatches = Math.ceil(jobQueue.length / BATCH_SIZE);
+
       console.log(
-        "%c🎉 [MILESTONE REACHED] Completed Batch of " + state.currentIndex + " jobs! Purging storage & cookies...",
+        "%c🎉 [BATCH " + curBatch + " COMPLETED] Finished " + state.currentIndex + " jobs! Purging cookies & storage...",
         "background: #065f46; color: #34d399; font-size: 13px; font-weight: bold; padding: 4px 8px; border-radius: 4px;"
       );
       
       wipeAllStorageAndCookies(true);
 
-      if (batchBehavior === "pause") {
-        isPaused = true;
-        if (btnLabel) btnLabel.innerText = "Start Batch " + (Math.floor(state.currentIndex / BATCH_SIZE) + 1);
-        if (btnIcon) btnIcon.innerHTML = ICONS.play;
-        if (mainActionBtn) mainActionBtn.style.background = "#2563eb";
-        if (statusDot) statusDot.style.background = "#f59e0b";
-        log("🎉 Milestone (" + state.currentIndex + " jobs)! Wiped cookies & storage. Paused for next batch.", "#059669");
-        return;
-      } else {
-        log("🎉 Milestone (" + state.currentIndex + " jobs)! Wiped cookies. Pausing 30s for organic human break...", "#059669");
-        if (statusDot) statusDot.style.background = "#f59e0b";
-        await sleep(30000);
-        if (statusDot) statusDot.style.background = "#10b981";
-        log("Resuming next batch (Job " + (state.currentIndex + 1) + ")...", "#2563eb");
+      isRunning = false;
+      if (btnLabel) btnLabel.innerText = "Start Batch " + nextBatch + " (" + (state.currentIndex + 1) + "–" + Math.min(jobQueue.length, state.currentIndex + BATCH_SIZE) + ")";
+      if (btnIcon) btnIcon.innerHTML = ICONS.play;
+      if (mainActionBtn) {
+        mainActionBtn.style.background = "#059669";
+        mainActionBtn.style.boxShadow = "0 4px 12px rgba(5, 150, 105, 0.3)";
       }
+      if (statusDot) statusDot.style.background = "#10b981";
+      log("🎉 Batch " + curBatch + " completed! Storage purged. Click button to begin Batch " + nextBatch + " / " + totalBatches, "#059669");
+      return;
     } else if (state.currentIndex % BATCH_SIZE !== 0) {
       state._milestonePassed = false;
     }
 
     if (state.currentIndex >= jobQueue.length) {
       isRunning = false;
-      if (btnLabel) btnLabel.innerText = "All Jobs Completed!";
+      if (btnLabel) btnLabel.innerText = "All " + jobQueue.length + " Jobs Completed!";
       if (btnIcon) btnIcon.innerHTML = ICONS.play;
       if (mainActionBtn) mainActionBtn.style.background = "#059669";
-      if (targetText) targetText.innerText = "Queue Finished!";
       if (statusDot) statusDot.style.background = "#10b981";
-      log("🎉 Queue Completed! Successfully processed " + state.completedCount + " job applications.", "#059669");
+      log("🎉 Entire Queue Completed! Successfully processed " + state.completedCount + " job applications.", "#059669");
       return;
     }
 
     const currentUrl = jobQueue[state.currentIndex];
     const roleName = formatSlug(currentUrl);
 
-    if (targetText) targetText.innerText = "[" + (state.currentIndex + 1) + "/" + jobQueue.length + "] " + roleName;
     updateUI();
 
     console.log(
@@ -1606,7 +1612,8 @@
     if (isRunning && !isPaused) return;
     isRunning = true;
     isPaused = false;
-    if (btnLabel) btnLabel.innerText = "Pause Queue";
+    const curBatch = Math.floor(state.currentIndex / BATCH_SIZE) + 1;
+    if (btnLabel) btnLabel.innerText = "Pause Batch " + curBatch;
     if (btnIcon) btnIcon.innerHTML = ICONS.pause;
     if (mainActionBtn) {
       mainActionBtn.style.background = "#d97706";
@@ -1619,7 +1626,8 @@
 
   function pauseQueue() {
     isPaused = true;
-    if (btnLabel) btnLabel.innerText = "Resume Queue";
+    const curBatch = Math.floor(state.currentIndex / BATCH_SIZE) + 1;
+    if (btnLabel) btnLabel.innerText = "Resume Batch " + curBatch;
     if (btnIcon) btnIcon.innerHTML = ICONS.play;
     if (mainActionBtn) {
       mainActionBtn.style.background = "#2563eb";
@@ -1654,53 +1662,50 @@
       state = { currentIndex: 0, completedCount: 0, skippedCount: 0, history: [] };
       saveState(state);
       updateUI();
-      if (btnLabel) btnLabel.innerText = "Start 1-by-1 Queue";
+      if (btnLabel) btnLabel.innerText = "Start Batch 1";
       if (btnIcon) btnIcon.innerHTML = ICONS.play;
       if (mainActionBtn) {
         mainActionBtn.style.background = "#2563eb";
         mainActionBtn.style.boxShadow = "0 4px 12px rgba(37, 99, 235, 0.25)";
       }
-      if (targetText) targetText.innerText = "Reset to Job #1";
-      log("↺ Progress reset back to Job #1.", "#e11d48");
+      log("↺ Progress reset back to Job #1 (Batch 1).", "#e11d48");
     }
+  }
+
+  function moveToNextBatch() {
+    const currentBatch = Math.floor(state.currentIndex / BATCH_SIZE);
+    const nextIndex = (currentBatch + 1) * BATCH_SIZE;
+    if (nextIndex < jobQueue.length) {
+      isRunning = false;
+      isPaused = false;
+      state.currentIndex = nextIndex;
+      saveState(state);
+      wipeAllStorageAndCookies(true);
+      updateUI();
+      log("⏩ Moved to Batch " + (Math.floor(nextIndex / BATCH_SIZE) + 1) + " (Starting from Job " + (nextIndex + 1) + "). Storage purged.", "#2563eb");
+    } else {
+      alert("Already at the final batch!");
+    }
+  }
+
+  function moveToPrevBatch() {
+    const currentBatch = Math.floor(state.currentIndex / BATCH_SIZE);
+    const prevIndex = Math.max(0, (currentBatch - 1) * BATCH_SIZE);
+    isRunning = false;
+    isPaused = false;
+    state.currentIndex = prevIndex;
+    saveState(state);
+    wipeAllStorageAndCookies(true);
+    updateUI();
+    log("⏪ Moved to Batch " + (Math.floor(prevIndex / BATCH_SIZE) + 1) + " (Starting from Job " + (prevIndex + 1) + "). Storage purged.", "#2563eb");
   }
 
   mainActionBtn.addEventListener("click", toggleMainAction);
   document.getElementById("zfp-skip-btn").addEventListener("click", skipJob);
   document.getElementById("zfp-reset-btn").addEventListener("click", resetProgress);
+  document.getElementById("zfp-next-batch-btn").addEventListener("click", moveToNextBatch);
+  document.getElementById("zfp-prev-batch-btn").addEventListener("click", moveToPrevBatch);
   document.getElementById("zfp-full-purge-btn").addEventListener("click", () => wipeAllStorageAndCookies(false));
-
-  // Milestone Behavior Toggle (Auto-Continue vs Pause & Wait)
-  const milestoneAutoBtn = document.getElementById("zfp-milestone-auto-btn");
-  const milestonePauseBtn = document.getElementById("zfp-milestone-pause-btn");
-
-  milestoneAutoBtn.addEventListener("click", () => {
-    batchBehavior = "auto";
-    milestoneAutoBtn.style.background = "#eff6ff";
-    milestoneAutoBtn.style.color = "#2563eb";
-    milestoneAutoBtn.style.borderColor = "#bfdbfe";
-    milestoneAutoBtn.style.fontWeight = "700";
-
-    milestonePauseBtn.style.background = "#ffffff";
-    milestonePauseBtn.style.color = "#64748b";
-    milestonePauseBtn.style.borderColor = "#cbd5e1";
-    milestonePauseBtn.style.fontWeight = "500";
-    log("At 50 milestone: Auto-continue with 30s break", "#2563eb");
-  });
-
-  milestonePauseBtn.addEventListener("click", () => {
-    batchBehavior = "pause";
-    milestonePauseBtn.style.background = "#eff6ff";
-    milestonePauseBtn.style.color = "#2563eb";
-    milestonePauseBtn.style.borderColor = "#bfdbfe";
-    milestonePauseBtn.style.fontWeight = "700";
-
-    milestoneAutoBtn.style.background = "#ffffff";
-    milestoneAutoBtn.style.color = "#64748b";
-    milestoneAutoBtn.style.borderColor = "#cbd5e1";
-    milestoneAutoBtn.style.fontWeight = "500";
-    log("At 50 milestone: Pause and wait for click", "#2563eb");
-  });
 
   // Speed Mode Buttons
   document.querySelectorAll(".zfp-speed-btn").forEach((btn) => {
@@ -1750,6 +1755,8 @@
     pause: pauseQueue,
     skip: skipJob,
     reset: resetProgress,
+    nextBatch: moveToNextBatch,
+    prevBatch: moveToPrevBatch,
     wipeStorage: () => wipeAllStorageAndCookies(false),
     cleanup: cleanupInstance,
     getState: () => ({ ...state }),
@@ -1771,11 +1778,11 @@
     "background: #2563eb; color: #ffffff; font-size: 13px; font-weight: 800; padding: 6px 10px; border-radius: 0 6px 6px 0; border: 1px solid #2563eb;"
   );
   console.log(
-    "%c📋 Total Queued: %c" + jobQueue.length + " openings\n" +
-    "%c💾 Saved Progress: %cJob " + (state.currentIndex + 1) + " of " + jobQueue.length + " (Applied: " + state.completedCount + ")\n" +
-    "%c🔍 Dynamic Polling: %cUp to 10s wait for React/Next.js button hydration\n" +
-    "%c🧹 Storage Purge: %cDedicated purge button on controller to wipe cookies & storage anytime\n" +
-    "%c💡 Instructions: Click 'Start 1-by-1 Queue' on the floating HUD or call window.__AUTO_APPLIER__.start()",
+    "%c📋 Total Queued: %c" + jobQueue.length + " openings across " + Math.ceil(jobQueue.length / BATCH_SIZE) + " batches\n" +
+    "%c💾 Saved Progress: %cJob " + (state.currentIndex + 1) + " (Batch " + (Math.floor(state.currentIndex / BATCH_SIZE) + 1) + ") | Applied: " + state.completedCount + "\n" +
+    "%c⏩ Batch Controls: %cClick 'Next 50 ▶' or 'Prev 50 ◀' on HUD to jump batches\n" +
+    "%c🧹 Storage Purge: %cClick 'Wipe Storage' button to purge cookies & storage instantly\n" +
+    "%c💡 Instructions: Click 'Start Batch " + (Math.floor(state.currentIndex / BATCH_SIZE) + 1) + "' on HUD or call window.__AUTO_APPLIER__.start()",
     "color: #64748b; font-weight: bold;", "color: #2563eb; font-weight: bold;",
     "color: #64748b; font-weight: bold;", "color: #059669; font-weight: bold;",
     "color: #64748b; font-weight: bold;", "color: #2563eb; font-weight: bold;",
