@@ -1,10 +1,17 @@
 /**
- * 🕶️ Zero-Footprint PRO: Ultimate Multi-City Playwright Automation Engine
+ * 🕶️ Zero-Footprint PRO: Ultimate Multi-City & Multi-Browser Playwright Engine
  * 
  * FEATURES:
+ * - 🌐 DYNAMIC MULTI-BROWSER ROTATION:
+ *     - 🟢 Google Chrome (Native Chrome channel)
+ *     - 🔷 Microsoft Edge (Native Edge channel)
+ *     - 🦊 Mozilla Firefox (Gecko engine with custom stealth prefs)
+ *     - 🧭 Apple WebKit (Safari engine)
+ *     - 🌐 Bundled Chromium
+ *     - Supports rotation per run / per job, random selection, or single browser pinning.
  * - 🧼 ZERO-TRACE DISPOSABLE PROFILES:
  *     - OS-Level Ephemeral Temp Directory (fs.mkdtempSync -> fs.rmSync): guarantees 0 bytes remain on disk.
- *     - CDP Protocol Level Purge: Storage.clearDataForOrigin (all origins, cookies, indexeddb, websql, cache, service workers).
+ *     - CDP Protocol Level Purge: Storage.clearDataForOrigin (for Chromium-based browsers).
  *     - Network Level Purge: Network.clearBrowserCookies & Network.clearBrowserCache.
  *     - DOM Level Purge: localStorage.clear(), sessionStorage.clear(), IndexedDB deletion, Cache API deletion.
  * - 🏙️ MULTI-CITY DOMESTIC GEO-ROTATION:
@@ -24,22 +31,114 @@
  *   node playwright_applier.js [options]
  * 
  * EXAMPLES:
- *   # 1. Run Batch 1 (50 Jobs in India with multi-city auto-rotation)
- *   node playwright_applier.js --location IN --batch 50 --headed
+ *   # 1. Run with Multi-Browser Engine Rotation (Cycles Chrome -> Edge -> Firefox -> WebKit -> Chromium)
+ *   node playwright_applier.js --location IN --batch 50 --browser rotate --headed
  * 
- *   # 2. Run Batch 2 (Jobs 51 to 100)
- *   node playwright_applier.js --location IN --batch 50 --batch-num 2 --headed
+ *   # 2. Run with Random Browser Selection per job
+ *   node playwright_applier.js --location IN --batch 50 --browser random --headed
  * 
- *   # 3. Run all batches automatically with auto-cooldown
- *   node playwright_applier.js --location IN --batch 50 --auto-next --headed
+ *   # 3. Pin to a specific browser engine (e.g. Firefox or WebKit)
+ *   node playwright_applier.js --location IN --batch 50 --browser firefox --headed
+ *   node playwright_applier.js --location IN --batch 50 --browser webkit --headed
  * 
- *   # 4. Resume from exact last saved progress
+ *   # 4. Custom browser subset rotation
+ *   node playwright_applier.js --location IN --batch 50 --browser-list chrome,firefox,msedge --headed
+ * 
+ *   # 5. Resume from exact last saved progress
  *   node playwright_applier.js --resume --headed
  */
 
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+
+// =========================================================================
+// 🌐 MULTI-BROWSER ENGINE DATABASE & PROFILES
+// =========================================================================
+const BROWSER_DATABASE = {
+  chrome: {
+    id: 'chrome',
+    engine: 'chromium',
+    name: 'Google Chrome',
+    icon: '🟢',
+    channel: 'chrome',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    supportsCdp: true,
+    launchArgs: [
+      '--disable-blink-features=AutomationControlled',
+      '--no-sandbox',
+      '--disable-web-security',
+      '--disable-dev-shm-usage',
+      '--disk-cache-size=0',
+      '--media-cache-size=0'
+    ]
+  },
+  msedge: {
+    id: 'msedge',
+    engine: 'chromium',
+    name: 'Microsoft Edge',
+    icon: '🔷',
+    channel: 'msedge',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0',
+    supportsCdp: true,
+    launchArgs: [
+      '--disable-blink-features=AutomationControlled',
+      '--no-sandbox',
+      '--disable-web-security',
+      '--disable-dev-shm-usage',
+      '--disk-cache-size=0',
+      '--media-cache-size=0'
+    ]
+  },
+  firefox: {
+    id: 'firefox',
+    engine: 'firefox',
+    name: 'Mozilla Firefox',
+    icon: '🦊',
+    channel: null,
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0',
+    supportsCdp: false,
+    firefoxUserPrefs: {
+      'dom.webdriver.enabled': false,
+      'useAutomationExtension': false,
+      'browser.cache.disk.enable': false,
+      'browser.cache.memory.enable': false
+    },
+    launchArgs: []
+  },
+  webkit: {
+    id: 'webkit',
+    engine: 'webkit',
+    name: 'Apple WebKit',
+    icon: '🧭',
+    channel: null,
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15',
+    supportsCdp: false,
+    launchArgs: []
+  },
+  chromium: {
+    id: 'chromium',
+    engine: 'chromium',
+    name: 'Chromium',
+    icon: '🌐',
+    channel: null,
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    supportsCdp: true,
+    launchArgs: [
+      '--disable-blink-features=AutomationControlled',
+      '--no-sandbox',
+      '--disable-web-security',
+      '--disable-dev-shm-usage',
+      '--disk-cache-size=0',
+      '--media-cache-size=0'
+    ]
+  }
+};
+
+// Aliases
+BROWSER_DATABASE.edge = BROWSER_DATABASE.msedge;
+BROWSER_DATABASE.safari = BROWSER_DATABASE.webkit;
+BROWSER_DATABASE.googlechrome = BROWSER_DATABASE.chrome;
 
 // =========================================================================
 // 🏙️ MULTI-CITY DOMESTIC & REGIONAL LOCATION DATABASE
@@ -92,6 +191,53 @@ function getArg(name, defaultValue) {
   return defaultValue;
 }
 
+if (args.includes('--help') || args.includes('-h')) {
+  console.log(`
+🕶️ Zero-Footprint PRO: Multi-City & Multi-Browser Playwright Engine
+
+USAGE:
+  node playwright_applier.js [options]
+
+BROWSER OPTIONS:
+  --browser <name>        Browser selection mode:
+                          'rotate' / 'all' - Cycle through all available browsers per job (default)
+                          'random'         - Randomly select a browser for each job
+                          'chrome'         - Google Chrome (native channel)
+                          'msedge'         - Microsoft Edge (native channel)
+                          'firefox'        - Mozilla Firefox (Gecko engine)
+                          'webkit'         - Apple WebKit (Safari engine)
+                          'chromium'       - Bundled Chromium
+  --browser-list <list>   Comma-separated list of browsers to rotate (e.g. chrome,firefox,msedge)
+  --browser-per <unit>    Rotation frequency: 'job' (default, rotate each job) or 'batch'
+
+BATCH & LOCATION OPTIONS:
+  --location <code|all>   Target country: IN, US, UK, CA, DE, or ROTATE (default: IN)
+  --batch <number>        Number of jobs per batch (default: 50)
+  --batch-num <number>    Jump directly to specific batch number (e.g. 2, 3)
+  --start <number>        Zero-based starting job index (default: 0)
+  --auto-next             Automatically progress to next batch after 30s cooldown
+  --resume                Resume execution from saved state in progress_state.json
+
+TIMING & DISPLAY:
+  --close-wait <ms>       Milliseconds to hold destination page open (default: 10000)
+  --speed <mode>          Pacing mode: 'fast', 'normal', 'stealth' (default: normal)
+  --headed                Display visible browser window (default: headless)
+  --mock-geo              Enable client-side mock geolocation API
+
+PROXY OPTIONS:
+  --proxy-server <url>    HTTP/SOCKS proxy server (e.g. http://ip:port)
+  --proxy-username <user> Proxy authentication username
+  --proxy-password <pass> Proxy authentication password
+
+EXAMPLES:
+  node playwright_applier.js --location IN --batch 50 --browser rotate --headed
+  node playwright_applier.js --location IN --batch 50 --browser firefox --headed
+  node playwright_applier.js --location US --batch 50 --browser random --auto-next
+  node playwright_applier.js --resume --headed
+`);
+  process.exit(0);
+}
+
 const isHeaded = args.includes('--headed');
 const isResume = args.includes('--resume');
 const isAutoNext = args.includes('--auto-next');
@@ -103,6 +249,33 @@ const speedMode = getArg('speed', 'normal');
 const requestedCountry = (getArg('location', 'IN')).toUpperCase();
 const isRotateCountry = requestedCountry === 'ROTATE' || requestedCountry === 'ALL' || requestedCountry === 'MULTI';
 const customQueueArg = getArg('queue', null);
+
+// Browser Rotation Configuration
+const browserArg = (getArg('browser', 'rotate')).toLowerCase();
+const customBrowserListArg = getArg('browser-list', null);
+const browserPerArg = (getArg('browser-per', 'job')).toLowerCase(); // 'job' or 'batch'
+
+const DEFAULT_BROWSER_ROTATION = ['chrome', 'msedge', 'firefox', 'webkit', 'chromium'];
+let activeBrowserList = [];
+
+if (customBrowserListArg) {
+  activeBrowserList = customBrowserListArg
+    .split(',')
+    .map(b => b.trim().toLowerCase())
+    .filter(b => BROWSER_DATABASE[b]);
+  if (activeBrowserList.length === 0) activeBrowserList = [...DEFAULT_BROWSER_ROTATION];
+} else if (browserArg === 'rotate' || browserArg === 'all' || browserArg === 'multi') {
+  activeBrowserList = [...DEFAULT_BROWSER_ROTATION];
+} else if (browserArg === 'random') {
+  activeBrowserList = [...DEFAULT_BROWSER_ROTATION];
+} else if (BROWSER_DATABASE[browserArg]) {
+  activeBrowserList = [browserArg];
+} else {
+  console.warn(`⚠️ Warning: Unknown browser '${browserArg}', defaulting to full browser rotation pool.`);
+  activeBrowserList = [...DEFAULT_BROWSER_ROTATION];
+}
+
+const isRandomBrowser = browserArg === 'random';
 
 // Proxy configuration
 const proxyServer = getArg('proxy-server', null);
@@ -191,6 +364,20 @@ function getCityProfile(index) {
   };
 }
 
+/**
+ * 🌐 Multi-Browser Profile Selector
+ */
+function getBrowserProfile(jobIndex, batchIndex = 0) {
+  const index = browserPerArg === 'batch' ? batchIndex : jobIndex;
+  let browserKey;
+  if (isRandomBrowser) {
+    browserKey = activeBrowserList[Math.floor(Math.random() * activeBrowserList.length)];
+  } else {
+    browserKey = activeBrowserList[index % activeBrowserList.length];
+  }
+  return BROWSER_DATABASE[browserKey] || BROWSER_DATABASE.chromium;
+}
+
 function saveState(currentIndex, completedCount, skippedCount) {
   try {
     fs.writeFileSync(stateFilePath, JSON.stringify({
@@ -206,7 +393,7 @@ function saveState(currentIndex, completedCount, skippedCount) {
 /**
  * 🧼 100% DEEP BROWSER DATA PURGE ENGINE
  */
-async function performDeepDataPurge(context, page, popup) {
+async function performDeepDataPurge(context, page, popup, browserProfile) {
   // 1. Wipe Popup (Tab 2) DOM storage
   if (popup && !popup.isClosed()) {
     try {
@@ -214,12 +401,16 @@ async function performDeepDataPurge(context, page, popup) {
         try { localStorage.clear(); } catch(e) {}
         try { sessionStorage.clear(); } catch(e) {}
         try {
-          const dbs = await indexedDB.databases();
-          dbs.forEach(db => indexedDB.deleteDatabase(db.name));
+          if (window.indexedDB && indexedDB.databases) {
+            const dbs = await indexedDB.databases();
+            dbs.forEach(db => indexedDB.deleteDatabase(db.name));
+          }
         } catch(e) {}
         try {
-          const keys = await caches.keys();
-          keys.forEach(k => caches.delete(k));
+          if (window.caches) {
+            const keys = await caches.keys();
+            keys.forEach(k => caches.delete(k));
+          }
         } catch(e) {}
       });
     } catch (e) {}
@@ -232,33 +423,39 @@ async function performDeepDataPurge(context, page, popup) {
         try { localStorage.clear(); } catch(e) {}
         try { sessionStorage.clear(); } catch(e) {}
         try {
-          const dbs = await indexedDB.databases();
-          dbs.forEach(db => indexedDB.deleteDatabase(db.name));
+          if (window.indexedDB && indexedDB.databases) {
+            const dbs = await indexedDB.databases();
+            dbs.forEach(db => indexedDB.deleteDatabase(db.name));
+          }
         } catch(e) {}
         try {
-          const keys = await caches.keys();
-          keys.forEach(k => caches.delete(k));
+          if (window.caches) {
+            const keys = await caches.keys();
+            keys.forEach(k => caches.delete(k));
+          }
         } catch(e) {}
       });
     } catch (e) {}
 
-    // 3. Chrome DevTools Protocol (CDP) Deep Cleanse
-    try {
-      const cdp = await context.newCDPSession(page);
-      await cdp.send('Storage.clearDataForOrigin', {
-        origin: '*',
-        storageTypes: 'all' // all origins, cookies, indexeddb, websql, cache_storage, service_workers
-      }).catch(() => {});
-      await cdp.send('Network.clearBrowserCookies').catch(() => {});
-      await cdp.send('Network.clearBrowserCache').catch(() => {});
-      await cdp.detach().catch(() => {});
-    } catch (e) {}
+    // 3. Chrome DevTools Protocol (CDP) Deep Cleanse (Chromium-based engines only)
+    if (browserProfile && browserProfile.supportsCdp) {
+      try {
+        const cdp = await context.newCDPSession(page);
+        await cdp.send('Storage.clearDataForOrigin', {
+          origin: '*',
+          storageTypes: 'all' // all origins, cookies, indexeddb, websql, cache_storage, service_workers
+        }).catch(() => {});
+        await cdp.send('Network.clearBrowserCookies').catch(() => {});
+        await cdp.send('Network.clearBrowserCache').catch(() => {});
+        await cdp.detach().catch(() => {});
+      } catch (e) {}
+    }
   }
 
   // 4. Playwright Context Cookie Flush
   try {
-    await context.clearCookies();
-    await context.clearPermissions();
+    await context.clearCookies().catch(() => {});
+    await context.clearPermissions().catch(() => {});
   } catch (e) {}
 }
 
@@ -268,6 +465,8 @@ const results = {
   queueFile: queueFileName,
   totalQueued: queue.length,
   batchSize,
+  browserMode: isRandomBrowser ? 'RANDOM' : (activeBrowserList.length > 1 ? 'ROTATION' : activeBrowserList[0].toUpperCase()),
+  activeBrowsers: activeBrowserList.map(b => BROWSER_DATABASE[b]?.name || b),
   appliedCount: 0,
   skippedCount: 0,
   failedCount: 0,
@@ -302,14 +501,16 @@ process.on('SIGTERM', handleGracefulExit);
     process.exit(1);
   }
 
-  const { chromium } = playwright;
+  const browserDisplayList = activeBrowserList.map(b => `${BROWSER_DATABASE[b]?.icon || '🌐'} ${BROWSER_DATABASE[b]?.name || b}`).join(', ');
 
   console.log('\n======================================================');
-  console.log('🕶️ ZERO-FOOTPRINT PRO: MULTI-CITY BATCH ENGINE');
+  console.log('🕶️ ZERO-FOOTPRINT PRO: MULTI-CITY & MULTI-BROWSER ENGINE');
   console.log('======================================================');
   console.log(`📁 Active Queue File:   ${path.basename(queueFilePath)} (${queue.length} jobs)`);
   console.log(`🎯 Batch Size:           ${batchSize} jobs per batch`);
   console.log(`🏁 Starting Index:       Job ${startIndex + 1} / ${queue.length} (Batch ${Math.floor(startIndex / batchSize) + 1})`);
+  console.log(`🌐 Browser Rotation:     ${activeBrowserList.length > 1 ? 'ACTIVE (Rotating per ' + browserPerArg + ')' : 'PINNED'}`);
+  console.log(`   └─ Targets:           ${browserDisplayList}`);
   console.log(`🏙️ City Rotation:        ACTIVE (${(CITY_DATABASE[requestedCountry] || CITY_DATABASE.IN).map(c => c.city).join(', ')})`);
   if (proxyServer) {
     console.log(`🔌 Network Proxy:        ${proxyServer}`);
@@ -337,35 +538,35 @@ process.on('SIGTERM', handleGracefulExit);
       const url = queue[currentIndex];
       const roleName = formatSlug(url);
       const activeProfile = getCityProfile(currentIndex);
+      const activeBrowser = getBrowserProfile(currentIndex, currentBatchNum - 1);
 
       console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
       console.log(`🎯 [JOB ${currentIndex + 1}/${queue.length}] ${roleName}`);
       console.log(`🔗 URL: ${url}`);
+      console.log(`🌐 Browser: ${activeBrowser.icon} ${activeBrowser.name} (Engine: ${activeBrowser.engine}${activeBrowser.channel ? ', Channel: ' + activeBrowser.channel : ''})`);
       console.log(`🏙️ Location: ${activeProfile.displayName} (GPS: ${activeProfile.geolocation.latitude}, ${activeProfile.geolocation.longitude})`);
 
       // 1. Create a unique, disposable OS-level temporary profile directory
       const tempUserDataDir = fs.mkdtempSync(path.join(os.tmpdir(), `pw_profile_${Date.now()}_`));
 
-      const launchArgs = [
-        '--disable-blink-features=AutomationControlled',
-        '--no-sandbox',
-        '--disable-web-security',
-        '--disable-dev-shm-usage',
-        '--disk-cache-size=0',
-        '--media-cache-size=0'
-      ];
-
       const contextOptions = {
         viewport: { width: 1366, height: 868 },
-        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        userAgent: activeBrowser.userAgent,
         geolocation: activeProfile.geolocation,
         permissions: ['geolocation'],
         timezoneId: activeProfile.timezoneId,
         locale: activeProfile.locale,
         extraHTTPHeaders: activeProfile.httpHeaders,
         headless: !isHeaded,
-        args: launchArgs
+        args: activeBrowser.launchArgs || []
       };
+
+      if (activeBrowser.channel) {
+        contextOptions.channel = activeBrowser.channel;
+      }
+      if (activeBrowser.firefoxUserPrefs) {
+        contextOptions.firefoxUserPrefs = activeBrowser.firefoxUserPrefs;
+      }
 
       if (proxyServer) {
         contextOptions.proxy = { server: proxyServer };
@@ -375,8 +576,21 @@ process.on('SIGTERM', handleGracefulExit);
         }
       }
 
-      // Launch sterile persistent context tied to the disposable temp directory
-      const context = await chromium.launchPersistentContext(tempUserDataDir, contextOptions);
+      // Launch sterile persistent context tied to the disposable temp directory with fallback safety
+      let context;
+      let effectiveBrowser = activeBrowser;
+      try {
+        const engine = playwright[activeBrowser.engine];
+        context = await engine.launchPersistentContext(tempUserDataDir, contextOptions);
+      } catch (launchErr) {
+        console.warn(`⚠️ [BROWSER LAUNCH FALLBACK] ${activeBrowser.name} launch error: ${launchErr.message}. Falling back to bundled Chromium.`);
+        delete contextOptions.channel;
+        delete contextOptions.firefoxUserPrefs;
+        contextOptions.args = BROWSER_DATABASE.chromium.launchArgs;
+        contextOptions.userAgent = BROWSER_DATABASE.chromium.userAgent;
+        effectiveBrowser = BROWSER_DATABASE.chromium;
+        context = await playwright.chromium.launchPersistentContext(tempUserDataDir, contextOptions);
+      }
 
       // Optional client-side geo route mocking for test environments
       if (isMockGeo) {
@@ -479,7 +693,7 @@ process.on('SIGTERM', handleGracefulExit);
         results.failedCount++;
       } finally {
         // 7. EXECUTE 100% COMPLETE IN-MEMORY BROWSER DATA PURGE
-        await performDeepDataPurge(context, page, spawnedPopup);
+        await performDeepDataPurge(context, page, spawnedPopup, effectiveBrowser);
 
         if (!page.isClosed()) {
           await page.close().catch(() => {});
@@ -491,7 +705,7 @@ process.on('SIGTERM', handleGracefulExit);
           fs.rmSync(tempUserDataDir, { recursive: true, force: true });
         } catch (e) {}
 
-        console.log(`🧼 [0-FOOTPRINT PURGE] Deleted temporary OS profile directory & all storage for Job ${currentIndex + 1}.`);
+        console.log(`🧼 [0-FOOTPRINT PURGE] Deleted temporary OS profile directory & storage for Job ${currentIndex + 1} (${effectiveBrowser.name}).`);
       }
 
       results.history.push({
@@ -499,6 +713,9 @@ process.on('SIGTERM', handleGracefulExit);
         url,
         applied: isApplied,
         location: activeProfile.displayName,
+        browser: effectiveBrowser.name,
+        engine: effectiveBrowser.engine,
+        channel: effectiveBrowser.channel || 'default',
         timestamp: new Date().toISOString()
       });
 
@@ -523,7 +740,7 @@ process.on('SIGTERM', handleGracefulExit);
         await sleep(30000);
       } else {
         console.log(`\n💡 To start the next batch, run:`);
-        console.log(`   node playwright_applier.js --location ${requestedCountry} --batch ${batchSize} --batch-num ${currentBatchNum + 1} --headed\n`);
+        console.log(`   node playwright_applier.js --location ${requestedCountry} --batch ${batchSize} --batch-num ${currentBatchNum + 1} --browser ${browserArg} --headed\n`);
         break;
       }
     }

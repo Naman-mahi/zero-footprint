@@ -1,6 +1,6 @@
-# 🌍 Zero-Footprint: Multi-City Batch Auto-Applier Suite
+# 🌍 Zero-Footprint: Multi-City & Multi-Browser Auto-Applier Suite
 
-A high-performance automated application suite featuring **100% OS-level disposable profiles**, **multi-city domestic geo-rotation with spatial GPS jitter**, **10-second destination page load timers**, and **batch navigation**.
+A high-performance automated application suite featuring **multi-browser rotation (Chrome, Edge, Firefox, WebKit, Chromium)**, **100% OS-level disposable profiles**, **multi-city domestic geo-rotation with spatial GPS jitter**, **10-second destination page load timers**, and **batch navigation**.
 
 ---
 
@@ -8,28 +8,51 @@ A high-performance automated application suite featuring **100% OS-level disposa
 
 | File | Purpose |
 | :--- | :--- |
-| **[`playwright_applier.js`](file:///d:/DEVELOPMENT/all-bots/global-applier/playwright_applier.js)** | Node.js Playwright runner with **OS-level temp directory deletion**, **multi-city geo-rotation**, **batch selection (`--batch-num`)**, and **auto-next mode**. |
+| **[`playwright_applier.js`](file:///d:/DEVELOPMENT/all-bots/global-applier/playwright_applier.js)** | Node.js Playwright runner with **multi-browser rotation**, **OS-level temp profile deletion**, **multi-city geo-rotation**, **batch navigation**, and **auto-next mode**. |
 | **[`global_applier.js`](file:///d:/DEVELOPMENT/all-bots/global-applier/global_applier.js)** | In-browser 1-by-1 auto-applier with **50 / 100 batch size toggle**, white frosted glass HUD, vector SVGs, and dual-tab auto-closer. |
 | **[`fetch_by_location.js`](file:///d:/DEVELOPMENT/all-bots/global-applier/fetch_by_location.js)** | Location-specific job fetcher saving clean separate JSON files (`jobs_in.json`, `jobs_us.json`, `jobs_uk.json`, etc.). |
 | **[`jobs_queue.json`](file:///d:/DEVELOPMENT/all-bots/global-applier/jobs_queue.json)** | Complete embedded queue of 974 global job openings. |
 
 ---
 
+## 🌐 Multi-Browser Rotation Support
+
+`playwright_applier.js` supports automated browser rotation across 5 distinct targets:
+* 🟢 **Google Chrome** (`channel: 'chrome'`)
+* 🔷 **Microsoft Edge** (`channel: 'msedge'`)
+* 🦊 **Mozilla Firefox** (`engine: 'firefox'`)
+* 🧭 **Apple WebKit** (`engine: 'webkit'`)
+* 🌐 **Bundled Chromium** (`engine: 'chromium'`)
+
+---
+
 ## 🎯 How to Run Batches (50 or 100 Jobs)
 
-### 1. Run Batch 1 (Jobs 1 to 50)
+### 1. Run with Multi-Browser Engine Rotation (Default)
+Cycles through Chrome ➔ Edge ➔ Firefox ➔ WebKit ➔ Chromium per job:
 ```powershell
+node playwright_applier.js --location IN --batch 50 --browser rotate --headed
+```
+
+### 2. Run with Specific Browser Engine
+```powershell
+# Firefox
+node playwright_applier.js --location IN --batch 50 --browser firefox --headed
+
+# Apple WebKit
+node playwright_applier.js --location IN --batch 50 --browser webkit --headed
+
+# Microsoft Edge
+node playwright_applier.js --location IN --batch 50 --browser msedge --headed
+```
+
+### 3. Run Specific Batches
+```powershell
+# Batch 1 (Jobs 1 to 50)
 node playwright_applier.js --location IN --batch 50 --batch-num 1 --headed
-```
 
-### 2. Run Batch 2 (Jobs 51 to 100)
-```powershell
+# Batch 2 (Jobs 51 to 100)
 node playwright_applier.js --location IN --batch 50 --batch-num 2 --headed
-```
-
-### 3. Run Batch 3 (Jobs 101 to 150)
-```powershell
-node playwright_applier.js --location IN --batch 50 --batch-num 3 --headed
 ```
 
 ### 4. Run All Batches Continuously (30s Cooldown Between Batches)
