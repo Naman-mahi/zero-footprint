@@ -8,63 +8,67 @@ This document provides a comprehensive technical overview and module-by-module b
 
 ```text
 browser_bot.js (Self-Executing IIFE)
-├── 🔒 Singleton Instance Guard (window.__ARTHA_APPLY_BOT_ACTIVE__)
-├── 📋 Job Queue Definition (JOB_QUEUE array)
+├── 🔄 Auto-Reset & Instance Manager (window.__ARTHA_BOT_INSTANCE__)
+├── 📋 Target Job Queue (JOB_QUEUE array with 16 verified roles)
+├── 🎨 Styled Console Startup Banner & Live Link Table
 ├── 🛡️ Human Event Simulator (sleep, randomDelay, humanClick)
-├── 🔍 DOM Button Discovery Engine (findApplyButton)
-├── 🖥️ Floating Control Panel (HUD DOM & CSS Glassmorphism)
+├── 🔍 Multi-Tier Button Discovery Engine (findApplyButton)
+├── 🖥️ Floating Glassmorphic Control Panel (HUD Component)
 ├── ⚡ Single-Page Apply Controller (applyOnCurrentPage)
-├── 🚀 Batch Queue Orchestrator (startBatchQueue)
+├── 🚀 Batch Queue Orchestrator (startBatchQueue & stopBatchQueue)
+├── 🌐 Global Control Interface (window.__ARTHA_BOT__)
 └── 🎛️ Event Listeners & Auto-Trigger Hook
 ```
 
 ---
 
-## 📋 Module 1: Singleton Instance Guard
+## 📋 Module 1: Auto-Reset & Instance Management
 
-Lines: [`browser_bot.js:L19-L25`](file:///d:/DEVELOPMENT/all-bots/browser_bot.js#L19-L25)
+Lines: [`browser_bot.js:L28-L38`](file:///d:/DEVELOPMENT/all-bots/browser_bot.js#L28-L38)
 
 ```javascript
-if (window.__ARTHA_APPLY_BOT_ACTIVE__) {
-  console.warn("⚠️ Bot is already running. Refresh the page to reset.");
-  return;
+if (window.__ARTHA_BOT_INSTANCE__) {
+  console.log("%c🔄 Existing bot instance detected. Resetting and initializing clean session...", "color: #38bdf8; font-weight: bold;");
+  try {
+    window.__ARTHA_BOT_INSTANCE__.cleanup();
+  } catch (e) {
+    console.warn("Cleaned previous instance:", e);
+  }
 }
-window.__ARTHA_APPLY_BOT_ACTIVE__ = true;
 ```
 
-- **Purpose**: Prevents duplicate HUDs, double event bindings, or concurrent loop conflicts if a user pastes the script multiple times into the console or triggers it via bookmarklet.
-- **Teardown**: Setting `window.__ARTHA_APPLY_BOT_ACTIVE__ = false` is handled automatically when the user closes the HUD via the `✕` button.
+- **Seamless Re-Injections**: If the user pastes the script multiple times or clicks the bookmarklet repeatedly, it automatically tears down the previous instance, removes the old HUD, resets state, and boots up a clean session without throwing blocking warnings or requiring a full webpage refresh.
 
 ---
 
 ## 📋 Module 2: Target Job Queue (`JOB_QUEUE`)
 
-Lines: [`browser_bot.js:L29-L46`](file:///d:/DEVELOPMENT/all-bots/browser_bot.js#L29-L46)
+Lines: [`browser_bot.js:L42-L60`](file:///d:/DEVELOPMENT/all-bots/browser_bot.js#L42-L60)
 
-An array of job targets containing title descriptors and direct web application URLs:
+An array of job targets containing position IDs, titles, and direct web application URLs:
 
 ```javascript
 const JOB_QUEUE = [
-  { 
-    title: "Data Engineer @ micro1", 
-    url: "https://artha.link/@ritu_singh_647119359/jobs/data-engineer-micro1-467d5920" 
-  },
-  { 
-    title: "Senior Database Reliability Engineer @ micro1", 
-    url: "https://artha.link/@ritu_singh_647119359/jobs/senior-database-reliability-engineer-micro1-8ef9e2c8" 
-  },
-  // ... Additional job openings
+  { id: 1, title: "Data Engineer @ micro1", url: "https://artha.link/@ritu_singh_647119359/jobs/data-engineer-micro1-467d5920" },
+  { id: 2, title: "Senior Database Reliability Engineer @ micro1", url: "https://artha.link/@ritu_singh_647119359/jobs/senior-database-reliability-engineer-micro1-8ef9e2c8" },
+  { id: 3, title: "QA Engineer @ micro1", url: "https://artha.link/@ritu_singh_647119359/jobs/qa-engineer-micro1-d29d2b9c" },
+  // ... 16 target roles
 ];
 ```
 
-### Extending the Queue:
-You can append new entries by extracting jobs from [`data.json`](file:///d:/DEVELOPMENT/all-bots/data.json) (see [Data Schema Guide](file:///d:/DEVELOPMENT/all-bots/docs/data-schema.md)).
+---
+
+## 🎨 Module 3: Console Startup Banner & Live Link Table
+
+When initialized, the bot outputs an interactive console dashboard displaying:
+1. **Version & Repository Banner**: Styled badge with GitHub link.
+2. **Interactive Collapsible Table (`console.table`)**: Formatted overview of all 16 target positions.
+3. **Direct Clickable Links**: Each job URL is logged to the console for quick manual inspection.
+4. **Live Execution Stream**: Color-coded real-time log messages for each opening, button detection strategy, and event cascade step.
 
 ---
 
-## 📋 Module 3: Multi-Selector Button Resolver (`findApplyButton`)
-
-Lines: [`browser_bot.js:L102-L114`](file:///d:/DEVELOPMENT/all-bots/browser_bot.js#L102-L114)
+## 📋 Module 4: Multi-Selector Button Resolver (`findApplyButton`)
 
 Target web platforms often employ A/B testing, dynamic class names, or variant DOM templates. The resolver uses a 3-tier cascade fallback mechanism:
 
@@ -72,91 +76,72 @@ Target web platforms often employ A/B testing, dynamic class names, or variant D
 function findApplyButton(doc = document) {
   // Tier 1: Canonical static ID selector
   const byId = doc.getElementById("creator-job-details-apply-job-trigger");
-  if (byId) return byId;
+  if (byId) return { el: byId, strategy: "ID (#creator-job-details-apply-job-trigger)" };
 
   // Tier 2: Experiment/Feature Flag data attribute
   const byExp = doc.querySelector('[data-experiment-id="creator-apply-job-trigger"]');
-  if (byExp) return byExp;
+  if (byExp) return { el: byExp, strategy: "Experiment Attr ([data-experiment-id='creator-apply-job-trigger'])" };
 
   // Tier 3: Heuristic semantic text search across clickable elements
   const buttons = Array.from(doc.querySelectorAll("button, a, div[role='button']"));
-  return buttons.find((b) => {
+  const byText = buttons.find((b) => {
     const txt = (b.innerText || b.textContent || "").trim().toLowerCase();
     return txt === "apply now" || txt.includes("apply now") || txt.startsWith("apply");
-  }) || null;
+  });
+  if (byText) return { el: byText, strategy: `Text Heuristic ('${(byText.innerText || byText.textContent || "").trim()}')` };
+
+  return null;
 }
 ```
 
-- **Scope Support**: Accepts an optional `doc` parameter (`document` or `popup.document`) allowing the same resolver to inspect popup windows and child tabs.
-
 ---
 
-## 📋 Module 4: Floating Glassmorphic Control Panel (HUD)
+## 📋 Module 5: Floating Glassmorphic Control Panel (HUD)
 
-Lines: [`browser_bot.js:L119-L203`](file:///d:/DEVELOPMENT/all-bots/browser_bot.js#L119-L203)
-
-The HUD provides a non-intrusive, styled floating interface placed in the bottom-right corner (`z-index: 9999999`):
+The HUD provides a styled floating interface placed in the bottom-right corner (`z-index: 9999999`):
 
 ```text
 ┌────────────────────────────────────────────────────────┐
-│ 🟢 UNDETECTABLE APPLY BOT                            ✕ │
+│ 🟢 ZERO-FOOTPRINT BOT                                ✕ │
 ├────────────────────────────────────────────────────────┤
 │ Status:   Ready (16 queued)                            │
 │ Progress: 0 / 16                                       │
+│ Active:   None                                         │
 ├────────────────────────────┬───────────────────────────┤
-│ [⚡ Apply Current Page]    │ [🚀 Start Batch (16)]     │
+│ [⚡ Apply Current]         │ [🚀 Start Batch (16)]     │
 ├────────────────────────────┴───────────────────────────┤
 │ Bot loaded. Click 'Start Batch' to begin.              │
 └────────────────────────────────────────────────────────┘
 ```
 
-### Key UI Features:
-- **Dark Theme with Glassmorphism**: `background: rgba(15, 23, 42, 0.96)`, `backdrop-filter: blur(12px)`.
-- **Pulse Status Indicator**: Dynamic glowing emerald status pill.
-- **Real-Time Log Stream**: Scrolling log area displaying live execution steps.
-- **Stateful Buttons**: Dynamic text swapping (`🚀 Start Batch` ↔ `⏹️ Stop Batch`).
-
 ---
 
-## 📋 Module 5: Execution Modes
+## 🌐 Module 6: Global API Interface (`window.__ARTHA_BOT__`)
 
-### 1. Single Page Mode (`applyOnCurrentPage`)
-Lines: [`browser_bot.js:L207-L226`](file:///d:/DEVELOPMENT/all-bots/browser_bot.js#L207-L226)
+In addition to the visual HUD, you can interact with the bot programmatically via DevTools:
 
-- Scans the active page for the apply trigger button.
-- If found, dispatches `humanClick(btn)`.
-- Updates the HUD with green confirmation status.
-- If triggered automatically on a direct job page, it waits `1500ms` for DOM hydration before firing.
+```javascript
+// Start the batch application queue
+window.__ARTHA_BOT__.startBatch();
 
-### 2. Batch Queue Orchestrator (`startBatchQueue`)
-Lines: [`browser_bot.js:L233-L285`](file:///d:/DEVELOPMENT/all-bots/browser_bot.js#L233-L285)
+// Stop active batch
+window.__ARTHA_BOT__.stopBatch();
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant MainTab as Main Window & HUD
-    participant WorkerTab as Spawned Job Tab
+// Apply on active page
+window.__ARTHA_BOT__.applyCurrent();
 
-    MainTab->>MainTab: Read JOB_QUEUE[i]
-    MainTab->>WorkerTab: window.open(job.url, '_blank')
-    MainTab->>MainTab: Pause 4.0s - 5.5s (Wait for tab load)
-    MainTab->>WorkerTab: Locate apply button in tab DOM
-    WorkerTab->>WorkerTab: Trigger application
-    MainTab->>MainTab: Pause 2.0s - 3.0s (Wait for network request)
-    MainTab->>WorkerTab: workerTab.close()
-    MainTab->>MainTab: Pause 5.0s - 8.0s (Human inter-job pacing)
-    MainTab->>MainTab: Advance to JOB_QUEUE[i+1]
+// View all 16 queued jobs in console table
+window.__ARTHA_BOT__.showJobs();
+
+// Cleanly close HUD and remove session
+window.__ARTHA_BOT__.cleanup();
 ```
 
-- **Graceful Cancellation**: User can click `⏹️ Stop Batch` at any time; the loop checks `if (!isRunningBatch) break;` at each step.
-- **Popup Handling**: Detects if `window.open` returns `null` and alerts the user to grant popup permissions in the address bar.
-
 ---
 
-## 🎛️ How to Run & Test Locally
+## 📚 Related Documentation
 
-1. Open Chrome / Brave / Edge.
-2. Navigate to `https://artha.link`.
-3. Open Developer Tools (`F12`) -> **Console**.
-4. Paste the script and hit `Enter`.
-5. Observe the HUD appearance and console log output.
+- [Anti-Detection Architecture](file:///d:/DEVELOPMENT/all-bots/docs/anti-detection.md)
+- [Data Feed Schema Guide](file:///d:/DEVELOPMENT/all-bots/docs/data-schema.md)
+- [GitHub & jsDelivr CDN Setup](file:///d:/DEVELOPMENT/all-bots/docs/cdn-and-github-guide.md)
+- [Docs Central Hub](file:///d:/DEVELOPMENT/all-bots/docs/README.md)
