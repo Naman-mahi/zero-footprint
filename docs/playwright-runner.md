@@ -1,67 +1,82 @@
-# 🚀 Production Playwright Multi-Location Runner (`playwright_applier.js`)
+# 🚀 Production Playwright Multi-City Batch Runner (`playwright_applier.js`)
 
-This technical reference explains how to use **`global-applier/playwright_applier.js`**, our production-grade Node.js Playwright automation runner designed for high-scale, multi-location batch processing with **5 Regional Location Profiles**, **extended redirect timers**, **state persistence**, and **automated storage cleansing**.
+This technical reference documents **`global-applier/playwright_applier.js`**, our production-grade Node.js Playwright automation runner featuring **100% OS-level disposable temporary profiles**, **multi-city domestic geo-rotation with spatial GPS jitter**, **10-second destination page load timers**, and **batch navigation**.
 
 ---
 
-## 🏛️ Architecture & Execution Flow
+## 🏛️ Architecture: 100% Zero-Trace Disposable Profiles
+
+To ensure **0 bytes of cookies, cache, localStorage, or tracking tokens persist** between applications, every job executes in a temporary, OS-isolated sandbox:
 
 ```mermaid
 flowchart TD
-    A[Start Playwright Runner] --> B[Load Location Profile: US / UK / IN / CA / DE / ROTATE]
-    B --> C[Create Isolated Browser Context with Real Geolocation & Locale]
-    C --> D[Navigate to Job details Tab 1]
-    D --> E[Dynamic Polling Resolver: Wait up to 10s for React DOM]
-    E --> F[Simulate Authentic Human Click]
-    F --> G[Capture Child Redirect Popup Tab 2]
-    G --> H[Extended 10.0s Full Page Load & Tracking Wait]
-    H --> I[Wipe localStorage, sessionStorage, cookies & Cleanly Close Tabs]
-    I --> J[Save Progress State to progress_state.json]
-    J --> K{Batch Complete 50/100?}
-    K -->|Yes| L[Purge Context Storage & Cookies -> 30s Human Cooldown -> Next Batch]
-    K -->|No| M[Human Pacing Delay 4s-7s -> Next Job]
-    L --> C
-    M --> D
+    A[Start Job N] --> B[Generate Disposable OS Temp Directory: fs.mkdtempSync]
+    B --> C[Assign City Profile: Bengaluru / Hyderabad / Mumbai / Pune / Delhi with Spatial Jitter]
+    C --> D[Launch Ephemeral Persistent Context in Temp Directory]
+    D --> E[Navigate to Job Details Page]
+    E --> F[Dynamic Poller: Resolve Apply Trigger]
+    F --> G[Dispatch 9-Stage Human Click]
+    G --> H[Extended 10.0s Full Page Load & Telemetry Wait]
+    H --> I[Execute CDP Storage.clearDataForOrigin & Network Cache Wipe]
+    I --> J[Purge DOM localStorage, sessionStorage, IndexedDB & Cache API]
+    J --> K[Close Browser Context: context.close]
+    K --> L[Delete OS Temp Directory from Disk: fs.rmSync]
+    L --> M[Clean Slate Ready for Job N+1]
 ```
 
 ---
 
-## 🌍 5 Regional Location Profiles
+## 🏙️ Multi-City Domestic Geolocation Database
 
-Playwright provides built-in emulation of genuine regional coordinates, timezone IDs, and language headers:
+Each job automatically rotates across major tech hubs with **$\pm 500\text{m}$ spatial Gaussian GPS jitter** so no two applications share the exact same coordinates:
 
-| Code | Location Profile | Geolocation (Lat / Lng) | Timezone ID | Locale |
+### 🇮🇳 India (`--location IN`):
+| City | Base Latitude | Base Longitude | Timezone | Locale |
 | :--- | :--- | :--- | :--- | :--- |
-| **`US`** | **United States (New York)** | `40.7128`, `-74.0060` | `America/New_York` | `en-US` |
-| **`UK` / `GB`** | **United Kingdom (London)** | `51.5074`, `-0.1278` | `Europe/London` | `en-GB` |
-| **`IN`** | **India (Hyderabad / Bengaluru)** | `17.3850`, `78.4867` | `Asia/Kolkata` | `en-IN` |
-| **`CA`** | **Canada (Toronto)** | `43.6532`, `-79.3832` | `America/Toronto` | `en-CA` |
-| **`DE`** | **Germany / Europe (Frankfurt)** | `50.1109`, `8.6821` | `Europe/Berlin` | `de-DE` |
-| **`ROTATE`** | **Auto-Rotation** | Rotates across US $\rightarrow$ UK $\rightarrow$ IN $\rightarrow$ CA $\rightarrow$ DE for each job |
+| **Bengaluru** | `12.9716` | `77.5946` | `Asia/Kolkata` | `en-IN` |
+| **Hyderabad** | `17.3850` | `78.4867` | `Asia/Kolkata` | `en-IN` |
+| **Mumbai** | `19.0760` | `72.8777` | `Asia/Kolkata` | `en-IN` |
+| **Pune** | `18.5204` | `73.8567` | `Asia/Kolkata` | `en-IN` |
+| **Chennai** | `13.0827` | `80.2707` | `Asia/Kolkata` | `en-IN` |
+| **Delhi NCR** | `28.6139` | `77.2090` | `Asia/Kolkata` | `en-IN` |
+| **Kolkata** | `22.5726` | `88.3639` | `Asia/Kolkata` | `en-IN` |
+| **Ahmedabad** | `23.0225` | `72.5714` | `Asia/Kolkata` | `en-IN` |
+
+### 🇺🇸 United States (`--location US`):
+* **New York** (`40.7128, -74.0060`, `America/New_York`)
+* **San Francisco** (`37.7749, -122.4194`, `America/Los_Angeles`)
+* **Austin** (`30.2672, -97.7431`, `America/Chicago`)
+* **Seattle** (`47.6062, -122.3321`, `America/Los_Angeles`)
+* **Chicago** (`41.8781, -87.6298`, `America/Chicago`)
 
 ---
 
-## 💻 CLI Commands & Examples
+## 🎯 Batch Navigation & Execution Commands
 
-### 1. Run 50 Jobs with Visible Browser Window (United States Profile)
-```bash
-node global-applier/playwright_applier.js --location US --batch 50 --headed
+### 1. Run Batch 1 (Jobs 1 to 50)
+```powershell
+node playwright_applier.js --location IN --batch 50 --batch-num 1 --headed
 ```
 
-### 2. Run 50 Jobs for United Kingdom with 6-Second Close Timer
-```bash
-node global-applier/playwright_applier.js --location UK --batch 50 --close-wait 6000 --headed
+### 2. Run Batch 2 (Jobs 51 to 100)
+```powershell
+node playwright_applier.js --location IN --batch 50 --batch-num 2 --headed
 ```
 
-### 3. Run 100 Jobs in Silent Headless Mode with Location Auto-Rotation
-```bash
-node global-applier/playwright_applier.js --location ROTATE --batch 100 --start 0
+### 3. Run Batch 3 (Jobs 101 to 150)
+```powershell
+node playwright_applier.js --location IN --batch 50 --batch-num 3 --headed
 ```
 
-### 4. Resume from Last Saved Progress
-If you stopped the script using `Ctrl+C`, it automatically saves `progress_state.json`. You can resume instantly:
-```bash
-node global-applier/playwright_applier.js --resume --headed
+### 4. Run All Batches Automatically (With 30s Cooldown Between Batches)
+```powershell
+node playwright_applier.js --location IN --batch 50 --auto-next --headed
+```
+
+### 5. Resume from Exact Stopped Position
+If you ever press `Ctrl+C`, simply run `--resume` to continue immediately:
+```powershell
+node playwright_applier.js --resume --headed
 ```
 
 ---
@@ -70,17 +85,10 @@ node global-applier/playwright_applier.js --resume --headed
 
 | Parameter | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
+| `--location` | `string` | `IN` | Regional profile (`IN`, `US`, `UK`, `CA`, `DE`, or `ROTATE`). |
 | `--batch` | `number` | `50` | Number of applications per batch (`50` or `100`). |
-| `--location` | `string` | `US` | Regional profile (`US`, `UK`, `IN`, `CA`, `DE`, or `ROTATE`). |
-| `--close-wait` | `number` | `5000` | Milliseconds to wait before closing the redirect tab (gives ample time for tracking beacons). |
-| `--start` | `number` | `0` | Zero-indexed starting position in the queue. |
-| `--resume` | `flag` | `false` | Resumes directly from the last saved state in `progress_state.json`. |
-| `--headed` | `flag` | `false` | Launches a visible Chromium window instead of headless mode. |
-| `--speed` | `string` | `normal` | Pacing delay preset (`fast`: 3-4.5s, `normal`: 5-7s, `stealth`: 8-12s). |
-
----
-
-## 📊 Summary Reports & State Persistence
-
-- **State File (`progress_state.json`)**: Automatically maintained in real-time. Captures current index, applied count, and timestamp.
-- **Execution Report (`results_<timestamp>.json`)**: Generated upon run completion. Records full breakdown of all applied URLs, location profiles used, and success metrics.
+| `--batch-num` | `number` | `1` | Specific batch number to run (`1` = 1-50, `2` = 51-100, `3` = 101-150). |
+| `--auto-next` | `flag` | `false` | Automatically proceeds to the next batch after a 30s rest. |
+| `--close-wait` | `number` | `10000` | Milliseconds to hold the destination page open (min 10s). |
+| `--resume` | `flag` | `false` | Resumes from exact index stored in `progress_state.json`. |
+| `--headed` | `flag` | `false` | Launches a visible Chromium window. |

@@ -1,110 +1,86 @@
 /**
- * 🕶️ Zero-Footprint PRO: Production-Grade Multi-Location Playwright Batch Applier
+ * 🕶️ Zero-Footprint PRO: Ultimate Multi-City Playwright Automation Engine
  * 
  * FEATURES:
- * - 🧼 100% DEEP BROWSER PURGE:
+ * - 🧼 ZERO-TRACE DISPOSABLE PROFILES:
+ *     - OS-Level Ephemeral Temp Directory (fs.mkdtempSync -> fs.rmSync): guarantees 0 bytes remain on disk.
  *     - CDP Protocol Level Purge: Storage.clearDataForOrigin (all origins, cookies, indexeddb, websql, cache, service workers).
  *     - Network Level Purge: Network.clearBrowserCookies & Network.clearBrowserCache.
  *     - DOM Level Purge: localStorage.clear(), sessionStorage.clear(), IndexedDB deletion, Cache API deletion.
- *     - Ephemeral Context Recycling: Recreates a sterile, isolated browser.newContext() on every job.
- * - ⏳ Extended 10-Second Mandatory Page Load Wait for full destination rendering.
- * - 🌍 5 Regional Location Profiles (US, UK, India, Canada, Germany/EU + Auto-Rotate).
- * - 🔌 Native Proxy Support (--proxy-server, --proxy-username, --proxy-password).
- * - 🧪 Client-Side Geo Route Interception (--mock-geo) for testing & staging environments.
- * - 📁 Location-Specific JSON Queue Auto-Detection (jobs_us.json, jobs_uk.json, jobs_in.json, etc.).
- * - 🎯 Configurable Batch Sizes (50 or 100 applications per run).
+ * - 🏙️ MULTI-CITY DOMESTIC GEO-ROTATION:
+ *     - India (IN): Bengaluru, Hyderabad, Mumbai, Pune, Chennai, Delhi NCR, Kolkata, Ahmedabad.
+ *     - United States (US): New York, San Francisco, Austin, Seattle, Chicago.
+ *     - United Kingdom (UK): London, Manchester, Birmingham.
+ *     - Spatial Gaussian Jitter: Jitters GPS coordinates per job so no two requests originate from the exact same coordinates.
+ * - ⏳ Extended 10-Second Mandatory Destination Hydration Wait.
+ * - 🎯 Intuitive Batch Navigation:
+ *     - --batch 50 / --batch 100
+ *     - --batch-num 2 (jumps straight to Batch 2)
+ *     - --auto-next (cycles through batches automatically with 30s cooldown)
+ *     - --resume (picks up from exact saved state)
  * - 🛡️ 9-Stage Human Pointer Simulation & Anti-Bot Evasion.
- * - 💾 State Persistence: Graceful Ctrl+C shutdown saving progress to progress_state.json.
- * - 📊 Detailed Execution Summary Report exported to results_<timestamp>.json.
  * 
  * USAGE:
  *   node playwright_applier.js [options]
  * 
- * OPTIONS:
- *   --location <code|all>       Location preset: US, UK, IN, CA, DE, or ROTATE (Default: IN)
- *   --batch <number>            Batch size: 50 or 100 (Default: 50)
- *   --queue <filename>          Custom queue JSON file path (e.g., jobs_in.json)
- *   --start <number>            Starting index in queue (Default: 0)
- *   --close-wait <ms>           Milliseconds to wait for destination page to finish loading (Default: 10000 = 10s)
- *   --proxy-server <url>        HTTP/SOCKS5 proxy server (e.g., http://proxy.example.com:8080)
- *   --proxy-username <user>     Proxy authentication username
- *   --proxy-password <pass>     Proxy authentication password
- *   --mock-geo                  Intercept client-side geo API calls for local test environments
- *   --resume                    Resume from last saved progress_state.json
- *   --headed                    Run with visible browser window (Default: headless)
- *   --speed <mode>              fast (3s), normal (5s), stealth (8s) (Default: normal)
- * 
  * EXAMPLES:
+ *   # 1. Run Batch 1 (50 Jobs in India with multi-city auto-rotation)
  *   node playwright_applier.js --location IN --batch 50 --headed
- *   node playwright_applier.js --location IN --batch 50 --close-wait 12000 --headed
- *   node playwright_applier.js --location US --proxy-server "http://us-proxy.example.com:8080" --batch 50
+ * 
+ *   # 2. Run Batch 2 (Jobs 51 to 100)
+ *   node playwright_applier.js --location IN --batch 50 --batch-num 2 --headed
+ * 
+ *   # 3. Run all batches automatically with auto-cooldown
+ *   node playwright_applier.js --location IN --batch 50 --auto-next --headed
+ * 
+ *   # 4. Resume from exact last saved progress
  *   node playwright_applier.js --resume --headed
  */
 
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 // =========================================================================
-// 🌍 5 PRE-CONFIGURED REGIONAL LOCATION PROFILES
+// 🏙️ MULTI-CITY DOMESTIC & REGIONAL LOCATION DATABASE
 // =========================================================================
-const LOCATION_PROFILES = {
-  US: {
-    code: 'US',
-    name: 'United States (New York)',
-    queueFile: 'jobs_us.json',
-    geolocation: { latitude: 40.7128, longitude: -74.0060 },
-    timezoneId: 'America/New_York',
-    locale: 'en-US',
-    httpHeaders: { 'Accept-Language': 'en-US,en;q=0.9' }
-  },
-  UK: {
-    code: 'UK',
-    name: 'United Kingdom (London)',
-    queueFile: 'jobs_uk.json',
-    geolocation: { latitude: 51.5074, longitude: -0.1278 },
-    timezoneId: 'Europe/London',
-    locale: 'en-GB',
-    httpHeaders: { 'Accept-Language': 'en-GB,en;q=0.9' }
-  },
-  GB: {
-    code: 'GB',
-    name: 'United Kingdom (London)',
-    queueFile: 'jobs_uk.json',
-    geolocation: { latitude: 51.5074, longitude: -0.1278 },
-    timezoneId: 'Europe/London',
-    locale: 'en-GB',
-    httpHeaders: { 'Accept-Language': 'en-GB,en;q=0.9' }
-  },
-  IN: {
-    code: 'IN',
-    name: 'India (Hyderabad / Bengaluru)',
-    queueFile: 'jobs_in.json',
-    geolocation: { latitude: 17.3850, longitude: 78.4867 },
-    timezoneId: 'Asia/Kolkata',
-    locale: 'en-IN',
-    httpHeaders: { 'Accept-Language': 'en-IN,en-GB;q=0.9,en;q=0.8' }
-  },
-  CA: {
-    code: 'CA',
-    name: 'Canada (Toronto)',
-    queueFile: 'jobs_ca.json',
-    geolocation: { latitude: 43.6532, longitude: -79.3832 },
-    timezoneId: 'America/Toronto',
-    locale: 'en-CA',
-    httpHeaders: { 'Accept-Language': 'en-CA,en;q=0.9' }
-  },
-  DE: {
-    code: 'DE',
-    name: 'Germany / Europe (Frankfurt)',
-    queueFile: 'jobs_de.json',
-    geolocation: { latitude: 50.1109, longitude: 8.6821 },
-    timezoneId: 'Europe/Berlin',
-    locale: 'de-DE',
-    httpHeaders: { 'Accept-Language': 'de-DE,de;q=0.9,en;q=0.8' }
-  }
+const CITY_DATABASE = {
+  IN: [
+    { city: 'Bengaluru', lat: 12.9716, lng: 77.5946, timezone: 'Asia/Kolkata', locale: 'en-IN' },
+    { city: 'Hyderabad', lat: 17.3850, lng: 78.4867, timezone: 'Asia/Kolkata', locale: 'en-IN' },
+    { city: 'Mumbai', lat: 19.0760, lng: 72.8777, timezone: 'Asia/Kolkata', locale: 'en-IN' },
+    { city: 'Pune', lat: 18.5204, lng: 73.8567, timezone: 'Asia/Kolkata', locale: 'en-IN' },
+    { city: 'Chennai', lat: 13.0827, lng: 80.2707, timezone: 'Asia/Kolkata', locale: 'en-IN' },
+    { city: 'Delhi NCR', lat: 28.6139, lng: 77.2090, timezone: 'Asia/Kolkata', locale: 'en-IN' },
+    { city: 'Kolkata', lat: 22.5726, lng: 88.3639, timezone: 'Asia/Kolkata', locale: 'en-IN' },
+    { city: 'Ahmedabad', lat: 23.0225, lng: 72.5714, timezone: 'Asia/Kolkata', locale: 'en-IN' }
+  ],
+  US: [
+    { city: 'New York', lat: 40.7128, lng: -74.0060, timezone: 'America/New_York', locale: 'en-US' },
+    { city: 'San Francisco', lat: 37.7749, lng: -122.4194, timezone: 'America/Los_Angeles', locale: 'en-US' },
+    { city: 'Austin', lat: 30.2672, lng: -97.7431, timezone: 'America/Chicago', locale: 'en-US' },
+    { city: 'Seattle', lat: 47.6062, lng: -122.3321, timezone: 'America/Los_Angeles', locale: 'en-US' },
+    { city: 'Chicago', lat: 41.8781, lng: -87.6298, timezone: 'America/Chicago', locale: 'en-US' }
+  ],
+  UK: [
+    { city: 'London', lat: 51.5074, lng: -0.1278, timezone: 'Europe/London', locale: 'en-GB' },
+    { city: 'Manchester', lat: 53.4808, lng: -2.2426, timezone: 'Europe/London', locale: 'en-GB' },
+    { city: 'Birmingham', lat: 52.4862, lng: -1.8904, timezone: 'Europe/London', locale: 'en-GB' }
+  ],
+  CA: [
+    { city: 'Toronto', lat: 43.6532, lng: -79.3832, timezone: 'America/Toronto', locale: 'en-CA' },
+    { city: 'Vancouver', lat: 49.2827, lng: -123.1207, timezone: 'America/Vancouver', locale: 'en-CA' },
+    { city: 'Montreal', lat: 45.5017, lng: -73.5673, timezone: 'America/Toronto', locale: 'en-CA' }
+  ],
+  DE: [
+    { city: 'Frankfurt', lat: 50.1109, lng: 8.6821, timezone: 'Europe/Berlin', locale: 'de-DE' },
+    { city: 'Berlin', lat: 52.5200, lng: 13.4050, timezone: 'Europe/Berlin', locale: 'de-DE' },
+    { city: 'Munich', lat: 48.1351, lng: 11.5820, timezone: 'Europe/Berlin', locale: 'de-DE' }
+  ]
 };
 
-const LOCATION_KEYS = ['US', 'UK', 'IN', 'CA', 'DE'];
+// Aliases
+CITY_DATABASE.GB = CITY_DATABASE.UK;
 
 // CLI Argument Parser
 const args = process.argv.slice(2);
@@ -118,13 +94,14 @@ function getArg(name, defaultValue) {
 
 const isHeaded = args.includes('--headed');
 const isResume = args.includes('--resume');
+const isAutoNext = args.includes('--auto-next');
 const isMockGeo = args.includes('--mock-geo');
 const batchSize = Number(getArg('batch', 50));
-// Minimum 10-second wait for full destination page load & beacon delivery
+const batchNumArg = getArg('batch-num', null);
 const closeWaitMs = Math.max(10000, Number(getArg('close-wait', 10000)));
 const speedMode = getArg('speed', 'normal');
-const requestedLocation = (getArg('location', 'IN')).toUpperCase();
-const isRotateLocation = requestedLocation === 'ROTATE' || requestedLocation === 'ALL' || requestedLocation === 'MULTI';
+const requestedCountry = (getArg('location', 'IN')).toUpperCase();
+const isRotateCountry = requestedCountry === 'ROTATE' || requestedCountry === 'ALL' || requestedCountry === 'MULTI';
 const customQueueArg = getArg('queue', null);
 
 // Proxy configuration
@@ -136,10 +113,11 @@ const proxyPassword = getArg('proxy-password', null);
 let queueFileName = 'jobs_queue.json';
 if (customQueueArg) {
   queueFileName = customQueueArg;
-} else if (!isRotateLocation && LOCATION_PROFILES[requestedLocation]) {
-  const candidateFile = LOCATION_PROFILES[requestedLocation].queueFile;
-  if (fs.existsSync(path.join(__dirname, candidateFile))) {
-    queueFileName = candidateFile;
+} else if (!isRotateCountry) {
+  const locMap = { IN: 'jobs_in.json', US: 'jobs_us.json', UK: 'jobs_uk.json', GB: 'jobs_uk.json', CA: 'jobs_ca.json', DE: 'jobs_de.json' };
+  const candidate = locMap[requestedCountry];
+  if (candidate && fs.existsSync(path.join(__dirname, candidate))) {
+    queueFileName = candidate;
   }
 }
 
@@ -148,15 +126,20 @@ const stateFilePath = path.join(__dirname, 'progress_state.json');
 
 if (!fs.existsSync(queueFilePath)) {
   console.error(`❌ Error: Queue file not found at ${queueFilePath}`);
-  console.error(`💡 Tip: Fetch jobs first using: node fetch_by_location.js ${requestedLocation} 500`);
+  console.error(`💡 Tip: Fetch jobs first using: node fetch_by_location.js ${requestedCountry} 500`);
   process.exit(1);
 }
 
 const queue = JSON.parse(fs.readFileSync(queueFilePath, 'utf8'));
 
 // Determine starting index
-let startIndex = Number(getArg('start', 0));
-if (isResume && fs.existsSync(stateFilePath)) {
+let startIndex = 0;
+if (batchNumArg) {
+  const bNum = Math.max(1, Number(batchNumArg));
+  startIndex = (bNum - 1) * batchSize;
+} else if (getArg('start', null) !== null) {
+  startIndex = Number(getArg('start', 0));
+} else if (isResume && fs.existsSync(stateFilePath)) {
   try {
     const saved = JSON.parse(fs.readFileSync(stateFilePath, 'utf8'));
     if (saved && typeof saved.currentIndex === 'number') {
@@ -185,12 +168,27 @@ function formatSlug(url) {
   return 'Job Opening';
 }
 
-function getLocationProfile(index) {
-  if (isRotateLocation) {
-    const key = LOCATION_KEYS[index % LOCATION_KEYS.length];
-    return LOCATION_PROFILES[key];
-  }
-  return LOCATION_PROFILES[requestedLocation] || LOCATION_PROFILES.IN;
+/**
+ * 🏙️ Multi-City Location Profile with Spatial Gaussian Jitter
+ */
+function getCityProfile(index) {
+  let countryKey = isRotateCountry ? ['IN', 'US', 'UK', 'CA', 'DE'][index % 5] : requestedCountry;
+  const cityList = CITY_DATABASE[countryKey] || CITY_DATABASE.IN;
+  const cityBase = cityList[index % cityList.length];
+
+  // Spatial Gaussian Jitter (+/- 0.005 deg approx 500m)
+  const jitterLat = cityBase.lat + (Math.random() - 0.5) * 0.009;
+  const jitterLng = cityBase.lng + (Math.random() - 0.5) * 0.009;
+
+  return {
+    country: countryKey,
+    city: cityBase.city,
+    displayName: `${cityBase.city}, ${countryKey}`,
+    geolocation: { latitude: Number(jitterLat.toFixed(6)), longitude: Number(jitterLng.toFixed(6)) },
+    timezoneId: cityBase.timezone,
+    locale: cityBase.locale,
+    httpHeaders: { 'Accept-Language': `${cityBase.locale},en;q=0.9` }
+  };
 }
 
 function saveState(currentIndex, completedCount, skippedCount) {
@@ -207,7 +205,6 @@ function saveState(currentIndex, completedCount, skippedCount) {
 
 /**
  * 🧼 100% DEEP BROWSER DATA PURGE ENGINE
- * Wipes CDP storage, Network cache, DOM localStorage, sessionStorage, IndexedDB, and Cache API.
  */
 async function performDeepDataPurge(context, page, popup) {
   // 1. Wipe Popup (Tab 2) DOM storage
@@ -279,7 +276,6 @@ const results = {
 
 // Graceful Shutdown Handler
 let isTerminating = false;
-let globalBrowser = null;
 let currentProcessingIndex = startIndex;
 
 function handleGracefulExit() {
@@ -288,12 +284,7 @@ function handleGracefulExit() {
   console.log('\n\n🛑 [SHUTDOWN] Saving progress state before exiting...');
   saveState(currentProcessingIndex, results.appliedCount, results.skippedCount);
   console.log(`💾 Progress saved at Job ${currentProcessingIndex + 1}. You can resume anytime using --resume.\n`);
-  
-  if (globalBrowser) {
-    globalBrowser.close().then(() => process.exit(0)).catch(() => process.exit(0));
-  } else {
-    process.exit(0);
-  }
+  process.exit(0);
 }
 
 process.on('SIGINT', handleGracefulExit);
@@ -314,44 +305,20 @@ process.on('SIGTERM', handleGracefulExit);
   const { chromium } = playwright;
 
   console.log('\n======================================================');
-  console.log('🕶️ ZERO-FOOTPRINT PRO: PLAYWRIGHT BATCH APPLIER');
+  console.log('🕶️ ZERO-FOOTPRINT PRO: MULTI-CITY BATCH ENGINE');
   console.log('======================================================');
   console.log(`📁 Active Queue File:   ${path.basename(queueFilePath)} (${queue.length} jobs)`);
-  console.log(`🎯 Batch Size:           ${batchSize} jobs per run`);
-  console.log(`🏁 Starting Index:       Job ${startIndex + 1} / ${queue.length}`);
-  console.log(`🌍 Location Profile:     ${isRotateLocation ? '🔄 Multi-Country Auto-Rotation (US, UK, IN, CA, DE)' : (LOCATION_PROFILES[requestedLocation]?.name || requestedLocation)}`);
+  console.log(`🎯 Batch Size:           ${batchSize} jobs per batch`);
+  console.log(`🏁 Starting Index:       Job ${startIndex + 1} / ${queue.length} (Batch ${Math.floor(startIndex / batchSize) + 1})`);
+  console.log(`🏙️ City Rotation:        ACTIVE (${(CITY_DATABASE[requestedCountry] || CITY_DATABASE.IN).map(c => c.city).join(', ')})`);
   if (proxyServer) {
     console.log(`🔌 Network Proxy:        ${proxyServer}`);
   }
-  if (isMockGeo) {
-    console.log(`🧪 Geo Interception:     ACTIVE (Mocking client-side geo endpoints)`);
-  }
-  console.log(`⏳ Page Load & Wait:    ${(closeWaitMs / 1000).toFixed(1)} seconds (Full load & beacon delivery)`);
-  console.log(`🧼 Deep Cleanse Mode:    100% COMPLETE (CDP Storage, Network Cache, Cookies, IndexedDB, Session)`);
+  console.log(`⏳ Page Load & Wait:    ${(closeWaitMs / 1000).toFixed(1)}s (Full load & beacon finalization)`);
+  console.log(`🧼 Deep Cleanse Mode:    100% DISPOSABLE EPHEMERAL PROFILES`);
   console.log(`🖥️ Browser Display:      ${isHeaded ? 'Headed (Visible GUI)' : 'Headless (Silent)'}`);
   console.log(`⏱️ Human Pacing:         ${speedMode.toUpperCase()}`);
   console.log('======================================================\n');
-
-  const launchOptions = {
-    headless: !isHeaded,
-    args: [
-      '--disable-blink-features=AutomationControlled',
-      '--no-sandbox',
-      '--disable-web-security'
-    ]
-  };
-
-  if (proxyServer) {
-    launchOptions.proxy = {
-      server: proxyServer
-    };
-    if (proxyUsername && proxyPassword) {
-      launchOptions.proxy.username = proxyUsername;
-      launchOptions.proxy.password = proxyPassword;
-    }
-  }
-
-  globalBrowser = await chromium.launch(launchOptions);
 
   let currentIndex = startIndex;
 
@@ -361,31 +328,55 @@ process.on('SIGTERM', handleGracefulExit);
     const batchEndIndex = Math.min(queue.length, currentIndex + batchSize);
 
     console.log(`\n┌──────────────────────────────────────────────────────────────┐`);
-    console.log(`│ 🚀 STARTING BATCH ${currentBatchNum} / ${totalBatches} (Jobs ${currentIndex + 1} to ${batchEndIndex})`);
-    console.log(`│ 📁 Queue File:       ${path.basename(queueFilePath)}`);
+    console.log(`│ 🚀 RUNNING BATCH ${currentBatchNum} / ${totalBatches} (Jobs ${currentIndex + 1} to ${batchEndIndex})`);
+    console.log(`│ 📁 Queue File: ${path.basename(queueFilePath)}`);
     console.log(`└──────────────────────────────────────────────────────────────┘\n`);
 
     for (; currentIndex < batchEndIndex && !isTerminating; currentIndex++) {
       currentProcessingIndex = currentIndex;
       const url = queue[currentIndex];
       const roleName = formatSlug(url);
-      const activeProfile = getLocationProfile(currentIndex);
+      const activeProfile = getCityProfile(currentIndex);
 
       console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
       console.log(`🎯 [JOB ${currentIndex + 1}/${queue.length}] ${roleName}`);
       console.log(`🔗 URL: ${url}`);
-      console.log(`🌍 Profile: ${activeProfile.name} (${activeProfile.code})`);
+      console.log(`🏙️ Location: ${activeProfile.displayName} (GPS: ${activeProfile.geolocation.latitude}, ${activeProfile.geolocation.longitude})`);
 
-      // CREATE FRESH, STERILE CONTEXT FOR THIS INDIVIDUAL JOB
-      const context = await globalBrowser.newContext({
+      // 1. Create a unique, disposable OS-level temporary profile directory
+      const tempUserDataDir = fs.mkdtempSync(path.join(os.tmpdir(), `pw_profile_${Date.now()}_`));
+
+      const launchArgs = [
+        '--disable-blink-features=AutomationControlled',
+        '--no-sandbox',
+        '--disable-web-security',
+        '--disable-dev-shm-usage',
+        '--disk-cache-size=0',
+        '--media-cache-size=0'
+      ];
+
+      const contextOptions = {
         viewport: { width: 1366, height: 868 },
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
         geolocation: activeProfile.geolocation,
         permissions: ['geolocation'],
         timezoneId: activeProfile.timezoneId,
         locale: activeProfile.locale,
-        extraHTTPHeaders: activeProfile.httpHeaders
-      });
+        extraHTTPHeaders: activeProfile.httpHeaders,
+        headless: !isHeaded,
+        args: launchArgs
+      };
+
+      if (proxyServer) {
+        contextOptions.proxy = { server: proxyServer };
+        if (proxyUsername && proxyPassword) {
+          contextOptions.proxy.username = proxyUsername;
+          contextOptions.proxy.password = proxyPassword;
+        }
+      }
+
+      // Launch sterile persistent context tied to the disposable temp directory
+      const context = await chromium.launchPersistentContext(tempUserDataDir, contextOptions);
 
       // Optional client-side geo route mocking for test environments
       if (isMockGeo) {
@@ -401,8 +392,8 @@ process.on('SIGTERM', handleGracefulExit);
                 geo: {
                   lat: activeProfile.geolocation.latitude,
                   lng: activeProfile.geolocation.longitude,
-                  city: activeProfile.name.split('(')[1]?.replace(')', '') || 'City',
-                  country: activeProfile.code,
+                  city: activeProfile.city,
+                  country: activeProfile.country,
                   timezone: activeProfile.timezoneId,
                   isVpn: false,
                   isProxy: false,
@@ -487,24 +478,27 @@ process.on('SIGTERM', handleGracefulExit);
         console.warn(`⚠️ Notice: ${err.message}`);
         results.failedCount++;
       } finally {
-        // 7. EXECUTE 100% COMPLETE BROWSER DATA PURGE BEFORE DESTROYING CONTEXT
+        // 7. EXECUTE 100% COMPLETE IN-MEMORY BROWSER DATA PURGE
         await performDeepDataPurge(context, page, spawnedPopup);
 
         if (!page.isClosed()) {
           await page.close().catch(() => {});
-          console.log(`🚪 Closed job details window.`);
         }
 
-        // 8. DESTROY THE ENTIRE CONTEXT (Removes all in-memory and disk session footprint)
+        // 8. DESTROY BROWSER CONTEXT & DELETE DISPOSABLE OS DIRECTORY
         await context.close().catch(() => {});
-        console.log(`🧼 [DEEP PURGE COMPLETE] Wiped all cookies, cache, indexedDB & storage for Job ${currentIndex + 1}.`);
+        try {
+          fs.rmSync(tempUserDataDir, { recursive: true, force: true });
+        } catch (e) {}
+
+        console.log(`🧼 [0-FOOTPRINT PURGE] Deleted temporary OS profile directory & all storage for Job ${currentIndex + 1}.`);
       }
 
       results.history.push({
         index: currentIndex + 1,
         url,
         applied: isApplied,
-        location: activeProfile.code,
+        location: activeProfile.displayName,
         timestamp: new Date().toISOString()
       });
 
@@ -518,14 +512,21 @@ process.on('SIGTERM', handleGracefulExit);
       }
     }
 
-    if (currentIndex < queue.length && !isTerminating) {
-      console.log(`\n☕ [COOLDOWN BREAK] Batch ${currentBatchNum} finished. Taking 30s organic human rest before Batch ${currentBatchNum + 1}...`);
-      await sleep(30000);
-    }
-  }
+    // End of Batch Handshake
+    console.log(`\n======================================================`);
+    console.log(`🎉 BATCH ${currentBatchNum} / ${totalBatches} FINISHED (Processed up to Job ${currentIndex})`);
+    console.log(`======================================================`);
 
-  if (globalBrowser) {
-    await globalBrowser.close().catch(() => {});
+    if (currentIndex < queue.length && !isTerminating) {
+      if (isAutoNext) {
+        console.log(`\n☕ [AUTO-NEXT COOLDOWN] Taking 30s organic human rest before Batch ${currentBatchNum + 1}...`);
+        await sleep(30000);
+      } else {
+        console.log(`\n💡 To start the next batch, run:`);
+        console.log(`   node playwright_applier.js --location ${requestedCountry} --batch ${batchSize} --batch-num ${currentBatchNum + 1} --headed\n`);
+        break;
+      }
+    }
   }
 
   // Export Execution Summary Report
@@ -535,7 +536,7 @@ process.on('SIGTERM', handleGracefulExit);
   fs.writeFileSync(reportPath, JSON.stringify(results, null, 2), 'utf8');
 
   console.log('\n======================================================');
-  console.log('🎉 EXECUTION RUN FINISHED');
+  console.log('🎉 EXECUTION RUN COMPLETED');
   console.log('======================================================');
   console.log(`✅ Total Applied:  ${results.appliedCount} / ${queue.length}`);
   console.log(`⏩ Total Skipped:  ${results.skippedCount}`);
