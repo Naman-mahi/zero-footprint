@@ -1,5 +1,5 @@
 /**
- * 🕶️ Zero-Footprint: High-Performance Sequential In-Browser Auto-Applier
+ * 🕶️ Zero-Footprint: Advanced 1-by-1 Sequential In-Browser Auto-Applier
  * 
  * GitHub: https://github.com/Naman-mahi/zero-footprint
  * CDN: https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js
@@ -7,78 +7,1001 @@
  * FEATURES:
  * - ⚡ 1-by-1 Sequential Processing: Never overloads CPU/RAM with hundreds of open tabs.
  * - 🪟 Dual-Tab Auto-Closer: Opens Job Page (Tab 1), clicks apply, handles redirect (Tab 2), and closes BOTH tabs cleanly.
+ * - 🛡️ Advanced Anti-Detection: 9-step human pointer cascade, deceleration scroll, and Gaussian spatial jitter.
+ * - 🧹 Smart Session & Tracker Cleaner: Cleans tracking cookies & telemetry storage while preserving login authentication.
  * - 💾 Session Resume: Saves progress in localStorage so you can pause/resume anytime without losing your place.
- * - 🛡️ 100% Undetectable: Authentic human pointer cascades, randomized coordinate jitter, and human pacing.
- * - 🖥️ Floating Dashboard (HUD): Glassmorphic UI with Start/Pause/Skip/Speed controls and real-time progress bar.
+ * - 🎨 Modern Light-Theme HUD: Ultra-clean frosted glass UI with vector SVG icons and real-time progress indicators.
  */
 
 (function () {
   // Prevent or clean up duplicate instances
   if (window.__AUTO_APPLIER_INSTANCE__) {
-    console.log("%c🔄 Cleaning up previous Auto-Applier instance...", "color: #38bdf8; font-weight: bold;");
+    console.log("%c🔄 Cleaning up previous Auto-Applier session...", "color: #2563eb; font-weight: bold;");
     try {
       window.__AUTO_APPLIER_INSTANCE__.cleanup();
     } catch (e) {}
   }
 
   // =========================================================================
-  // 📋 JOB URL QUEUE (Combined 974 Verified Openings from out JSON feeds)
+  // 📋 EMBEDDED JOB URL QUEUE (974 Openings from out_*.json feeds)
   // =========================================================================
-  // Default queue loaded from out_20260902_133307.json & out_20260902_133816.json
   const DEFAULT_QUEUE = [
-    "https://artha.link/@eanxt/jobs/director-of-infrastructure-engineering-micro1-3edbafcb",
-    "https://artha.link/@eanxt/jobs/member-of-technical-staff-vulnerability-micro1-a6d38faa",
-    "https://artha.link/@eanxt/jobs/devops-engineer-data-platforms-procter-gamble-naskal-178d6713",
-    "https://artha.link/@eanxt/jobs/cloud-security-qualizeal-hyderabad-11437b6c",
-    "https://artha.link/@eanxt/jobs/devops-engineer-procter-gamble-pasmamala-149b8d6c",
-    "https://artha.link/@eanxt/jobs/security-engineer-pellera-technologies-india-b7186dca",
-    "https://artha.link/@eanxt/jobs/devops-consultant-sutherland-hyderabad-c88dd462",
-    "https://artha.link/@eanxt/jobs/cloud-security-qualizeal-hyderabad-40ecfaed",
-    "https://artha.link/@eanxt/jobs/devops-consultant-sutherland-hyderabad-1e3805e8",
-    "https://artha.link/@eanxt/jobs/security-engineer-pellera-technologies-mumbai-df55a9b7",
-    "https://artha.link/@eanxt/jobs/associate-application-development-genworth-maicha-2c40cbb8",
-    "https://artha.link/@eanxt/jobs/aws-devops-cloud-security-cloud-tata-consultancy-noida-9c9208e3",
-    "https://artha.link/@eanxt/jobs/security-incident-response-analyst-endava-bengaluru-aadfd5fd",
-    "https://artha.link/@eanxt/jobs/senior-application-security-engineer-elevate-global-bengaluru-d94322e6",
-    "https://artha.link/@eanxt/jobs/cloud-security-lead-simelabs-digital-ai-mumbai-2efef4d9",
-    "https://artha.link/@eanxt/jobs/gcp-cloud-security-engineer-tata-consultancy-mumbai-c8d83e50",
-    "https://artha.link/@eanxt/jobs/cyber-security-engineer-application-mumbai-ebceff72",
-    "https://artha.link/@eanxt/jobs/senior-cloud-security-remediation-dbiz-ai-bengaluru-dc2772d2",
-    "https://artha.link/@eanxt/jobs/network-security-engineer-kerala-vision-kerala-74f151e3",
-    "https://artha.link/@eanxt/jobs/senior-application-security-engineer-parking-base-india-0e37f5ca",
-    "https://artha.link/@eanxt/jobs/network-security-engineer-trantor-india-2f138dc1",
-    "https://artha.link/@eanxt/jobs/cloud-native-security-lead-teladoc-health-greater-ce6d9117",
-    "https://artha.link/@eanxt/jobs/senior-application-security-engineer-moneyview-bengaluru-fc1e6955",
-    "https://artha.link/@eanxt/jobs/cloud-network-engineer-shi-solutions-india-hyderabad-cfb2faca",
-    "https://artha.link/@eanxt/jobs/lead-specialist-information-security-lseg-london-stock-hyderabad-5c1cfb9b",
-    "https://artha.link/@eanxt/jobs/senior-devops-engineer-mumbai-8db234ba",
-    "https://artha.link/@eanxt/jobs/cybersecurity-engineer-devops-bengaluru-67f6bbbc",
-    "https://artha.link/@eanxt/jobs/lead-engineer-data-platform-swiggy-bengaluru-275d1f6c",
-    "https://artha.link/@eanxt/jobs/cyber-security-engineer-inland-technologies-india-pvt-ltd-hyderabad-05202613",
-    "https://artha.link/@eanxt/jobs/sr-incident-response-security-engineer-quess-corp-bengaluru-0f9e160e",
-    "https://artha.link/@eanxt/jobs/principal-cloud-infrastructure-security-engineer-oracle-bengaluru-b6fa72d3",
-    "https://artha.link/@eanxt/jobs/lead-engineer-data-platform-swiggy-bengaluru-caefeb93",
-    "https://artha.link/@eanxt/jobs/senior-infrastructure-engineer-it-services-and-it-consulting-mumbai-036ae526",
-    "https://artha.link/@eanxt/jobs/cloud-security-engineer-tata-consultancy-mumbai-29e3776e",
-    "https://artha.link/@eanxt/jobs/network-security-lead-genpact-noida-96a928ba",
-    "https://artha.link/@eanxt/jobs/cloud-security-engineer-tata-consultancy-mumbai-cf88135a",
-    "https://artha.link/@eanxt/jobs/incident-response-engineer-phenom-hyderabad-644d31dd",
-    "https://artha.link/@eanxt/jobs/incident-response-lead-tata-consultancy-mumbai-2f5a6b0c",
-    "https://artha.link/@eanxt/jobs/information-security-engineer-incident-response-dell-technologies-bengaluru-d667c485",
-    "https://artha.link/@eanxt/jobs/senior-cloud-security-engineer-oracle-hyderabad-071c775d",
-    "https://artha.link/@eanxt/jobs/lead-engineer-data-platform-swiggy-bengaluru-a28a3683",
-    "https://artha.link/@eanxt/jobs/sr-analyst-information-security-incident-response-dell-technologies-bengaluru-cb2566ec",
-    "https://artha.link/@eanxt/jobs/lead-engineer-data-platform-swiggy-bengaluru-fd0579e0",
-    "https://artha.link/@eanxt/jobs/lead-engineer-data-platform-swiggy-bengaluru-91ea8351",
-    "https://artha.link/@eanxt/jobs/cloud-security-engineer-tata-consultancy-mumbai-e09217f2",
-    "https://artha.link/@eanxt/jobs/lead-engineer-data-platform-swiggy-bengaluru-03823793",
-    "https://artha.link/@eanxt/jobs/lead-engineer-data-platform-swiggy-bengaluru-5a639d67",
-    "https://artha.link/@eanxt/jobs/lead-engineer-data-platform-swiggy-bengaluru-6a75fba1",
-    "https://artha.link/@eanxt/jobs/principal-network-security-engineer-oracle-bengaluru-8cb151d3",
-    "https://artha.link/@eanxt/jobs/lead-engineer-data-platform-swiggy-bengaluru-8557ee0f"
-  ];
+  "https://artha.link/@eanxt/jobs/director-of-infrastructure-engineering-micro1-3edbafcb",
+  "https://artha.link/@eanxt/jobs/member-of-technical-staff-vulnerability-micro1-a6d38faa",
+  "https://artha.link/@eanxt/jobs/devops-engineer-data-platforms-procter-gamble-naskal-178d6713",
+  "https://artha.link/@eanxt/jobs/cloud-security-qualizeal-hyderabad-11437b6c",
+  "https://artha.link/@eanxt/jobs/devops-engineer-procter-gamble-pasmamala-149b8d6c",
+  "https://artha.link/@eanxt/jobs/security-engineer-pellera-technologies-india-b7186dca",
+  "https://artha.link/@eanxt/jobs/devops-consultant-sutherland-hyderabad-c88dd462",
+  "https://artha.link/@eanxt/jobs/cloud-security-qualizeal-hyderabad-40ecfaed",
+  "https://artha.link/@eanxt/jobs/devops-consultant-sutherland-hyderabad-1e3805e8",
+  "https://artha.link/@eanxt/jobs/security-engineer-pellera-technologies-mumbai-df55a9b7",
+  "https://artha.link/@eanxt/jobs/associate-application-development-genworth-maicha-2c40cbb8",
+  "https://artha.link/@eanxt/jobs/aws-devops-cloud-security-cloud-tata-consultancy-noida-9c9208e3",
+  "https://artha.link/@eanxt/jobs/security-incident-response-analyst-endava-bengaluru-aadfd5fd",
+  "https://artha.link/@eanxt/jobs/senior-application-security-engineer-elevate-global-bengaluru-d94322e6",
+  "https://artha.link/@eanxt/jobs/cloud-security-lead-simelabs-digital-ai-mumbai-2efef4d9",
+  "https://artha.link/@eanxt/jobs/gcp-cloud-security-engineer-tata-consultancy-mumbai-c8d83e50",
+  "https://artha.link/@eanxt/jobs/cyber-security-engineer-application-mumbai-ebceff72",
+  "https://artha.link/@eanxt/jobs/senior-cloud-security-remediation-dbiz-ai-bengaluru-dc2772d2",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-kerala-vision-kerala-74f151e3",
+  "https://artha.link/@eanxt/jobs/senior-application-security-engineer-parking-base-india-0e37f5ca",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-trantor-india-2f138dc1",
+  "https://artha.link/@eanxt/jobs/cloud-native-security-lead-teladoc-health-greater-ce6d9117",
+  "https://artha.link/@eanxt/jobs/senior-application-security-engineer-moneyview-bengaluru-fc1e6955",
+  "https://artha.link/@eanxt/jobs/cloud-network-engineer-shi-solutions-india-hyderabad-cfb2faca",
+  "https://artha.link/@eanxt/jobs/linux-devops-engineer-persistent-systems-pune-city-519cbca4",
+  "https://artha.link/@eanxt/jobs/principal-security-engineer-arcana-bengaluru-fa0386bd",
+  "https://artha.link/@eanxt/jobs/cyber-security-engineer-techsara-solutions-ahmedabad-d5cb5f28",
+  "https://artha.link/@eanxt/jobs/cyber-security-engineer-slris-hyderabad-e4df1803",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-coforge-noida-19edb8f9",
+  "https://artha.link/@eanxt/jobs/senior-application-security-engineer-nexware-bengaluru-3d5bde6b",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-cloud4c-services-hyderabad-0b922a3c",
+  "https://artha.link/@eanxt/jobs/azure-iam-engineer-luxoft-bengaluru-40a207a0",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-sisl-global-india-68ec9a38",
+  "https://artha.link/@eanxt/jobs/senior-network-security-engineer-valuelabs-bengaluru-07536c51",
+  "https://artha.link/@eanxt/jobs/incident-response-engineer-phenom-hyderabad-644d31dd",
+  "https://artha.link/@eanxt/jobs/cloud-automation-engineer-infosys-finacle-bengaluru-e49686e0",
+  "https://artha.link/@eanxt/jobs/senior-security-engineer-bkn301-india-e358acd7",
+  "https://artha.link/@eanxt/jobs/information-system-security-engineer-d-genminds-talent-delhi-4f3e0c76",
+  "https://artha.link/@eanxt/jobs/cyber-security-analyst-codegama-bengaluru-f905b9e9",
+  "https://artha.link/@eanxt/jobs/security-iam-engineer-vericence-india-80424ceb",
+  "https://artha.link/@eanxt/jobs/saas-security-engineer-bluocean-cyber-india-bcd620de",
+  "https://artha.link/@eanxt/jobs/application-security-lead-persistent-systems-pune-city-f3d05cca",
+  "https://artha.link/@eanxt/jobs/manager-identity-access-management-grant-thornton-indus-hyderabad-4e54dd13",
+  "https://artha.link/@eanxt/jobs/senior-security-engineer-ciam-vistra-mumbai-26917a7e",
+  "https://artha.link/@eanxt/jobs/network-security-manager-adani-enterprises-ahmedabad-af6aba05",
+  "https://artha.link/@eanxt/jobs/cyber-security-engineer-insight-global-india-42a16a8b",
+  "https://artha.link/@eanxt/jobs/principal-engineer-t500-28593-marriott-tech-hyderabad-a89ce08e",
+  "https://artha.link/@eanxt/jobs/senior-security-engineer-coretek-labs-hyderabad-6663f2c4",
+  "https://artha.link/@eanxt/jobs/cyber-security-analyst-rein-security-india-d585009d",
+  "https://artha.link/@eanxt/jobs/cloud-infrastructure-lead-phonon-automating-vadodara-36132873",
+  "https://artha.link/@eanxt/jobs/security-iam-engineer-vericence-india-7a1e1aaa",
+  "https://artha.link/@eanxt/jobs/java-backend-developer-terveys-technology-trivandrum-34171280",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-caci-ltd-pune-district-91f64bfc",
+  "https://artha.link/@eanxt/jobs/senior-ps-consultant-zero-trust-trantor-chandigarh-9efe4544",
+  "https://artha.link/@eanxt/jobs/technical-lead-engineer-security-whitefield-careers-bengaluru-c6bbac6c",
+  "https://artha.link/@eanxt/jobs/security-engineer-nanoprecise-sci-corp-india-f756edcd",
+  "https://artha.link/@eanxt/jobs/information-security-analyst-cloud-mathworks-hyderabad-e6e6b094",
+  "https://artha.link/@eanxt/jobs/lead-security-engineer-searce-inc-hyderabad-6dc7149f",
+  "https://artha.link/@eanxt/jobs/executive-director-wissen-technology-bengaluru-e22365b6",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-sisl-global-india-9592cd71",
+  "https://artha.link/@eanxt/jobs/senior-database-reliability-engineer-micro1-8ef9e2c8",
+  "https://artha.link/@eanxt/jobs/senior-technical-architect-micro1-5c564f93",
+  "https://artha.link/@eanxt/jobs/senior-platform-engineer-micro1-d4f3bedd",
+  "https://artha.link/@eanxt/jobs/data-engineer-micro1-e0009f4d",
+  "https://artha.link/@eanxt/jobs/solidworks-specialist-micro1-74eb3f0c",
+  "https://artha.link/@eanxt/jobs/ai-ml-engineer-micro1-f5765e65",
+  "https://artha.link/@eanxt/jobs/senior-freecad-engineer-micro1-8f4d15f7",
+  "https://artha.link/@eanxt/jobs/software-engineer-new-grad-micro1-50721cbd",
+  "https://artha.link/@eanxt/jobs/devops-engineer-micro1-44ab9c0b",
+  "https://artha.link/@eanxt/jobs/autodesk-inventor-specialist-micro1-87099196",
+  "https://artha.link/@eanxt/jobs/ai-ml-engineer-internal-platforms-micro1-8ba2c514",
+  "https://artha.link/@eanxt/jobs/data-scientist-procter-gamble-borivali-west-aec4eba6",
+  "https://artha.link/@eanxt/jobs/smart-automations-platform-engineer-procter-gamble-naskal-4ca2e8c4",
+  "https://artha.link/@eanxt/jobs/cad-data-generation-validation-micro1-04ea6e08",
+  "https://artha.link/@eanxt/jobs/cloud-security-qualizeal-500001-fffcf6c1",
+  "https://artha.link/@eanxt/jobs/senior-software-engineer-micro1-215ec6b5",
+  "https://artha.link/@eanxt/jobs/open-source-contributor-micro1-d82a7a74",
+  "https://artha.link/@eanxt/jobs/senior-backend-engineer-micro1-56b8b236",
+  "https://artha.link/@eanxt/jobs/robotics-engineer-hardware-integrations-micro1-ba1b291f",
+  "https://artha.link/@eanxt/jobs/computational-biology-cheminformatics-micro1-2408638f",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-procter-gamble-hyderabad-6c1b68af",
+  "https://artha.link/@eanxt/jobs/backend-java-developer-micro1-dec9b93a",
+  "https://artha.link/@eanxt/jobs/backend-c-net-developer-micro1-5ad9258f",
+  "https://artha.link/@eanxt/jobs/software-engineer-micro1-9d369339",
+  "https://artha.link/@eanxt/jobs/senior-application-security-engineer-qualizeal-hyderabad-8da787a6",
+  "https://artha.link/@eanxt/jobs/cloud-security-tata-consultancy-chennai-e51562a2",
+  "https://artha.link/@eanxt/jobs/product-engineer-tata-consultancy-mumbai-bd308564",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-pyspark-indore-pune-tata-consultancy-pune-district-c40b3d78",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-tata-consultancy-chennai-343d714f",
+  "https://artha.link/@eanxt/jobs/azure-linux-admin-lead-tata-consultancy-bengaluru-4e9061b4",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-persistent-systems-pune-city-8ed46765",
+  "https://artha.link/@eanxt/jobs/gcp-security-engineer-tata-consultancy-hyderabad-7c6ed7f1",
+  "https://artha.link/@eanxt/jobs/gcp-security-engineer-tata-consultancy-gandhinagar-220c3005",
+  "https://artha.link/@eanxt/jobs/aws-infra-support-engineer-tata-consultancy-bengaluru-37c12a7b",
+  "https://artha.link/@eanxt/jobs/openshift-admin-kubernetes-tata-consultancy-chennai-fb7f71c9",
+  "https://artha.link/@eanxt/jobs/siem-architect-tata-consultancy-chennai-e3d0f702",
+  "https://artha.link/@eanxt/jobs/seniorapplication-security-analyst-tata-consultancy-delhi-4c273a96",
+  "https://artha.link/@eanxt/jobs/cloud-security-vm-lead-persistent-systems-pune-city-0b6daccf",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-tata-consultancy-hyderabad-56e9b868",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-tata-consultancy-bengaluru-e3bcd1a0",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-tata-consultancy-chennai-be4eac96",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-tata-consultancy-bengaluru-5f1d1dbe",
+  "https://artha.link/@eanxt/jobs/senior-professional-services-consultant-trantor-india-cbd709c2",
+  "https://artha.link/@eanxt/jobs/devops-automation-support-jrd-systems-bengaluru-0dc3b7b5",
+  "https://artha.link/@eanxt/jobs/senior-identity-access-management-iam-kaplan-bengaluru-9bfc2d73",
+  "https://artha.link/@eanxt/jobs/senior-professional-services-consultant-trantor-india-cb4a0b92",
+  "https://artha.link/@eanxt/jobs/senior-professional-services-consultant-trantor-india-d25b0efc",
+  "https://artha.link/@eanxt/jobs/senior-member-of-technical-staff-backend-athenahealth-kesnand-65c7b261",
+  "https://artha.link/@eanxt/jobs/inside-sales-representative-public-altin-teksol-llp-indore-9e3eb9ee",
+  "https://artha.link/@eanxt/jobs/google-data-engineering-tata-consultancy-bengaluru-cabd7358",
+  "https://artha.link/@eanxt/jobs/88qurl44-senior-data-engineer-1-gcp-f2f-zettamine-labs-pvt-bengaluru-0500a1cd",
+  "https://artha.link/@eanxt/jobs/lead-implementation-engineer-qualys-pune-district-3d092b55",
+  "https://artha.link/@eanxt/jobs/network-security-sme-tata-consultancy-bengaluru-70b12238",
+  "https://artha.link/@eanxt/jobs/it-infrastructure-security-administrator-equicom-technologies-bengaluru-42458d87",
+  "https://artha.link/@eanxt/jobs/practice-manager-cloud-devops-ai-teceze-chennai-af273b68",
+  "https://artha.link/@eanxt/jobs/databricks-data-engineer-cloudtech-bengaluru-220ab28d",
+  "https://artha.link/@eanxt/jobs/customer-success-engineer-trantor-bengaluru-e37d4640",
+  "https://artha.link/@eanxt/jobs/cybersecurity-consultant-tekwissen-india-hyderabad-5959d07e",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-mumbai-quess-it-staffing-mumbai-f1a18320",
+  "https://artha.link/@eanxt/jobs/cloud-consultant-intellect-design-thiruporur-df381555",
+  "https://artha.link/@eanxt/jobs/cyber-security-business-leader-coforge-noida-8cdfc2b3",
+  "https://artha.link/@eanxt/jobs/information-security-manager-searce-inc-pune-district-1aa5f575",
+  "https://artha.link/@eanxt/jobs/gcp-storage-tata-consultancy-chennai-d0f738f8",
+  "https://artha.link/@eanxt/jobs/l3-network-security-engineer-teceze-chennai-9d4f5f75",
+  "https://artha.link/@eanxt/jobs/principal-architect-fullstack-gcp-quantiphi-bengaluru-8c3e73ed",
+  "https://artha.link/@eanxt/jobs/soc-tata-consultancy-bengaluru-6ffbf626",
+  "https://artha.link/@eanxt/jobs/cybersecurity-admin-sec-siem-tata-consultancy-chennai-4c78ce7e",
+  "https://artha.link/@eanxt/jobs/security-incident-response-analyst-endava-bengaluru-65262876",
+  "https://artha.link/@eanxt/jobs/senior-security-architect-netenrich-hyderabad-a5d8328c",
+  "https://artha.link/@eanxt/jobs/cyber-security-manager-insight-global-hyderabad-d18cdd2e",
+  "https://artha.link/@eanxt/jobs/microsoft-defender-xdr-security-engineer-tata-consultancy-chennai-e97a2493",
+  "https://artha.link/@eanxt/jobs/senior-project-manager-nav-fund-services-jaipur-015a4a9a",
+  "https://artha.link/@eanxt/jobs/gcp-cloud-security-engineer-tata-consultancy-mumbai-9e56ec8b",
+  "https://artha.link/@eanxt/jobs/digital-forensics-incident-response-mizuho-pune-city-3d398c64",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-andor-tech-bengaluru-bf6158f4",
+  "https://artha.link/@eanxt/jobs/senior-application-security-engineer-elevate-global-bengaluru-f9e38f70",
+  "https://artha.link/@eanxt/jobs/cyber-security-architect-nokia-noida-9b6f3c40",
+  "https://artha.link/@eanxt/jobs/senior-cloud-security-remediation-dbiz-ai-bengaluru-b0be7b6e",
+  "https://artha.link/@eanxt/jobs/cloud-security-trainer-cloudthat-bengaluru-e6a06a71",
+  "https://artha.link/@eanxt/jobs/network-security-administration-ltm-bengaluru-cc9bd22b",
+  "https://artha.link/@eanxt/jobs/redhat-openshift-administrator-tata-consultancy-hyderabad-0d974cc3",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-olympus-corporation-hyderabad-abeb9bd8",
+  "https://artha.link/@eanxt/jobs/senior-security-engineer-red-team-bkn301-india-23ae422d",
+  "https://artha.link/@eanxt/jobs/senior-sql-server-database-administrator-programmers-io-delhi-cc8276a0",
+  "https://artha.link/@eanxt/jobs/automation-lead-playwright-qualitykiosk-navi-mumbai-c169a497",
+  "https://artha.link/@eanxt/jobs/senior-application-security-engineer-qualizeal-hyderabad-15de3901",
+  "https://artha.link/@eanxt/jobs/ruby-on-rails-developer-talentbridge-hyderabad-033c5009",
+  "https://artha.link/@eanxt/jobs/security-analyst-nokia-bengaluru-e019182f",
+  "https://artha.link/@eanxt/jobs/cloud-security-lead-simelabs-digital-ai-mumbai-098a20f6",
+  "https://artha.link/@eanxt/jobs/enterprise-architect-java-neurealm-chennai-2f15b612",
+  "https://artha.link/@eanxt/jobs/senior-application-security-engineer-parking-base-mumbai-27f9a04c",
+  "https://artha.link/@eanxt/jobs/information-security-manager-cissp-deloitte-mumbai-e888bf3d",
+  "https://artha.link/@eanxt/jobs/azure-administrator-tata-consultancy-hyderabad-580ae8d1",
+  "https://artha.link/@eanxt/jobs/pipeline-automation-engineer-adb-safegate-hyderabad-8998d75c",
+  "https://artha.link/@eanxt/jobs/endpoint-security-engineer-intuitive-ai-india-e032765a",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-tata-consultancy-indore-1507b4ab",
+  "https://artha.link/@eanxt/jobs/engineer-it-cloud-devops-t500-28733-ansr-hyderabad-161d6c8d",
+  "https://artha.link/@eanxt/jobs/openshift-admin-simple-logic-it-navi-mumbai-9cbd140e",
+  "https://artha.link/@eanxt/jobs/sr-engineer-network-engineering-crosstab-it-mumbai-343fd3cb",
+  "https://artha.link/@eanxt/jobs/senior-manager-application-security-ai-pine-labs-noida-04a677f3",
+  "https://artha.link/@eanxt/jobs/enterprise-network-architect-computer-futures-india-54fceb42",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-trantor-mumbai-7493ab14",
+  "https://artha.link/@eanxt/jobs/senior-application-security-engineer-moneyview-bengaluru-c4b84a3e",
+  "https://artha.link/@eanxt/jobs/head-of-information-security-aurigo-software-bengaluru-0e4d6f70",
+  "https://artha.link/@eanxt/jobs/cloud-network-engineer-shi-solutions-india-hyderabad-1ab306b0",
+  "https://artha.link/@eanxt/jobs/azure-devops-technical-consultant-astreya-india-b97ce4bd",
+  "https://artha.link/@eanxt/jobs/incident-response-engineer-phenom-hyderabad-04a5cded",
+  "https://artha.link/@eanxt/jobs/cyber-security-vulnerability-assessment-sonata-software-pune-district-3bbbf16a",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-tata-consultancy-bangalore-urban-88cbca3b",
+  "https://artha.link/@eanxt/jobs/network-infra-network-security-lead-exide-industries-kolkata-2c215204",
+  "https://artha.link/@eanxt/jobs/spark-data-engineer-persistent-systems-pune-city-87846ac7",
+  "https://artha.link/@eanxt/jobs/saas-security-engineer-bluocean-cyber-mumbai-070f243f",
+  "https://artha.link/@eanxt/jobs/principal-engineer-security-procore-technologies-bangalore-urban-9a99d434",
+  "https://artha.link/@eanxt/jobs/network-engineer-trantor-india-fe5669da",
+  "https://artha.link/@eanxt/jobs/back-end-developer-hclsoftware-noida-65e6e9e6",
+  "https://artha.link/@eanxt/jobs/threat-hunter-angel-one-bengaluru-d1c340d7",
+  "https://artha.link/@eanxt/jobs/cybersecurity-consultant-tekwissen-india-bengaluru-473b52ef",
+  "https://artha.link/@eanxt/jobs/cyber-security-engineer-slris-hyderabad-dd785c60",
+  "https://artha.link/@eanxt/jobs/technical-architect-genpact-bengaluru-6265efca",
+  "https://artha.link/@eanxt/jobs/senior-product-security-engineer-ai-insight-global-bangalore-9714e619",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-htc-global-services-chennai-bbc02078",
+  "https://artha.link/@eanxt/jobs/senior-fullstack-engineer-immediate-north-hires-bengaluru-33c263fd",
+  "https://artha.link/@eanxt/jobs/zscaler-senior-engineer-tata-consultancy-chennai-eac82dae",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-kamakhya-analytics-bengaluru-3af91bb1",
+  "https://artha.link/@eanxt/jobs/cyber-security-engineer-application-mumbai-e25f1357",
+  "https://artha.link/@eanxt/jobs/software-engineer-in-test-recro-noida-1a778af1",
+  "https://artha.link/@eanxt/jobs/data-engineer-with-scala-spark-sql-hmg-america-llc-bangalore-rural-7cb95ee6",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-kerala-vision-thiruvananthapu-a731c5db",
+  "https://artha.link/@eanxt/jobs/information-system-security-engineer-d-genminds-talent-delhi-6d29cac1",
+  "https://artha.link/@eanxt/jobs/principal-security-engineer-arcana-bengaluru-7c9d6533",
+  "https://artha.link/@eanxt/jobs/java-backend-engineering-manager-curately-ai-inc-india-93f43b9b",
+  "https://artha.link/@eanxt/jobs/tosca-automation-engineer-tata-consultancy-bengaluru-752ebc13",
+  "https://artha.link/@eanxt/jobs/security-engineer-quantalent-ai-bengaluru-a660d8bd",
+  "https://artha.link/@eanxt/jobs/ran-l2-engineer-tata-consultancy-hyderabad-91b145df",
+  "https://artha.link/@eanxt/jobs/network-access-control-engineer-world-wide-chennai-2885175f",
+  "https://artha.link/@eanxt/jobs/ir-lead-shi-solutions-india-pune-district-3e960c72",
+  "https://artha.link/@eanxt/jobs/information-security-manager-avaso-technology-mohali-district-6c143ad6",
+  "https://artha.link/@eanxt/jobs/senior-ps-consultant-zero-trust-trantor-chandigarh-58ee3f90",
+  "https://artha.link/@eanxt/jobs/information-security-lead-capillary-bengaluru-2005f26f",
+  "https://artha.link/@eanxt/jobs/senior-quality-engineer-i-t500-28750-marriott-tech-hyderabad-2020ec21",
+  "https://artha.link/@eanxt/jobs/vulnerlability-management-tata-consultancy-bengaluru-f05e6933",
+  "https://artha.link/@eanxt/jobs/lead-system-administrator-colaberry-hyderabad-2887d0ab",
+  "https://artha.link/@eanxt/jobs/cyber-security-analyst-alliantgroup-hyderabad-35536936",
+  "https://artha.link/@eanxt/jobs/information-technology-security-manager-advantmed-pune-district-b70e30f1",
+  "https://artha.link/@eanxt/jobs/aws-devops-cloud-security-cloud-tata-consultancy-201301-3d8d7d15",
+  "https://artha.link/@eanxt/jobs/senior-application-security-engineer-nexware-bengaluru-8db27dbb",
+  "https://artha.link/@eanxt/jobs/security-incident-response-analyst-endava-vasanthanagar-c10aac33",
+  "https://artha.link/@eanxt/jobs/principal-architect-gcp-tiger-analytics-chennai-c225f1f4",
+  "https://artha.link/@eanxt/jobs/senior-quality-assurance-engineer-zestiot-hyderabad-959cf7c0",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-coforge-sector-bebfc445",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-aws-objectways-bengaluru-3036d992",
+  "https://artha.link/@eanxt/jobs/soc-bengaluru-karnataka-india-tata-consultancy-bengaluru-d875600a",
+  "https://artha.link/@eanxt/jobs/senior-cloud-security-remediation-dbiz-ai-vasanthanagar-2f16da26",
+  "https://artha.link/@eanxt/jobs/chief-architect-big-4-consultancy-bengaluru-9baf73c4",
+  "https://artha.link/@eanxt/jobs/senior-aws-data-engineer-omnicom-global-bengaluru-2628e634",
+  "https://artha.link/@eanxt/jobs/cyber-security-analyst-soc-genpact-pune-city-9fcf5966",
+  "https://artha.link/@eanxt/jobs/senior-network-engineer-oec-chennai-e252659c",
+  "https://artha.link/@eanxt/jobs/openshift-admin-kubernetes-tata-consultancy-chennai-8b2f2472",
+  "https://artha.link/@eanxt/jobs/azure-data-engineer-tata-consultancy-new-delhi-68c3e482",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-caci-ltd-pune-district-e9acc982",
+  "https://artha.link/@eanxt/jobs/gcp-cloud-security-engineer-tata-consultancy-400001-540eccb7",
+  "https://artha.link/@eanxt/jobs/enterprise-architect-valuelabs-hyderabad-e8b35b20",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-cloud4c-services-hyderabad-11bde9e5",
+  "https://artha.link/@eanxt/jobs/cyber-security-architect-nokia-noida-4b7bcfd9",
+  "https://artha.link/@eanxt/jobs/aep-data-engineer-gcp-specialist-cybage-software-pune-district-e6fd99b3",
+  "https://artha.link/@eanxt/jobs/senior-network-security-engineer-valuelabs-bengaluru-ebca32d2",
+  "https://artha.link/@eanxt/jobs/senior-product-security-engineer-ai-insight-global-bengaluru-888a0cb1",
+  "https://artha.link/@eanxt/jobs/senior-security-engineer-ntt-data-inc-bengaluru-122b465b",
+  "https://artha.link/@eanxt/jobs/lead-security-engineer-searce-inc-hyderabad-c0f44ed2",
+  "https://artha.link/@eanxt/jobs/network-security-specialist-mumbai-bandhan-technologies-mumbai-3f433821",
+  "https://artha.link/@eanxt/jobs/security-engineer-pellera-technologies-pune-district-3228902e",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-eql-global-bengaluru-04e05d4f",
+  "https://artha.link/@eanxt/jobs/threat-hunting-tata-consultancy-bengaluru-44e3af65",
+  "https://artha.link/@eanxt/jobs/cyber-security-engineer-techsara-solutions-ahmedabad-93772269",
+  "https://artha.link/@eanxt/jobs/data-engineer-blue-spire-inc-hyderabad-4ac1bf16",
+  "https://artha.link/@eanxt/jobs/technical-analyst-vulnerability-cibc-india-hyderabad-c2f56c3b",
+  "https://artha.link/@eanxt/jobs/network-cyber-security-engineer-l2-primum-talent-group-noida-d0b5279e",
+  "https://artha.link/@eanxt/jobs/cloud-automation-engineer-infosys-finacle-bengaluru-ef0d147c",
+  "https://artha.link/@eanxt/jobs/senior-application-security-engineer-nexware-vasanthanagar-815a0706",
+  "https://artha.link/@eanxt/jobs/senior-security-engineer-eventus-security-navi-mumbai-24eaf094",
+  "https://artha.link/@eanxt/jobs/information-security-manager-searce-inc-pune-690677ed",
+  "https://artha.link/@eanxt/jobs/devops-engineer-blockchain-credence-hr-services-pune-district-4c0c78bd",
+  "https://artha.link/@eanxt/jobs/cyber-security-manager-flipkart-bengaluru-4f050ab9",
+  "https://artha.link/@eanxt/jobs/cloud-native-security-lead-teladoc-health-noida-0ddf0fcd",
+  "https://artha.link/@eanxt/jobs/cloud-security-lead-simelabs-digital-ai-400001-0f7bd06e",
+  "https://artha.link/@eanxt/jobs/sr-network-engineer-narwal-hyderabad-cd1ff6aa",
+  "https://artha.link/@eanxt/jobs/automation-tools-engineer-oss-nexgen-tech-india-83e5956f",
+  "https://artha.link/@eanxt/jobs/middleware-administrator-tata-consultancy-mumbai-87105a60",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-tata-consultancy-chennai-1e19502c",
+  "https://artha.link/@eanxt/jobs/senior-application-security-engineer-moneyview-vasanthanagar-7f752863",
+  "https://artha.link/@eanxt/jobs/senior-backend-engineer-net-codem-inc-india-2581269b",
+  "https://artha.link/@eanxt/jobs/senior-information-security-engineer-optum-bengaluru-e63d99ac",
+  "https://artha.link/@eanxt/jobs/ran-l1-engineer-tata-consultancy-hyderabad-d40e75b6",
+  "https://artha.link/@eanxt/jobs/senior-application-security-engineer-elevate-global-vasanthanagar-72fead18",
+  "https://artha.link/@eanxt/jobs/back-end-developer-goquant-india-4cc054f7",
+  "https://artha.link/@eanxt/jobs/network-security-l3-ntt-data-mumbai-63dfef6c",
+  "https://artha.link/@eanxt/jobs/specialist-cyber-security-operations-ab-inbev-gcc-india-bengaluru-490ce1f1",
+  "https://artha.link/@eanxt/jobs/automation-test-analyst-la-international-chennai-eefe5804",
+  "https://artha.link/@eanxt/jobs/manager-identity-access-management-grant-thornton-indus-hyderabad-751fef3c",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-tata-consultancy-tamil-nadu-fbc4e332",
+  "https://artha.link/@eanxt/jobs/openshift-administrator-tata-consultancy-chennai-d051f85a",
+  "https://artha.link/@eanxt/jobs/lead-data-engineer-data-architect-technet-it-india-15fd3e0d",
+  "https://artha.link/@eanxt/jobs/vulnerability-exposure-management-lead-mizuho-pune-city-281e9164",
+  "https://artha.link/@eanxt/jobs/manager-identity-access-management-grant-thornton-indus-bengaluru-abfe519a",
+  "https://artha.link/@eanxt/jobs/cyber-security-it-apprentice-mizuho-chennai-b620c13e",
+  "https://artha.link/@eanxt/jobs/technical-specialist-cyber-security-l3-lenovo-bengaluru-3ddcbcac",
+  "https://artha.link/@eanxt/jobs/senior-data-modeler-ai-advanced-luxoft-india-chennai-46c9ca28",
+  "https://artha.link/@eanxt/jobs/security-consultant-soc-maturity-cism-ntt-data-mumbai-a62c0ed9",
+  "https://artha.link/@eanxt/jobs/senior-application-security-engineer-qualizeal-500001-29d5002c",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-programmers-io-india-6e395984",
+  "https://artha.link/@eanxt/jobs/splunk-developer-tata-consultancy-maharashtra-02a3d0e0",
+  "https://artha.link/@eanxt/jobs/splunk-administrator-cognizant-bengaluru-f8eb7f51",
+  "https://artha.link/@eanxt/jobs/product-engineer-tata-consultancy-mumbai-7550667b",
+  "https://artha.link/@eanxt/jobs/gen-ai-llm-backend-developer-2-to-5-aimleap-ahmedabad-50be61ba",
+  "https://artha.link/@eanxt/jobs/azure-administrator-tata-consultancy-hyderabad-16c2a583",
+  "https://artha.link/@eanxt/jobs/incident-response-engineer-phenom-500001-87505dc7",
+  "https://artha.link/@eanxt/jobs/firewall-engineer-tata-consultancy-hyderabad-e77348cd",
+  "https://artha.link/@eanxt/jobs/automation-engineer-solvex-solutions-pune-city-9a60df92",
+  "https://artha.link/@eanxt/jobs/cyber-security-engineer-insight-global-mumbai-3351df51",
+  "https://artha.link/@eanxt/jobs/hcl-now-cloudops-product-sr-devops-hclsoftware-hyderabad-4bd64f56",
+  "https://artha.link/@eanxt/jobs/linux-devops-engineer-persistent-systems-pune-3a9554c4",
+  "https://artha.link/@eanxt/jobs/technical-lead-novo-ahmedabad-6deb6833",
+  "https://artha.link/@eanxt/jobs/networking-specialist-lorven-technologies-bangalore-urban-fe03ebd5",
+  "https://artha.link/@eanxt/jobs/cyber-security-analyst-codegama-bengaluru-ad2a6cf9",
+  "https://artha.link/@eanxt/jobs/network-security-tata-consultancy-chennai-8fed04bf",
+  "https://artha.link/@eanxt/jobs/cyber-security-specialist-terralogic-bengaluru-d2f69247",
+  "https://artha.link/@eanxt/jobs/cybersecurity-consultant-tekwissen-india-bengaluru-77754336",
+  "https://artha.link/@eanxt/jobs/chief-architect-fynehand-bengaluru-5b8a91d8",
+  "https://artha.link/@eanxt/jobs/cloud-security-trainer-cloudthat-bengaluru-5f706d9d",
+  "https://artha.link/@eanxt/jobs/security-architect-persistent-systems-mumbai-f2c5e54c",
+  "https://artha.link/@eanxt/jobs/zscaler-senior-engineer-tata-consultancy-chennai-fc1eaf3f",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineering-tata-consultancy-bengaluru-120fad92",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-calsoft-pune-district-bc0a13ac",
+  "https://artha.link/@eanxt/jobs/network-security-testing-ipsec-ike-acl-digital-karnataka-002d25a8",
+  "https://artha.link/@eanxt/jobs/principal-security-engineer-arcana-vasanthanagar-eb1951ef",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-tata-consultancy-noida-4eeacea7",
+  "https://artha.link/@eanxt/jobs/it-integration-engineer-confidential-mumbai-88bec6e6",
+  "https://artha.link/@eanxt/jobs/senior-security-engineer-ciam-vistra-mumbai-53bc3a1c",
+  "https://artha.link/@eanxt/jobs/aws-infra-support-engineer-tata-consultancy-vasanthanagar-af3f0e35",
+  "https://artha.link/@eanxt/jobs/gcp-security-engineer-tata-consultancy-gandhinagar-e17ec64c",
+  "https://artha.link/@eanxt/jobs/gcp-security-engineer-tata-consultancy-hyderabad-a5ecf1f8",
+  "https://artha.link/@eanxt/jobs/technical-project-manager-haystek-technologies-india-70342be4",
+  "https://artha.link/@eanxt/jobs/senior-security-engineer-coretek-labs-hyderabad-de3061dd",
+  "https://artha.link/@eanxt/jobs/cyber-security-engineer-application-400001-6f9a9e8e",
+  "https://artha.link/@eanxt/jobs/senior-java-backend-engineer-cloud-bridge-ai-mumbai-fbca8f9f",
+  "https://artha.link/@eanxt/jobs/technical-project-manager-straive-chennai-0bea43bb",
+  "https://artha.link/@eanxt/jobs/software-engineer-cyber-security-principle-pride-mumbai-c48abcfd",
+  "https://artha.link/@eanxt/jobs/sr-agentic-ai-python-engineer-ai-ust-bengaluru-ad20db47",
+  "https://artha.link/@eanxt/jobs/network-security-manager-adani-enterprises-ahmedabad-b5b25837",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-publicis-global-bengaluru-48ba4644",
+  "https://artha.link/@eanxt/jobs/sap-cloud-architect-phoenix-business-hyderabad-f7e66ef8",
+  "https://artha.link/@eanxt/jobs/java-backend-application-engineer-the-judge-group-chennai-2bb75931",
+  "https://artha.link/@eanxt/jobs/endpoint-security-engineer-intuitive-ai-hyderabad-065221a0",
+  "https://artha.link/@eanxt/jobs/product-engineer-prentis-pune-583df591",
+  "https://artha.link/@eanxt/jobs/staff-infrastructure-security-engineer-observe-ai-bengaluru-e724f29e",
+  "https://artha.link/@eanxt/jobs/tech-support-engineer-vehere-delhi-b85898a5",
+  "https://artha.link/@eanxt/jobs/security-engineer-altered-security-bhopal-51044e04",
+  "https://artha.link/@eanxt/jobs/cyber-security-engineer-slris-500001-1cdfca64",
+  "https://artha.link/@eanxt/jobs/backend-java-developer-100-remote-work-textellent-inc-india-64fcf9bf",
+  "https://artha.link/@eanxt/jobs/director-quality-automation-engineering-mobileum-bengaluru-33ef82c9",
+  "https://artha.link/@eanxt/jobs/senior-devops-with-linux-tata-consultancy-chennai-c8272b8f",
+  "https://artha.link/@eanxt/jobs/senior-product-security-engineer-ai-insight-global-vasanthanagar-1ca9ed1e",
+  "https://artha.link/@eanxt/jobs/senior-frontend-developer-wex-bengaluru-a5cd6526",
+  "https://artha.link/@eanxt/jobs/principal-architect-fullstack-gcp-quantiphi-bengaluru-4948df81",
+  "https://artha.link/@eanxt/jobs/engineer-it-cloud-devops-t500-28733-ansr-hyderabad-ce403752",
+  "https://artha.link/@eanxt/jobs/cloud-native-security-lead-teladoc-health-area-884a4926",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-impetus-bengaluru-c4c5fa8b",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-coforge-201301-0bf65196",
+  "https://artha.link/@eanxt/jobs/security-engineer-nanoprecise-sci-corp-mumbai-4d0c283e",
+  "https://artha.link/@eanxt/jobs/information-security-analyst-cloud-mathworks-hyderabad-31cfeaae",
+  "https://artha.link/@eanxt/jobs/siem-architect-tata-consultancy-chennai-cfc4e206",
+  "https://artha.link/@eanxt/jobs/gcp-security-engineer-tata-consultancy-380060-abdd2e5f",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-tata-consultancy-bengaluru-c26ad896",
+  "https://artha.link/@eanxt/jobs/senior-staff-engineer-architect-t500-albertsons-bengaluru-54a9fc3b",
+  "https://artha.link/@eanxt/jobs/infrastructure-automation-engineer-dexian-india-hyderabad-3052fed6",
+  "https://artha.link/@eanxt/jobs/cybersecurity-engineer-remote-80-90-hr-synthires-india-5a93eccc",
+  "https://artha.link/@eanxt/jobs/network-devops-engineer-sisl-global-india-4c020945",
+  "https://artha.link/@eanxt/jobs/technical-project-manager-impetus-bengaluru-b851ba35",
+  "https://artha.link/@eanxt/jobs/senior-quality-assurance-automation-luxoft-bengaluru-52659573",
+  "https://artha.link/@eanxt/jobs/endpoint-security-engineer-intuitive-ai-gmbh-mumbai-36f9c44d",
+  "https://artha.link/@eanxt/jobs/cloud-automation-engineer-infosys-finacle-vasanthanagar-f3ebc48e",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-tata-consultancy-hyderabad-951dd248",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-cloud4c-services-500001-19184299",
+  "https://artha.link/@eanxt/jobs/staff-offensive-security-engineer-aquanow-india-905c023e",
+  "https://artha.link/@eanxt/jobs/assistant-vice-president-linux-security-bnp-paribas-mumbai-157f5fd4",
+  "https://artha.link/@eanxt/jobs/security-lead-eventus-security-navi-mumbai-8d0af36d",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-persistent-systems-pune-city-569c8041",
+  "https://artha.link/@eanxt/jobs/server-engineer-kerala-vision-kerala-e0d2d1f2",
+  "https://artha.link/@eanxt/jobs/senior-analyst-network-operation-deutsche-b-rse-group-hyderabad-21013a31",
+  "https://artha.link/@eanxt/jobs/soar-automation-engineer-hexaware-chennai-119c55d1",
+  "https://artha.link/@eanxt/jobs/openshift-admin-kubernetes-tata-consultancy-600001-d74f9e5c",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-tata-consultancy-bengaluru-c8f7b91e",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-sisl-global-mumbai-ee2e5b3d",
+  "https://artha.link/@eanxt/jobs/back-end-developer-hclsoftware-noida-7fb16dfc",
+  "https://artha.link/@eanxt/jobs/devops-consultant-sutherland-500001-0c188dbf",
+  "https://artha.link/@eanxt/jobs/senior-professional-services-consultant-trantor-mumbai-c75bc96e",
+  "https://artha.link/@eanxt/jobs/senior-security-engineer-it-acuity-analytics-gurugram-23ad731b",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-tata-consultancy-chennai-2be3e5f9",
+  "https://artha.link/@eanxt/jobs/senior-security-analyst-manhattan-associates-vasanthanagar-e38fba58",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-stackave-solutions-hyderabad-79a3c8aa",
+  "https://artha.link/@eanxt/jobs/cloud-security-vm-lead-persistent-systems-pune-e4b7b159",
+  "https://artha.link/@eanxt/jobs/product-engineer-tata-consultancy-400001-237681c6",
+  "https://artha.link/@eanxt/jobs/hcl-now-cloudops-product-sr-devops-hclsoftware-hyderabad-30c02edc",
+  "https://artha.link/@eanxt/jobs/senior-security-engineer-bkn301-mumbai-bc95e43b",
+  "https://artha.link/@eanxt/jobs/senior-identity-access-management-iam-kaplan-bengaluru-2d8f0209",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-coforge-noida-a3faa136",
+  "https://artha.link/@eanxt/jobs/technical-architect-straive-maharashtra-9a981baa",
+  "https://artha.link/@eanxt/jobs/linux-devops-engineer-persistent-systems-411001-457ef8b5",
+  "https://artha.link/@eanxt/jobs/inside-sales-representative-public-altin-teksol-llp-ganj-f3ac189c",
+  "https://artha.link/@eanxt/jobs/soc-l3-consultant-tata-consultancy-hyderabad-2faa9bf1",
+  "https://artha.link/@eanxt/jobs/inside-sales-representative-public-altin-teksol-llp-indore-b8569592",
+  "https://artha.link/@eanxt/jobs/azure-iam-engineer-luxoft-vasanthanagar-5360eb45",
+  "https://artha.link/@eanxt/jobs/application-support-engineers-fully-skillscapital-india-2b4a610c",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-102524-mycareernet-chennai-49a17237",
+  "https://artha.link/@eanxt/jobs/cyber-security-engineer-techsara-solutions-s-barmat-4716372f",
+  "https://artha.link/@eanxt/jobs/technical-lead-nomiso-hyderabad-ee49d312",
+  "https://artha.link/@eanxt/jobs/genai-architect-grid-dynamics-hyderabad-cc74a34d",
+  "https://artha.link/@eanxt/jobs/senior-technical-support-engineer-bot-consulting-jaipur-0bfdfe3c",
+  "https://artha.link/@eanxt/jobs/enterprise-solution-strategist-presales-tata-consultancy-bengaluru-55f9d938",
+  "https://artha.link/@eanxt/jobs/cloud-network-engineer-shi-solutions-india-500001-e2ff239b",
+  "https://artha.link/@eanxt/jobs/azure-data-postgresql-engineer-thoughtfocus-hyderabad-227ba5c6",
+  "https://artha.link/@eanxt/jobs/snowflake-administrator-nexify-infosystems-greater-13500057",
+  "https://artha.link/@eanxt/jobs/data-scientist-only-iit-cse-passouts-talentquell-india-bd97490d",
+  "https://artha.link/@eanxt/jobs/technical-architect-with-python-and-luxoft-india-chennai-5ea804ff",
+  "https://artha.link/@eanxt/jobs/azure-databricks-pan-india-tata-consultancy-bengaluru-9d2e94ac",
+  "https://artha.link/@eanxt/jobs/cloud-backend-engineer-azure-ai-xogo-kochi-7964fd7f",
+  "https://artha.link/@eanxt/jobs/cyber-security-analyst-randstad-enterprise-trivandrum-f42f0b6e",
+  "https://artha.link/@eanxt/jobs/chief-architect-fynehand-vasanthanagar-78b71081",
+  "https://artha.link/@eanxt/jobs/ruby-on-rails-developer-bristlecone-hyderabad-ca2bd8fe",
+  "https://artha.link/@eanxt/jobs/cyber-security-manager-insight-global-500001-196422b9",
+  "https://artha.link/@eanxt/jobs/intune-sme-tata-consultancy-noida-584cf05e",
+  "https://artha.link/@eanxt/jobs/azure-infra-architect-tata-consultancy-hyderabad-39a0d72c",
+  "https://artha.link/@eanxt/jobs/lead-security-engineer-searce-inc-500001-c66f7a8b",
+  "https://artha.link/@eanxt/jobs/cyber-security-analyst-codegama-vasanthanagar-ba83de78",
+  "https://artha.link/@eanxt/jobs/security-consultant-soc-maturity-cism-ntt-data-mumbai-d742d2f6",
+  "https://artha.link/@eanxt/jobs/back-end-developer-asymmetric-labs-bengaluru-fd3655d3",
+  "https://artha.link/@eanxt/jobs/cybersecurity-consultant-tekwissen-india-gurugram-ddd24c30",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-mumbai-quess-it-staffing-mumbai-419e475d",
+  "https://artha.link/@eanxt/jobs/it-compliance-lead-mobileum-bengaluru-dcb45e9e",
+  "https://artha.link/@eanxt/jobs/cloud-security-vm-lead-persistent-systems-411001-022fe329",
+  "https://artha.link/@eanxt/jobs/network-security-sme-tata-consultancy-bengaluru-f992ee7b",
+  "https://artha.link/@eanxt/jobs/cyber-security-manager-insight-global-hyderabad-f46d0317",
+  "https://artha.link/@eanxt/jobs/cyber-security-business-leader-coforge-sector-db63052e",
+  "https://artha.link/@eanxt/jobs/kubernetes-administrator-whiteblue-chennai-a36df78a",
+  "https://artha.link/@eanxt/jobs/senior-project-manager-nav-fund-services-jaipur-fff95034",
+  "https://artha.link/@eanxt/jobs/software-engineer-in-test-gurucul-pune-city-8668e41e",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-quess-it-staffing-bengaluru-0852b023",
+  "https://artha.link/@eanxt/jobs/team-leader-it-software-engineering-garmin-hyderabad-hyderabad-f5eb1449",
+  "https://artha.link/@eanxt/jobs/senior-cloud-sales-specialist-aws-azure-ntt-data-bengaluru-f6cf4085",
+  "https://artha.link/@eanxt/jobs/l3-network-security-engineer-teceze-chennai-2565827f",
+  "https://artha.link/@eanxt/jobs/python-technical-lead-jrd-systems-bengaluru-e40bb53e",
+  "https://artha.link/@eanxt/jobs/product-engineer-prentis-mumbai-81d745d5",
+  "https://artha.link/@eanxt/jobs/gcp-serverless-tata-consultancy-chennai-0d9b0d9c",
+  "https://artha.link/@eanxt/jobs/seniorapplication-security-analyst-tata-consultancy-delhi-f553dadc",
+  "https://artha.link/@eanxt/jobs/endpoint-security-engineer-shimentox-hyderabad-e1bb0d39",
+  "https://artha.link/@eanxt/jobs/director-genai-agentic-ai-practice-happiest-minds-bengaluru-9c6a6228",
+  "https://artha.link/@eanxt/jobs/automation-engineer-tata-consultancy-hyderabad-2e55f6da",
+  "https://artha.link/@eanxt/jobs/programmer-dev-persistent-systems-pune-city-8f6f5305",
+  "https://artha.link/@eanxt/jobs/cissp-certified-security-consultant-ntt-data-bengaluru-cce3ba63",
+  "https://artha.link/@eanxt/jobs/network-security-administration-ltm-vasanthanagar-3d7b3f5a",
+  "https://artha.link/@eanxt/jobs/api-testing-walk-in-interview-tata-consultancy-pune-acfa71f0",
+  "https://artha.link/@eanxt/jobs/gcp-senior-data-engineer-horizontal-talent-bengaluru-b4e4bc68",
+  "https://artha.link/@eanxt/jobs/java-backend-developer-terveys-technology-pattom-b13b34d8",
+  "https://artha.link/@eanxt/jobs/lead-security-research-engineer-qualys-pune-district-a76f3ccf",
+  "https://artha.link/@eanxt/jobs/enterprise-architect-exl-bengaluru-035d3dff",
+  "https://artha.link/@eanxt/jobs/information-technology-security-senvion-india-mumbai-2d0b83c7",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-andor-tech-vasanthanagar-e11b516a",
+  "https://artha.link/@eanxt/jobs/sde-3-backend-licious-bengaluru-ae6def88",
+  "https://artha.link/@eanxt/jobs/security-architect-persistent-systems-mumbai-3ae8e406",
+  "https://artha.link/@eanxt/jobs/accordion-india-lead-data-engineer-accordion-india-hyderabad-cb0296ef",
+  "https://artha.link/@eanxt/jobs/cloud-security-trainer-cloudthat-vasanthanagar-832a2030",
+  "https://artha.link/@eanxt/jobs/apigee-api-management-infinite-computer-bengaluru-d92d4a26",
+  "https://artha.link/@eanxt/jobs/senior-network-security-engineer-valuelabs-vasanthanagar-f03f0e32",
+  "https://artha.link/@eanxt/jobs/microsoft-defender-xdr-security-engineer-tata-consultancy-chennai-0b2bcfff",
+  "https://artha.link/@eanxt/jobs/java-backend-developer-terveys-technology-thiruvananthapu-7715c474",
+  "https://artha.link/@eanxt/jobs/technical-lead-engineer-security-whitefield-careers-bengaluru-ea1b2c64",
+  "https://artha.link/@eanxt/jobs/data-scientist-only-iit-cse-passouts-talentquell-mumbai-11392c07",
+  "https://artha.link/@eanxt/jobs/azure-databricks-tata-consultancy-bengaluru-404b4bbb",
+  "https://artha.link/@eanxt/jobs/soc-l3-alliant-hyderabad-507082ce",
+  "https://artha.link/@eanxt/jobs/digital-forensics-incident-response-mizuho-pune-3963cba7",
+  "https://artha.link/@eanxt/jobs/senior-security-architect-netenrich-hyderabad-61bd3f4e",
+  "https://artha.link/@eanxt/jobs/back-end-developer-publicis-production-bengaluru-c27f4f80",
+  "https://artha.link/@eanxt/jobs/security-analyst-nokia-bengaluru-ce0ea1b8",
+  "https://artha.link/@eanxt/jobs/technical-consultant-iii-saas-and-velodata-global-pvt-thiruvananthapu-b32f0fac",
+  "https://artha.link/@eanxt/jobs/director-security-engineering-confidential-jobs-bengaluru-bf12dfb2",
+  "https://artha.link/@eanxt/jobs/azure-cloud-operations-lead-ncs-group-pune-district-b1bbee05",
+  "https://artha.link/@eanxt/jobs/network-security-administration-ltm-bengaluru-41c2f189",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-102524-mycareernet-chennai-3b371fbc",
+  "https://artha.link/@eanxt/jobs/database-administrator-artech-infosystem-pune-district-a4e29a41",
+  "https://artha.link/@eanxt/jobs/redhat-openshift-administrator-tata-consultancy-hyderabad-6269c939",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-technet-it-india-c7ef5842",
+  "https://artha.link/@eanxt/jobs/hcl-now-cloudops-product-sr-devops-hclsoftware-hyderabad-27ab42cb",
+  "https://artha.link/@eanxt/jobs/senior-devops-with-linux-tata-consultancy-chennai-7debd958",
+  "https://artha.link/@eanxt/jobs/specialist-cyber-security-operations-ab-inbev-gcc-india-bengaluru-5656b04b",
+  "https://artha.link/@eanxt/jobs/security-iam-engineer-vericence-mumbai-ab7d3259",
+  "https://artha.link/@eanxt/jobs/senior-engineer-network-security-cloud4c-services-hyderabad-cc89d1c3",
+  "https://artha.link/@eanxt/jobs/middleware-l3-support-landmark-group-bengaluru-35386d11",
+  "https://artha.link/@eanxt/jobs/gcp-sap-architect-tata-consultancy-bengaluru-30518e53",
+  "https://artha.link/@eanxt/jobs/senior-qa-automation-engineer-cloudwick-bengaluru-bb43b2d9",
+  "https://artha.link/@eanxt/jobs/information-security-manager-cissp-deloitte-mumbai-a6d72d27",
+  "https://artha.link/@eanxt/jobs/gcp-security-engineer-tata-consultancy-500001-429d0b29",
+  "https://artha.link/@eanxt/jobs/azure-data-engineer-persistent-systems-pune-city-2e5d8a65",
+  "https://artha.link/@eanxt/jobs/senior-security-engineer-ciam-vistra-400001-7f81d773",
+  "https://artha.link/@eanxt/jobs/network-architects-l3-control-tower-bio-tata-consultancy-chennai-aaa62db0",
+  "https://artha.link/@eanxt/jobs/cyber-security-analyst-randstad-enterprise-pattom-fa528820",
+  "https://artha.link/@eanxt/jobs/network-access-control-engineer-world-wide-chennai-59976101",
+  "https://artha.link/@eanxt/jobs/assistant-vice-president-linux-security-bnp-paribas-mumbai-768a809b",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-persistent-systems-pune-2aa854c7",
+  "https://artha.link/@eanxt/jobs/sr-engineer-software-ai-database-tmus-global-hyderabad-71c5d754",
+  "https://artha.link/@eanxt/jobs/azure-linux-admin-lead-tata-consultancy-vasanthanagar-5aa9648e",
+  "https://artha.link/@eanxt/jobs/director-it-operations-imerit-technology-hyderabad-1aab4b51",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-t500-28803-cibc-india-hyderabad-5b340872",
+  "https://artha.link/@eanxt/jobs/security-architect-persistent-systems-400001-d8ea4c43",
+  "https://artha.link/@eanxt/jobs/88qurl44-senior-data-engineer-1-gcp-f2f-zettamine-labs-pvt-bengaluru-f215960a",
+  "https://artha.link/@eanxt/jobs/product-aligned-agentic-quality-bridge-ai-india-900f42c3",
+  "https://artha.link/@eanxt/jobs/network-engineer-application-mumbai-26d3b764",
+  "https://artha.link/@eanxt/jobs/cyber-security-architect-nokia-sector-c376702a",
+  "https://artha.link/@eanxt/jobs/assistant-professor-birla-institute-of-bengaluru-04a05e1e",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-tata-consultancy-hyderabad-2d745532",
+  "https://artha.link/@eanxt/jobs/network-architect-sdwan-hcltech-noida-72e85933",
+  "https://artha.link/@eanxt/jobs/quality-assurance-automation-lead-velodata-global-pvt-thiruvananthapu-8b9ef4c6",
+  "https://artha.link/@eanxt/jobs/java-backend-developer-persistent-systems-pune-85b48955",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-tata-consultancy-pune-district-2a8d1962",
+  "https://artha.link/@eanxt/jobs/sap-basis-consultant-hcltech-india-26562f13",
+  "https://artha.link/@eanxt/jobs/back-end-developer-macrohire-pune-city-66d3246e",
+  "https://artha.link/@eanxt/jobs/lead-network-engineer-ensono-bengaluru-0e6a9f8a",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-olympus-corporation-hyderabad-c87b6c0e",
+  "https://artha.link/@eanxt/jobs/python-backend-engineer-fastapi-bncw-enterprises-dwarka-51ad7a86",
+  "https://artha.link/@eanxt/jobs/siem-architect-tata-consultancy-600001-9b0cd8dd",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-kamakhya-analytics-bengaluru-dcfa68c8",
+  "https://artha.link/@eanxt/jobs/senior-network-engineer-oec-chennai-daa03180",
+  "https://artha.link/@eanxt/jobs/data-quality-engineer-bpmlinks-hyderabad-7d81a118",
+  "https://artha.link/@eanxt/jobs/network-devops-engineer-sisl-global-mumbai-a0222843",
+  "https://artha.link/@eanxt/jobs/cloud-database-administrator-zarthi-sector-7bf04e37",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-tata-consultancy-500001-bbb9c849",
+  "https://artha.link/@eanxt/jobs/network-engineer-trantor-mumbai-cac7e078",
+  "https://artha.link/@eanxt/jobs/senior-ps-consultant-zero-trust-trantor-chandigarh-4b59748d",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-tata-consultancy-vasanthanagar-f3180be9",
+  "https://artha.link/@eanxt/jobs/cloud-consultant-intellect-design-pudup-kkam-725e5efd",
+  "https://artha.link/@eanxt/jobs/chief-information-security-officer-credence-hr-services-mumbai-3fd9e1c2",
+  "https://artha.link/@eanxt/jobs/go-backend-engineer-sourcefuse-mohali-district-af2ecbfd",
+  "https://artha.link/@eanxt/jobs/business-development-manager-styli-bengaluru-40d1ab3f",
+  "https://artha.link/@eanxt/jobs/information-technology-specialist-holland-safety-mumbai-94705392",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-tata-consultancy-600001-b8ca1f72",
+  "https://artha.link/@eanxt/jobs/network-infra-network-security-lead-exide-industries-beng-l-97eb416e",
+  "https://artha.link/@eanxt/jobs/gcp-data-analytics-tata-consultancy-chennai-38d858fc",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-persistent-systems-pune-city-2d5687a2",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-artech-l-l-c-hyderabad-a1cfc735",
+  "https://artha.link/@eanxt/jobs/technical-project-manager-straive-hyderabad-b48affae",
+  "https://artha.link/@eanxt/jobs/cyber-security-vulnerability-assessment-sonata-software-pune-district-33f27732",
+  "https://artha.link/@eanxt/jobs/principal-engineer-t500-28593-marriott-tech-500001-c8c669dd",
+  "https://artha.link/@eanxt/jobs/sr-data-reporting-analyst-ishare-inc-india-601a3e04",
+  "https://artha.link/@eanxt/jobs/aws-architect-persistent-systems-pune-city-4fb897ba",
+  "https://artha.link/@eanxt/jobs/senior-identity-access-management-iam-kaplan-vasanthanagar-de4b1cf7",
+  "https://artha.link/@eanxt/jobs/cyber-fusion-center-threat-intelligence-mizuho-pune-city-30c6596e",
+  "https://artha.link/@eanxt/jobs/azure-data-engineer-tata-consultancy-chennai-5adaf220",
+  "https://artha.link/@eanxt/jobs/oci-security-valuelabs-india-2e29d910",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-innodata-inc-noida-3db92576",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-tata-consultancy-hyderabad-b4a14328",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-hcltech-hyderabad-af9f03b9",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-tata-consultancy-pune-city-18ee01bd",
+  "https://artha.link/@eanxt/jobs/sap-cloud-architect-phoenix-business-500001-f158fdf6",
+  "https://artha.link/@eanxt/jobs/inside-sales-representative-public-altin-teksol-llp-indore-g-p-o-99da1c1e",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-objectways-bengaluru-dc8b5faa",
+  "https://artha.link/@eanxt/jobs/technical-project-manager-sonata-software-bengaluru-89f3bd11",
+  "https://artha.link/@eanxt/jobs/chief-information-security-officer-credence-hr-services-mumbai-24eed6a1",
+  "https://artha.link/@eanxt/jobs/grc-cloud-security-risk-compliance-airtel-digital-noida-9bfd1125",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-hcltech-hyderabad-817a0794",
+  "https://artha.link/@eanxt/jobs/azure-administrator-tata-consultancy-hyderabad-9557407b",
+  "https://artha.link/@eanxt/jobs/sr-security-analyst-advanced-analyst-soc-unitedlex-gurugram-d314a808",
+  "https://artha.link/@eanxt/jobs/senior-information-technology-snapmint-bengaluru-9ddb0083",
+  "https://artha.link/@eanxt/jobs/senior-security-architect-netenrich-500001-6418dad4",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-tata-consultancy-pune-city-b7254835",
+  "https://artha.link/@eanxt/jobs/application-security-lead-persistent-systems-411001-851a6110",
+  "https://artha.link/@eanxt/jobs/back-end-developer-hclsoftware-sector-4794797b",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-kanerika-inc-hyderabad-65930759",
+  "https://artha.link/@eanxt/jobs/zscaler-senior-engineer-tata-consultancy-600001-073b2772",
+  "https://artha.link/@eanxt/jobs/cyber-security-analyst-alliantgroup-hyderabad-172a5d6b",
+  "https://artha.link/@eanxt/jobs/azure-data-engineer-tata-consultancy-chennai-eabb2b95",
+  "https://artha.link/@eanxt/jobs/azure-devops-technical-consultant-astreya-mumbai-bc81dd05",
+  "https://artha.link/@eanxt/jobs/golang-python-backend-developer-acl-digital-bengaluru-cc342d2d",
+  "https://artha.link/@eanxt/jobs/back-end-developer-node-js-rest-api-lorven-technologies-bengaluru-24543d5d",
+  "https://artha.link/@eanxt/jobs/soc-l3-consultant-tata-consultancy-hyderabad-146304ba",
+  "https://artha.link/@eanxt/jobs/senior-service-delivery-manager-tata-consultancy-noida-b03b6699",
+  "https://artha.link/@eanxt/jobs/sap-basis-consultant-tata-consultancy-bengaluru-834fdeaa",
+  "https://artha.link/@eanxt/jobs/senior-security-engineer-coretek-labs-500001-9b0bdf16",
+  "https://artha.link/@eanxt/jobs/tech-lead-cybersecurity-genpact-bengaluru-72525142",
+  "https://artha.link/@eanxt/jobs/azure-data-engineer-exl-noida-6c18eb62",
+  "https://artha.link/@eanxt/jobs/ruby-on-rails-developer-bristlecone-hyderabad-5f6bf38c",
+  "https://artha.link/@eanxt/jobs/back-end-developer-intraedge-pune-district-3f20e1b5",
+  "https://artha.link/@eanxt/jobs/director-security-engineering-confidential-jobs-vasanthanagar-3f9c56d5",
+  "https://artha.link/@eanxt/jobs/application-security-lead-persistent-systems-pune-82e933e0",
+  "https://artha.link/@eanxt/jobs/cyber-security-analyst-soc-genpact-pune-1fc27a6a",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-htc-global-services-chennai-880ade3f",
+  "https://artha.link/@eanxt/jobs/cybersecurity-consultant-tekwissen-india-vasanthanagar-6e27c13d",
+  "https://artha.link/@eanxt/jobs/azure-data-engineer-azure-data-factory-tata-consultancy-bengaluru-5892da3a",
+  "https://artha.link/@eanxt/jobs/cyber-fusion-center-shift-lead-mizuho-pune-city-9b017f81",
+  "https://artha.link/@eanxt/jobs/tcs-walkin-drive-opportunity-for-tata-consultancy-kolkata-ea0453a6",
+  "https://artha.link/@eanxt/jobs/cybersecurity-consultant-tekwissen-india-500001-46af1ec4",
+  "https://artha.link/@eanxt/jobs/senior-software-development-engineer-in-ansr-bengaluru-1fffc73d",
+  "https://artha.link/@eanxt/jobs/senior-sales-engineer-india-openiam-bangalore-ae1de7e2",
+  "https://artha.link/@eanxt/jobs/aws-data-eng-tata-consultancy-mumbai-8e69d478",
+  "https://artha.link/@eanxt/jobs/senior-engineer-back-end-agentic-systems-camarin-ai-noida-fdfbce60",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-need-immediate-joiners-palnar-noida-db5e2c81",
+  "https://artha.link/@eanxt/jobs/data-engineer-tata-consultancy-chennai-f5784a51",
+  "https://artha.link/@eanxt/jobs/quick-commerce-account-manager-farmdidi-pune-division-a1252325",
+  "https://artha.link/@eanxt/jobs/azure-administrator-freelances-india-agile-global-hyderabad-323d81e3",
+  "https://artha.link/@eanxt/jobs/java-backend-engineering-manager-curately-ai-inc-mumbai-b9d3e689",
+  "https://artha.link/@eanxt/jobs/devops-engineer-blockchain-credence-hr-services-pune-district-0c8c6f6a",
+  "https://artha.link/@eanxt/jobs/information-security-analyst-cloud-mathworks-500001-aad6a871",
+  "https://artha.link/@eanxt/jobs/l3-network-security-engineer-teceze-600001-902b5b56",
+  "https://artha.link/@eanxt/jobs/network-security-engineer-mumbai-quess-it-staffing-400001-6458237d",
+  "https://artha.link/@eanxt/jobs/cybersecurity-consultant-tekwissen-india-hyderabad-305f99eb",
+  "https://artha.link/@eanxt/jobs/d365-f-o-technical-assistant-manager-san-r-d-business-bengaluru-5a06c08b",
+  "https://artha.link/@eanxt/jobs/container-admin-walkin-interview-tata-consultancy-noida-4ee5073d",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-intraedge-gurugram-edc360d0",
+  "https://artha.link/@eanxt/jobs/cyber-security-engineer-tata-consultancy-bengaluru-14ea5197",
+  "https://artha.link/@eanxt/jobs/appdynamics-engineer-python-backend-5-ust-bengaluru-3c8f6373",
+  "https://artha.link/@eanxt/jobs/network-access-control-engineer-world-wide-600001-0b275511",
+  "https://artha.link/@eanxt/jobs/information-technology-security-imaging-endpoints-hyderabad-8e69dae1",
+  "https://artha.link/@eanxt/jobs/application-security-analyst-tata-consultancy-thane-957fedc8",
+  "https://artha.link/@eanxt/jobs/data-engineer-contract-mail-at-nirmal-inspire-chennai-67d8244d",
+  "https://artha.link/@eanxt/jobs/cybersecurity-admin-sec-siem-tata-consultancy-600001-aaaf41ec",
+  "https://artha.link/@eanxt/jobs/technical-architect-aws-azilen-technologies-ahmedabad-a7cf5c8f",
+  "https://artha.link/@eanxt/jobs/cyber-security-lead-advisor-nokia-noida-b5d5168d",
+  "https://artha.link/@eanxt/jobs/data-engineer-valuemomentum-hyderabad-25b140e0",
+  "https://artha.link/@eanxt/jobs/cyber-security-business-leader-coforge-201301-d55f7056",
+  "https://artha.link/@eanxt/jobs/information-technology-security-engineer-nerve-solutions-mumbai-eac8d806",
+  "https://artha.link/@eanxt/jobs/email-security-agent-sutherland-hyderabad-279d0508",
+  "https://artha.link/@eanxt/jobs/88qurl44-senior-data-engineer-1-gcp-f2f-zettamine-labs-pvt-vasanthanagar-8030ab87",
+  "https://artha.link/@eanxt/jobs/principal-architect-gcp-tiger-analytics-chennai-9aa6624e",
+  "https://artha.link/@eanxt/jobs/backend-java-developer-100-remote-work-textellent-inc-rajkot-769c09e5",
+  "https://artha.link/@eanxt/jobs/technical-lead-nomiso-hyderabad-ae79aaa6",
+  "https://artha.link/@eanxt/jobs/ir-lead-shi-solutions-india-pune-62a94329",
+  "https://artha.link/@eanxt/jobs/big-data-specialist-8-to-12-delhi-ncr-tata-consultancy-new-delhi-b8b9b43b",
+  "https://artha.link/@eanxt/jobs/info-sec-engineer-infovision-inc-vasanthanagar-5b77b027",
+  "https://artha.link/@eanxt/jobs/golang-python-backend-developer-acl-digital-vasanthanagar-bcf9cbd6",
+  "https://artha.link/@eanxt/jobs/senior-software-engineer-ii-it-security-marriott-tech-hyderabad-0c19d98f",
+  "https://artha.link/@eanxt/jobs/senior-backend-engineer-josys-vasanthanagar-8a0ba07a",
+  "https://artha.link/@eanxt/jobs/cloud-backend-engineer-azure-ai-xogo-682001-d479ec12",
+  "https://artha.link/@eanxt/jobs/sr-associate-engineer-it-software-ansr-hyderabad-4efd617e",
+  "https://artha.link/@eanxt/jobs/senior-databricks-engineer-kani-solutions-inc-vasanthanagar-58375925",
+  "https://artha.link/@eanxt/jobs/backup-administrator-cloud4c-services-hyderabad-15bf3237",
+  "https://artha.link/@eanxt/jobs/lead-data-engineer-smc-squared-india-vasanthanagar-6842a7d3",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-persistent-systems-411001-8e491a0b",
+  "https://artha.link/@eanxt/jobs/senior-engineer-telecom-atain-gurugram-374f77f1",
+  "https://artha.link/@eanxt/jobs/database-team-lead-einfochips-an-arrow-s-barmat-235774c5",
+  "https://artha.link/@eanxt/jobs/application-support-engineer-checkpoint-systems-bengaluru-0edfaa1f",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-globus-systems-hyderabad-56f9d329",
+  "https://artha.link/@eanxt/jobs/sfdc-cpq-sales-cloud-developer-lead-itc-infotech-vasanthanagar-053c9bf7",
+  "https://artha.link/@eanxt/jobs/senior-technical-support-engineer-palo-alto-networks-vasanthanagar-2be6d9ff",
+  "https://artha.link/@eanxt/jobs/automation-engineer-dexian-india-bengaluru-86f3857b",
+  "https://artha.link/@eanxt/jobs/java-backend-engineer-curately-ai-inc-india-9c5b9d9b",
+  "https://artha.link/@eanxt/jobs/network-engineer-cbts-600001-396c9948",
+  "https://artha.link/@eanxt/jobs/senior-product-engineer-lascade-ernakulam-695495fd",
+  "https://artha.link/@eanxt/jobs/data-engineer-genai-persistent-systems-pune-34615391",
+  "https://artha.link/@eanxt/jobs/network-engineer-iii-cbts-600001-a9613d00",
+  "https://artha.link/@eanxt/jobs/principal-data-engineer-ab-inbev-gcc-india-bengaluru-8cd2d5d1",
+  "https://artha.link/@eanxt/jobs/technical-architect-straive-mumbai-35d2fec0",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-impetus-vasanthanagar-45cff48c",
+  "https://artha.link/@eanxt/jobs/network-engineer-tata-consultancy-chennai-b8c1ba07",
+  "https://artha.link/@eanxt/jobs/vmware-consultant-tata-consultancy-pune-city-408d7e97",
+  "https://artha.link/@eanxt/jobs/machine-learning-operations-consultant-ara-resources-pvt-vasanthanagar-9481b175",
+  "https://artha.link/@eanxt/jobs/senior-software-security-engineer-tech-mahindra-hyderabad-842f56be",
+  "https://artha.link/@eanxt/jobs/technical-lead-backend-rakuten-india-bengaluru-7cd36211",
+  "https://artha.link/@eanxt/jobs/product-support-engineer-colortokens-inc-vasanthanagar-d7f8d08e",
+  "https://artha.link/@eanxt/jobs/oracle-cloud-infrastructure-landmark-group-bengaluru-01754c3b",
+  "https://artha.link/@eanxt/jobs/senior-lead-intelligent-automation-ia-talent500-hyderabad-243d88b8",
+  "https://artha.link/@eanxt/jobs/engineer-information-security-forgerock-lowe-s-india-bengaluru-ba65e7b3",
+  "https://artha.link/@eanxt/jobs/backup-recovery-engineer-rubrik-mizuho-pune-city-a5f7c0d4",
+  "https://artha.link/@eanxt/jobs/senior-software-engineer-php-adfluence-hub-noida-bede2bd4",
+  "https://artha.link/@eanxt/jobs/lead-engineer-data-governance-mahindra-and-600001-773b9525",
+  "https://artha.link/@eanxt/jobs/technical-lead-novo-ahmedabad-17a6bc14",
+  "https://artha.link/@eanxt/jobs/technical-lead-novo-s-barmat-db7e0f93",
+  "https://artha.link/@eanxt/jobs/senior-sales-engineer-india-openiam-mumbai-2f13b101",
+  "https://artha.link/@eanxt/jobs/it-support-engineer-noc-analyst-sikich-india-hyderabad-8fd69317",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-sanaari-software-bengaluru-dd676a5d",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-kanerika-inc-500001-12b48523",
+  "https://artha.link/@eanxt/jobs/data-engineer-talentbridge-mumbai-97b44b3d",
+  "https://artha.link/@eanxt/jobs/senior-sales-engineer-india-openiam-400001-d20f2bd7",
+  "https://artha.link/@eanxt/jobs/data-engineer-talentbridge-hyderabad-530c578a",
+  "https://artha.link/@eanxt/jobs/golang-python-backend-developer-acl-digital-bengaluru-4eae84cc",
+  "https://artha.link/@eanxt/jobs/technical-architect-straive-maharashtra-6bfaacf9",
+  "https://artha.link/@eanxt/jobs/storage-and-resiliency-operations-the-hartford-india-500001-8556eb9b",
+  "https://artha.link/@eanxt/jobs/principal-architect-gcp-tiger-analytics-600001-8b79df82",
+  "https://artha.link/@eanxt/jobs/technical-consultant-iii-saas-and-velodata-global-pvt-thiruvananthapu-4e882015",
+  "https://artha.link/@eanxt/jobs/senior-product-engineer-lascade-682001-c64ff0f0",
+  "https://artha.link/@eanxt/jobs/senior-professional-services-engineer-persistent-systems-pune-0f740895",
+  "https://artha.link/@eanxt/jobs/teradata-database-admin-mphasis-bengaluru-e25ee15b",
+  "https://artha.link/@eanxt/jobs/it-integration-engineer-confidential-400001-96b0c288",
+  "https://artha.link/@eanxt/jobs/software-engineering-senior-analyst-evernorth-health-hyderabad-deeb6c3e",
+  "https://artha.link/@eanxt/jobs/data-engineer-associate-technical-quantiphi-vasanthanagar-3d7b3e40",
+  "https://artha.link/@eanxt/jobs/principal-data-engineer-ab-inbev-gcc-india-vasanthanagar-26a2b7e5",
+  "https://artha.link/@eanxt/jobs/founding-engineer-ai-backend-zango-bengaluru-8281efdb",
+  "https://artha.link/@eanxt/jobs/senior-fullstack-engineer-immediate-north-hires-bengaluru-17f88bcd",
+  "https://artha.link/@eanxt/jobs/data-engineer-useready-bengaluru-5ac20948",
+  "https://artha.link/@eanxt/jobs/sr-associate-engineer-it-software-java-ansr-hyderabad-0b911c68",
+  "https://artha.link/@eanxt/jobs/sr-engineer-it-software-t500-28833-ansr-hyderabad-c2839452",
+  "https://artha.link/@eanxt/jobs/it-engineer-plat4mation-bengaluru-1dc0d728",
+  "https://artha.link/@eanxt/jobs/global-m365-data-engineer-sodexo-gurugram-6a91a5a7",
+  "https://artha.link/@eanxt/jobs/senior-professional-services-engineer-accops-pune-district-61872859",
+  "https://artha.link/@eanxt/jobs/technical-lead-backend-rakuten-india-bengaluru-46502cf5",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-publicis-sapient-bengaluru-1acf1505",
+  "https://artha.link/@eanxt/jobs/principal-engineer-t500-28950-marriott-tech-hyderabad-34acbabf",
+  "https://artha.link/@eanxt/jobs/sr-engineer-it-software-java-react-t500-ansr-hyderabad-4d3b1666",
+  "https://artha.link/@eanxt/jobs/senior-software-development-engineer-in-blinkrx-bengaluru-f2667ae7",
+  "https://artha.link/@eanxt/jobs/network-engineer-tata-consultancy-600001-d6c0e376",
+  "https://artha.link/@eanxt/jobs/data-engineer-mhpi-masco-home-india-bea96256",
+  "https://artha.link/@eanxt/jobs/data-engineer-genai-persistent-systems-411001-29a0d742",
+  "https://artha.link/@eanxt/jobs/customer-support-engineer-utility-trilliant-meerut-25810876",
+  "https://artha.link/@eanxt/jobs/staff-engineer-principal-engineer-motown-capital-vasanthanagar-48a630dc",
+  "https://artha.link/@eanxt/jobs/senior-professional-services-engineer-persistent-systems-411001-b820b2d4",
+  "https://artha.link/@eanxt/jobs/accordion-india-senior-data-engineer-accordion-india-hyderabad-7f0365d3",
+  "https://artha.link/@eanxt/jobs/accordion-india-lead-data-engineer-accordion-india-hyderabad-94c432fd",
+  "https://artha.link/@eanxt/jobs/teradata-database-admin-mphasis-bengaluru-09177245",
+  "https://artha.link/@eanxt/jobs/lead-ai-and-application-security-leadsquared-bengaluru-20f832fc",
+  "https://artha.link/@eanxt/jobs/java-backend-engineer-curately-ai-inc-mumbai-b4382bdf",
+  "https://artha.link/@eanxt/jobs/technical-consultant-iii-saas-and-velodata-global-pvt-695001-e1ed6cb9",
+  "https://artha.link/@eanxt/jobs/oracle-cloud-infrastructure-landmark-group-vasanthanagar-fd53d923",
+  "https://artha.link/@eanxt/jobs/senior-software-engineer-ii-it-security-marriott-tech-hyderabad-9b2342a4",
+  "https://artha.link/@eanxt/jobs/support-engineer-persistent-systems-411001-b3bc46d9",
+  "https://artha.link/@eanxt/jobs/lead-data-engineer-first-citizens-india-bengaluru-61b2a050",
+  "https://artha.link/@eanxt/jobs/backup-recovery-engineer-rubrik-mizuho-pune-09022e05",
+  "https://artha.link/@eanxt/jobs/software-engineer-in-test-arcana-bengaluru-71e90cdc",
+  "https://artha.link/@eanxt/jobs/ruby-on-rails-developer-talentbridge-500001-1fe10544",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-tata-consultancy-chennai-7952a398",
+  "https://artha.link/@eanxt/jobs/network-architect-tata-consultancy-chennai-287d2b93",
+  "https://artha.link/@eanxt/jobs/sr-azure-databricks-engineer-persistent-systems-bengaluru-b4151ad7",
+  "https://artha.link/@eanxt/jobs/senior-python-backend-developer-gyansys-inc-bengaluru-e08d0e0b",
+  "https://artha.link/@eanxt/jobs/lead-ai-and-application-security-leadsquared-bengaluru-1f7de0e9",
+  "https://artha.link/@eanxt/jobs/information-security-lead-capillary-vasanthanagar-c2dee910",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-pyspark-indore-pune-tata-consultancy-pune-district-73a77739",
+  "https://artha.link/@eanxt/jobs/storage-and-resiliency-operations-the-hartford-india-hyderabad-e2d3209a",
+  "https://artha.link/@eanxt/jobs/automation-test-analyst-la-international-chennai-75b412e5",
+  "https://artha.link/@eanxt/jobs/security-analyst-nokia-bangalore-e413dba5",
+  "https://artha.link/@eanxt/jobs/technical-account-manager-black-duck-bengaluru-44e034cd",
+  "https://artha.link/@eanxt/jobs/quality-assurance-automation-engineer-recro-bengaluru-23047a8e",
+  "https://artha.link/@eanxt/jobs/soar-automation-engineer-hexaware-chennai-bcb40d15",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-jman-group-chennai-7c9a6a96",
+  "https://artha.link/@eanxt/jobs/splunk-administrator-cognizant-bengaluru-937a8874",
+  "https://artha.link/@eanxt/jobs/tech-lead-cybersecurity-genpact-bangalore-a2da58b4",
+  "https://artha.link/@eanxt/jobs/cybersecurity-expert-remote-80-90-hr-synthires-india-11878439",
+  "https://artha.link/@eanxt/jobs/operation-engineer-vlink-inc-gurugram-accae31c",
+  "https://artha.link/@eanxt/jobs/vulnerability-exposure-management-lead-mizuho-pune-2dc4b002",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-programmers-io-mumbai-d6e0e790",
+  "https://artha.link/@eanxt/jobs/qe-architect-kanerika-inc-hyderabad-1175e68e",
+  "https://artha.link/@eanxt/jobs/senior-backend-engineer-system-soft-india-7c3fab57",
+  "https://artha.link/@eanxt/jobs/cyber-security-analyst-randstad-enterprise-thiruvananthapu-9f541a35",
+  "https://artha.link/@eanxt/jobs/azure-linux-admin-lead-tata-consultancy-bengaluru-2d6e4752",
+  "https://artha.link/@eanxt/jobs/software-development-engineer-in-test-crestron-electronics-bengaluru-6c4781a6",
+  "https://artha.link/@eanxt/jobs/google-data-engineering-tata-consultancy-bengaluru-2335151c",
+  "https://artha.link/@eanxt/jobs/senior-cloud-services-sales-specialist-ntt-data-bengaluru-8f1934b5",
+  "https://artha.link/@eanxt/jobs/principal-architect-globallogic-noida-dd0809ad",
+  "https://artha.link/@eanxt/jobs/senior-aem-backend-eds-developer-cloudfulcrum-bengaluru-0d11e18d",
+  "https://artha.link/@eanxt/jobs/cyber-security-analyst-rein-security-mumbai-8702081e",
+  "https://artha.link/@eanxt/jobs/information-security-analyst-exposure-mathworks-hyderabad-2f5b0354",
+  "https://artha.link/@eanxt/jobs/website-engineering-lead-daskalos-india-c005fc13",
+  "https://artha.link/@eanxt/jobs/gen-ai-llm-backend-developer-2-to-5-aimleap-ahmedabad-83b8af5f",
+  "https://artha.link/@eanxt/jobs/network-security-tata-consultancy-chennai-4725823d",
+  "https://artha.link/@eanxt/jobs/senior-sql-database-administrator-grid-dynamics-chennai-47ccc9b8",
+  "https://artha.link/@eanxt/jobs/senior-sales-engineer-quantiphi-bengaluru-d8a96e8c",
+  "https://artha.link/@eanxt/jobs/oracle-cloud-security-consultant-zensar-zensar-technologies-maharashtra-a8a0a47c",
+  "https://artha.link/@eanxt/jobs/linux-system-administrator-ihub-data-iiit-hyderabad-8079d8c5",
+  "https://artha.link/@eanxt/jobs/threat-hunting-tata-consultancy-vasanthanagar-b3ee8f69",
+  "https://artha.link/@eanxt/jobs/lead-data-engineer-data-architect-technet-it-mumbai-c0fd382f",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-tata-consultancy-sector-ea0ce3de",
+  "https://artha.link/@eanxt/jobs/network-infra-network-security-lead-exide-industries-l-lb-z-r-53a589ff",
+  "https://artha.link/@eanxt/jobs/cloud-backend-engineer-azure-ai-xogo-ernakulam-657cb0b5",
+  "https://artha.link/@eanxt/jobs/chief-data-scientist-bandhan-technologies-mumbai-a10df8dd",
+  "https://artha.link/@eanxt/jobs/test-architect-incedo-inc-hyderabad-8722dc0c",
+  "https://artha.link/@eanxt/jobs/network-security-testing-ipsec-ike-acl-digital-bengaluru-181fda92",
+  "https://artha.link/@eanxt/jobs/network-architect-sdwan-hcltech-201301-ea46efa5",
+  "https://artha.link/@eanxt/jobs/senior-quality-assurance-automation-trantor-bengaluru-0805a0cb",
+  "https://artha.link/@eanxt/jobs/senior-sql-database-administrator-programmers-io-delhi-dc901dd7",
+  "https://artha.link/@eanxt/jobs/senior-linux-administrator-intraedge-pune-3384cc4b",
+  "https://artha.link/@eanxt/jobs/network-architect-sdwan-hcltech-noida-55af2f28",
+  "https://artha.link/@eanxt/jobs/enterprise-architect-java-neurealm-chennai-b313bbfe",
+  "https://artha.link/@eanxt/jobs/senior-aws-data-engineer-remote-neurodrift-mumbai-0ea5a509",
+  "https://artha.link/@eanxt/jobs/networking-specialist-lorven-technologies-bengaluru-2e34eb37",
+  "https://artha.link/@eanxt/jobs/sr-engineer-software-backend-t500-28888-tmus-global-hyderabad-eeee3872",
+  "https://artha.link/@eanxt/jobs/apigee-api-management-infinite-computer-vasanthanagar-d6ff04bf",
+  "https://artha.link/@eanxt/jobs/genai-architect-grid-dynamics-hyderabad-1fe916cb",
+  "https://artha.link/@eanxt/jobs/ruby-on-rails-developer-bristlecone-500001-9027ecef",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-htc-global-services-600001-0cf5574f",
+  "https://artha.link/@eanxt/jobs/director-it-operations-imerit-technology-beng-l-a09db123",
+  "https://artha.link/@eanxt/jobs/back-end-developer-bnp-paribas-chennai-8738a20f",
+  "https://artha.link/@eanxt/jobs/security-operations-manager-angel-one-bengaluru-5ba39ce0",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-tata-consultancy-bengaluru-eac6c672",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-valuemomentum-hyderabad-d658de3a",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-tata-consultancy-bengaluru-58f1c30d",
+  "https://artha.link/@eanxt/jobs/technical-project-manager-haystek-technologies-mumbai-9636641c",
+  "https://artha.link/@eanxt/jobs/golang-backend-developer-persistent-systems-pune-city-7e9fc3f6",
+  "https://artha.link/@eanxt/jobs/network-security-testing-ipsec-ike-acl-digital-karnatak-region-4d3cd416",
+  "https://artha.link/@eanxt/jobs/security-engineer-altered-security-bhopal-23c2dcdd",
+  "https://artha.link/@eanxt/jobs/devops-engineer-it-administrator-duties-swades-ai-delhi-b92af00f",
+  "https://artha.link/@eanxt/jobs/director-quality-automation-engineering-mobileum-bengaluru-8765325a",
+  "https://artha.link/@eanxt/jobs/d365-technical-consultant-godrej-infotech-ltd-bangalore-urban-6a666a5f",
+  "https://artha.link/@eanxt/jobs/sap-basis-consultant-tata-consultancy-greater-b574333c",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-tata-consultancy-hyderabad-3650d297",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-tata-consultancy-maharashtra-feefe0ce",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-rocket-india-chennai-bddddcd0",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-tata-consultancy-chennai-daafb98c",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-tata-consultancy-pune-district-ce6e17d9",
+  "https://artha.link/@eanxt/jobs/enterprise-architect-cloud-with-genai-tata-consultancy-500001-b9f2b324",
+  "https://artha.link/@eanxt/jobs/information-security-lead-capillary-bengaluru-2c52b347",
+  "https://artha.link/@eanxt/jobs/back-end-developer-ari-chennai-9f629770",
+  "https://artha.link/@eanxt/jobs/sr-azure-data-engineer-persistent-systems-goa-c8ec1cdc",
+  "https://artha.link/@eanxt/jobs/cyber-security-manager-deloitte-mumbai-4c7b808b",
+  "https://artha.link/@eanxt/jobs/azure-data-postgresql-engineer-thoughtfocus-hyderabad-6a708b7f",
+  "https://artha.link/@eanxt/jobs/data-engineer-with-scala-spark-sql-hmg-america-llc-bengaluru-rural-1ee52733",
+  "https://artha.link/@eanxt/jobs/senior-staff-engineer-architect-t500-albertsons-bengaluru-eca5c3f7",
+  "https://artha.link/@eanxt/jobs/cyber-security-analyst-alliantgroup-500001-ea064f8d",
+  "https://artha.link/@eanxt/jobs/automotive-safety-engineer-infovision-inc-bengaluru-99900b2e",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-immediate-to-15-days-dentsu-global-bengaluru-97b9616c",
+  "https://artha.link/@eanxt/jobs/security-engineer-altered-security-imaliya-ac95da56",
+  "https://artha.link/@eanxt/jobs/team-lead-backend-developer-techostinger-110001-b71b99e9",
+  "https://artha.link/@eanxt/jobs/senior-automation-engineer-josys-bengaluru-e7d31c47",
+  "https://artha.link/@eanxt/jobs/network-architect-tata-consultancy-chennai-5efdcfdb",
+  "https://artha.link/@eanxt/jobs/backend-java-developer-100-remote-work-textellent-inc-mumbai-e9aab7a0",
+  "https://artha.link/@eanxt/jobs/information-technology-security-engineer-nerve-solutions-mumbai-fbfefa5c",
+  "https://artha.link/@eanxt/jobs/qa-automation-engineer-persistent-systems-pune-city-a7aa41bb",
+  "https://artha.link/@eanxt/jobs/linux-patching-engineer-aliando-india-c1eecdec",
+  "https://artha.link/@eanxt/jobs/back-end-developer-people-tech-group-hyderabad-1d2dc3de",
+  "https://artha.link/@eanxt/jobs/azure-data-engineer-tata-consultancy-chennai-ea2ee8c0",
+  "https://artha.link/@eanxt/jobs/azure-infra-architect-tata-consultancy-hyderabad-a2c5c523",
+  "https://artha.link/@eanxt/jobs/azure-data-engineer-tata-consultancy-noida-b56438ae",
+  "https://artha.link/@eanxt/jobs/azure-migration-engineer-tata-consultancy-hyderabad-a7886d93",
+  "https://artha.link/@eanxt/jobs/azure-data-engineer-tata-consultancy-hyderabad-57a1ac29",
+  "https://artha.link/@eanxt/jobs/azure-data-engineer-tata-consultancy-noida-1e57d681",
+  "https://artha.link/@eanxt/jobs/gcp-sap-architect-tata-consultancy-vasanthanagar-b6c5740c",
+  "https://artha.link/@eanxt/jobs/golang-backend-developer-persistent-systems-pune-5eab1b3d",
+  "https://artha.link/@eanxt/jobs/cissp-certified-security-consultant-ntt-data-vasanthanagar-b154dc54",
+  "https://artha.link/@eanxt/jobs/quality-assurance-automation-engineer-dentsu-global-bengaluru-2d2890e6",
+  "https://artha.link/@eanxt/jobs/cyber-security-manager-deloitte-mumbai-3a36fe1a",
+  "https://artha.link/@eanxt/jobs/azure-data-engineer-tata-consultancy-chennai-3e7b0101",
+  "https://artha.link/@eanxt/jobs/azure-data-engineer-tata-consultancy-chennai-d3ef8af9",
+  "https://artha.link/@eanxt/jobs/azure-data-engineer-tata-consultancy-noida-681c76c9",
+  "https://artha.link/@eanxt/jobs/azure-data-engineer-tata-consultancy-hyderabad-c51c5edf",
+  "https://artha.link/@eanxt/jobs/staff-offensive-security-engineer-aquanow-mumbai-7d4b8ce6",
+  "https://artha.link/@eanxt/jobs/technical-lead-nomiso-500001-fd7a0f36",
+  "https://artha.link/@eanxt/jobs/back-end-developer-publicis-production-vasanthanagar-109c164f",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-aws-objectways-vasanthanagar-61bd9b21",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-impetus-bengaluru-54e18078",
+  "https://artha.link/@eanxt/jobs/quality-assurance-automation-engineer-recro-vasanthanagar-e07ce4d3",
+  "https://artha.link/@eanxt/jobs/java-backend-developer-tata-consultancy-vasanthanagar-1d52612a",
+  "https://artha.link/@eanxt/jobs/senior-backend-engineer-net-codem-inc-mumbai-f8337c37",
+  "https://artha.link/@eanxt/jobs/azure-data-engineer-trainer-arbor-academy-pune-city-04597eb2",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-technet-it-mumbai-3adfd6c2",
+  "https://artha.link/@eanxt/jobs/senior-security-engineer-ntt-data-inc-vasanthanagar-1e2b90ec",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-tata-consultancy-bengaluru-4690b278",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-stackave-solutions-hyderabad-59256193",
+  "https://artha.link/@eanxt/jobs/senior-manager-application-security-ai-pine-labs-noida-ab596155",
+  "https://artha.link/@eanxt/jobs/sr-engineer-network-engineering-crosstab-it-400001-47f2e89e",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-tata-consultancy-bengaluru-00d3dccc",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-andor-tech-bengaluru-d38e9684",
+  "https://artha.link/@eanxt/jobs/azure-sql-developer-luxoft-pune-district-58217dc8",
+  "https://artha.link/@eanxt/jobs/azure-data-engineer-infovision-inc-pune-district-31e582b7",
+  "https://artha.link/@eanxt/jobs/azure-linux-admin-tata-consultancy-hyderabad-c191eaec",
+  "https://artha.link/@eanxt/jobs/azure-data-engineer-tata-consultancy-hyderabad-78a5c3d5",
+  "https://artha.link/@eanxt/jobs/azure-sql-dba-tata-consultancy-bengaluru-71cd1ce2",
+  "https://artha.link/@eanxt/jobs/cyber-security-network-design-engineer-adecco-pune-city-109de2bb",
+  "https://artha.link/@eanxt/jobs/data-science-manager-perfios-bengaluru-f65f7a73",
+  "https://artha.link/@eanxt/jobs/senior-system-administrator-shift-ahead-maharashtra-65c7f117",
+  "https://artha.link/@eanxt/jobs/sr-engineer-data-t500-28676-tmus-global-500001-2ad6c03f",
+  "https://artha.link/@eanxt/jobs/technical-project-manager-straive-chennai-be0fae91",
+  "https://artha.link/@eanxt/jobs/head-automation-apmosys-mumbai-ac14981b",
+  "https://artha.link/@eanxt/jobs/informatica-administrator-with-gcp-iitjobs-inc-india-9b726fbd",
+  "https://artha.link/@eanxt/jobs/7-yoe-python-backend-developer-with-ust-vasanthanagar-343ab625",
+  "https://artha.link/@eanxt/jobs/sdet-repro-india-limited-noida-a4c749bb",
+  "https://artha.link/@eanxt/jobs/leading-associate-vice-president-iam-deutsche-b-rse-group-hyderabad-2df97e83",
+  "https://artha.link/@eanxt/jobs/cyber-security-engineer-ust-hyderabad-fcf620e7",
+  "https://artha.link/@eanxt/jobs/offensive-security-engineer-pen-tester-konfirmity-bengaluru-ab5cf7a0",
+  "https://artha.link/@eanxt/jobs/security-engineer-vapt-tac-security-delhi-eb81dc79",
+  "https://artha.link/@eanxt/jobs/ir-lead-shi-solutions-india-pune-district-4c7fe44b",
+  "https://artha.link/@eanxt/jobs/programmer-dev-persistent-systems-pune-45ae6dab",
+  "https://artha.link/@eanxt/jobs/network-security-sme-tata-consultancy-vasanthanagar-cb690e8c",
+  "https://artha.link/@eanxt/jobs/cybersecurity-specialist-remote-80-90-hr-synthires-india-4c402086",
+  "https://artha.link/@eanxt/jobs/cybersecurity-specialist-remote-80-90-hr-synthires-india-46f85f7f",
+  "https://artha.link/@eanxt/jobs/sap-basis-consultant-abap-background-naks-digital-bengaluru-2226d836",
+  "https://artha.link/@eanxt/jobs/mdr-greater-delhi-area-tata-consultancy-new-delhi-01d6a697",
+  "https://artha.link/@eanxt/jobs/soc-l3-consultant-tata-consultancy-500001-ac7f37c1",
+  "https://artha.link/@eanxt/jobs/quality-assurance-automation-lead-velodata-global-pvt-thiruvananthapu-79492b37",
+  "https://artha.link/@eanxt/jobs/information-security-manager-searce-inc-pune-district-248c24a8",
+  "https://artha.link/@eanxt/jobs/senior-quality-assurance-automation-tanla-platforms-hyderabad-7cd9bc98",
+  "https://artha.link/@eanxt/jobs/cyberark-technical-architect-tata-consultancy-bengaluru-a7d12aab",
+  "https://artha.link/@eanxt/jobs/team-lead-backend-developer-techostinger-new-delhi-c58d831a",
+  "https://artha.link/@eanxt/jobs/sdet-engineer-quality-engineering-grhombus-chennai-7d22049a",
+  "https://artha.link/@eanxt/jobs/business-development-executive-cloud-acufore-india-bengaluru-3641c510",
+  "https://artha.link/@eanxt/jobs/cyber-security-it-apprentice-mizuho-chennai-576a58a8",
+  "https://artha.link/@eanxt/jobs/menlo-web-browser-security-itc-infotech-hyderabad-c4e0ef5c",
+  "https://artha.link/@eanxt/jobs/information-technology-security-imaging-endpoints-hyderabad-2124fc68",
+  "https://artha.link/@eanxt/jobs/network-cyber-security-engineer-l2-primum-talent-group-201301-f0e5c16b",
+  "https://artha.link/@eanxt/jobs/technical-architect-with-python-and-luxoft-india-chennai-3b7b2be0",
+  "https://artha.link/@eanxt/jobs/azure-databricks-pan-india-tata-consultancy-vasanthanagar-db8668fe",
+  "https://artha.link/@eanxt/jobs/automation-test-analyst-la-international-600001-ce86128c",
+  "https://artha.link/@eanxt/jobs/business-professional-infoyss-hyderabad-0cae8233",
+  "https://artha.link/@eanxt/jobs/senior-cyber-security-engineer-garmin-hyderabad-hyderabad-f5afe989",
+  "https://artha.link/@eanxt/jobs/information-technology-security-engineer-nerve-solutions-400001-96dda7ee",
+  "https://artha.link/@eanxt/jobs/automation-engineer-zensar-technologies-bengaluru-c9446d30",
+  "https://artha.link/@eanxt/jobs/cybersecurity-project-manager-persistent-systems-pune-city-e14c7948",
+  "https://artha.link/@eanxt/jobs/cyber-fusion-center-shift-lead-mizuho-411001-2f304558",
+  "https://artha.link/@eanxt/jobs/windows-patching-engineer-aliando-india-673e7ec9",
+  "https://artha.link/@eanxt/jobs/senior-analyst-network-operation-deutsche-b-rse-group-hyderabad-008a3380",
+  "https://artha.link/@eanxt/jobs/arcgis-enterprise-admin-cybertech-systems-th-ne-8fc34af4",
+  "https://artha.link/@eanxt/jobs/cloud-infrastructure-lead-phonon-automating-vadodara-928d1125",
+  "https://artha.link/@eanxt/jobs/cyber-security-analyst-soc-genpact-411001-82be29f3",
+  "https://artha.link/@eanxt/jobs/security-operations-manager-soc-aviva-india-gurugram-c41346cd",
+  "https://artha.link/@eanxt/jobs/senior-aws-data-engineer-with-amazon-aptask-bengaluru-9f400ddb",
+  "https://artha.link/@eanxt/jobs/automation-engineer-valuelabs-hyderabad-f4deb281",
+  "https://artha.link/@eanxt/jobs/enterprise-architect-valuelabs-500001-9e9d7f33",
+  "https://artha.link/@eanxt/jobs/tcs-is-hiring-for-as400-admi-tata-consultancy-new-delhi-45f10cf2",
+  "https://artha.link/@eanxt/jobs/frontend-developer-concentrix-india-75be2b59",
+  "https://artha.link/@eanxt/jobs/network-firewall-security-tata-consultancy-chennai-cf6f618e",
+  "https://artha.link/@eanxt/jobs/back-end-developer-hclsoftware-201301-8be72e8b",
+  "https://artha.link/@eanxt/jobs/mulesoft-openshift-platform-sme-10-yoe-ust-bengaluru-cef3ef72",
+  "https://artha.link/@eanxt/jobs/senior-backend-developer-php-nordavo-bengaluru-1bfbf836",
+  "https://artha.link/@eanxt/jobs/qa-automation-engineer-persistent-systems-pune-city-f39c44a8",
+  "https://artha.link/@eanxt/jobs/splunk-administrator-cognizant-vasanthanagar-7bfd85e9",
+  "https://artha.link/@eanxt/jobs/quality-assurance-automation-engineer-qualizeal-500001-33ae9da9",
+  "https://artha.link/@eanxt/jobs/it-engineer-applications-v-ocp-architect-peoplefy-pune-city-630e4127",
+  "https://artha.link/@eanxt/jobs/senior-devops-with-linux-tata-consultancy-600001-b276feeb",
+  "https://artha.link/@eanxt/jobs/senior-cloud-sales-specialist-aws-azure-ntt-data-bengaluru-14191e92",
+  "https://artha.link/@eanxt/jobs/lead-data-engineer-ormae-pune-70e54b5b",
+  "https://artha.link/@eanxt/jobs/cybersecurity-engineer-remote-80-90-hr-synthires-india-40e22c5d",
+  "https://artha.link/@eanxt/jobs/cooperate-security-engineer-azilen-technologies-s-barmat-24864e42",
+  "https://artha.link/@eanxt/jobs/backend-engineer-fastapi-developer-hindustan-drone-hyderabad-533bc8a4",
+  "https://artha.link/@eanxt/jobs/middleware-administrator-tata-consultancy-mumbai-8cfdf68c",
+  "https://artha.link/@eanxt/jobs/quality-engineering-automation-lead-cibc-india-hyderabad-09d5e102",
+  "https://artha.link/@eanxt/jobs/senior-data-modeler-ai-advanced-luxoft-india-600001-fe12d05f",
+  "https://artha.link/@eanxt/jobs/e-commerce-analyst-trainee-intern-non-nuvoretail-new-delhi-2376b644",
+  "https://artha.link/@eanxt/jobs/sr-agentic-ai-python-engineer-ai-ust-bengaluru-8cde08e9",
+  "https://artha.link/@eanxt/jobs/sap-basis-consultant-7-years-experienced-quantum-integrators-nagpur-fc62eb5f",
+  "https://artha.link/@eanxt/jobs/kubernetes-administrator-whiteblue-chennai-defa2d27",
+  "https://artha.link/@eanxt/jobs/automation-engineer-nav-fund-services-jaipur-83926467",
+  "https://artha.link/@eanxt/jobs/director-data-analytics-anaptyss-sector-03fad128",
+  "https://artha.link/@eanxt/jobs/team-leader-it-software-engineering-garmin-hyderabad-hyderabad-d4171cdc",
+  "https://artha.link/@eanxt/jobs/senior-support-engineer-clari5-a-perfios-jammu-kashmir-75257660",
+  "https://artha.link/@eanxt/jobs/aws-data-engineer-data-bricks-pyspark-tata-consultancy-bengaluru-5f1f0cde",
+  "https://artha.link/@eanxt/jobs/team-lead-backend-developer-techostinger-new-delhi-07a9b0d3",
+  "https://artha.link/@eanxt/jobs/cloud-presales-consultant-itc-infotech-411001-66a2fe18",
+  "https://artha.link/@eanxt/jobs/product-aligned-agentic-quality-bridge-ai-mumbai-060c6897",
+  "https://artha.link/@eanxt/jobs/threat-hunter-angel-one-bengaluru-92d91e3d",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-quess-it-staffing-vasanthanagar-c063a285",
+  "https://artha.link/@eanxt/jobs/network-firewall-security-tata-consultancy-600001-099381fb",
+  "https://artha.link/@eanxt/jobs/aws-pyspark-data-engineer-tata-consultancy-hyderabad-06529a71",
+  "https://artha.link/@eanxt/jobs/data-engineer-analytics-aws-health-catalyst-hyderabad-14f9084d",
+  "https://artha.link/@eanxt/jobs/customer-success-engineer-trantor-vasanthanagar-037daa64",
+  "https://artha.link/@eanxt/jobs/software-engineer-in-test-gurucul-pune-2a13855a",
+  "https://artha.link/@eanxt/jobs/network-engineer-application-mumbai-3d20e0bb",
+  "https://artha.link/@eanxt/jobs/azure-databricks-tata-consultancy-bengaluru-aa5ebe75",
+  "https://artha.link/@eanxt/jobs/backend-developer-java-springboot-netcomm-it-chennai-a272178b",
+  "https://artha.link/@eanxt/jobs/director-it-operations-imerit-technology-500001-99685740",
+  "https://artha.link/@eanxt/jobs/gcp-senior-data-engineer-horizontal-talent-bengaluru-349f74e9",
+  "https://artha.link/@eanxt/jobs/director-genai-agentic-ai-practice-happiest-minds-bengaluru-643bdf28",
+  "https://artha.link/@eanxt/jobs/data-scientist-bdo-india-mumbai-bb3808e0",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-6-10-years-tata-consultancy-bengaluru-26f723a9",
+  "https://artha.link/@eanxt/jobs/endpoint-security-engineer-shimentox-hyderabad-69a65649",
+  "https://artha.link/@eanxt/jobs/windows-vmware-tata-consultancy-bengaluru-314fdecf",
+  "https://artha.link/@eanxt/jobs/information-technology-security-manager-advantmed-pune-district-3ad9c61c",
+  "https://artha.link/@eanxt/jobs/lead-security-research-engineer-qualys-pune-district-71cfb294",
+  "https://artha.link/@eanxt/jobs/cyber-security-consultant-contract-hiresquad-resources-201301-b9870be9",
+  "https://artha.link/@eanxt/jobs/java-backend-developer-antal-international-mumbai-a8ce72af",
+  "https://artha.link/@eanxt/jobs/network-architect-sdwan-hcltech-sector-c63f4828",
+  "https://artha.link/@eanxt/jobs/gcp-storage-tata-consultancy-chennai-1995651a",
+  "https://artha.link/@eanxt/jobs/gcp-serverless-tata-consultancy-chennai-6604b240",
+  "https://artha.link/@eanxt/jobs/threat-hunter-angel-one-vasanthanagar-f22bbd1f",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-aws-infocepts-pune-city-64dac714",
+  "https://artha.link/@eanxt/jobs/oracle-database-aws-specialist-tata-consultancy-bengaluru-d7716e49",
+  "https://artha.link/@eanxt/jobs/network-security-l3-ntt-data-400001-40585ee5",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-pyspark-aws-rbm-software-pune-city-4c2f0b7a",
+  "https://artha.link/@eanxt/jobs/senior-application-security-specialist-creospan-private-pune-district-60c9b5fc",
+  "https://artha.link/@eanxt/jobs/technical-architect-cms-and-digital-synapone-gurugram-2955224e",
+  "https://artha.link/@eanxt/jobs/cyber-security-analyst-randstad-enterprise-695004-cacab3fd",
+  "https://artha.link/@eanxt/jobs/technical-sales-engineer-crest-data-ahmedabad-4bfbbc98",
+  "https://artha.link/@eanxt/jobs/enterprise-network-architect-computer-futures-mumbai-0cfbba6d",
+  "https://artha.link/@eanxt/jobs/sap-basis-consultant-hcltech-mumbai-fd933954",
+  "https://artha.link/@eanxt/jobs/senior-sql-server-database-administrator-programmers-io-noida-8c797514",
+  "https://artha.link/@eanxt/jobs/citrix-administrator-tata-consultancy-hyderabad-38eace1a",
+  "https://artha.link/@eanxt/jobs/azure-windows-admin-lead-tata-consultancy-chennai-ef9e3913",
+  "https://artha.link/@eanxt/jobs/azure-event-hub-sme-persistent-systems-pune-city-d978f087",
+  "https://artha.link/@eanxt/jobs/gcp-sap-architect-tata-consultancy-bengaluru-ff02c041",
+  "https://artha.link/@eanxt/jobs/cyber-security-manager-flipkart-vasanthanagar-cd90d097",
+  "https://artha.link/@eanxt/jobs/technical-lead-engineer-security-whitefield-careers-vasanthanagar-8d1e197c",
+  "https://artha.link/@eanxt/jobs/enterprise-solution-strategist-presales-tata-consultancy-bengaluru-0077157f",
+  "https://artha.link/@eanxt/jobs/technical-architect-aws-azilen-technologies-ahmedabad-0d085d0b",
+  "https://artha.link/@eanxt/jobs/back-end-developer-asymmetric-labs-bengaluru-76748a43",
+  "https://artha.link/@eanxt/jobs/oracle-pl-sql-developer-azure-data-atyeti-inc-pune-district-216fd85d",
+  "https://artha.link/@eanxt/jobs/soc-l3-alliant-hyderabad-c1eeef42",
+  "https://artha.link/@eanxt/jobs/specialist-cyber-security-operations-ab-inbev-gcc-india-vasanthanagar-c1502936",
+  "https://artha.link/@eanxt/jobs/support-engineer-loch-corporate-gurugram-86067a38",
+  "https://artha.link/@eanxt/jobs/senior-data-engineer-data-architecture-calfus-inc-pune-city-2a4d086b",
+  "https://artha.link/@eanxt/jobs/middleware-l3-support-landmark-group-vasanthanagar-27e66328",
+  "https://artha.link/@eanxt/jobs/ror-fullstack-vayuz-technologies-delhi-11a165c6",
+  "https://artha.link/@eanxt/jobs/senior-automation-engineer-qualitykiosk-mumbai-b3eecc04",
+  "https://artha.link/@eanxt/jobs/gcp-data-engineer-lead-artificial-bengaluru-d2a89c7f",
+  "https://artha.link/@eanxt/jobs/aws-senior-data-engineer-tata-consultancy-bengaluru-67801ba0",
+  "https://artha.link/@eanxt/jobs/aws-databricks-with-python-tata-consultancy-hyderabad-f5c8a999",
+  "https://artha.link/@eanxt/jobs/firewall-engineer-tata-consultancy-hyderabad-24235ea1",
+  "https://artha.link/@eanxt/jobs/data-engineer-hcltech-chennai-7e1a3cda",
+  "https://artha.link/@eanxt/jobs/vp-head-of-security-assurance-mashreq-bengaluru-e29010c3",
+  "https://artha.link/@eanxt/jobs/network-administrator-tata-consultancy-chennai-e82b2fa5",
+  "https://artha.link/@eanxt/jobs/senior-network-engineer-alliantgroup-500001-37353f03",
+  "https://artha.link/@eanxt/jobs/network-security-tata-consultancy-600001-a74e747a",
+  "https://artha.link/@eanxt/jobs/back-end-developer-publicis-production-bengaluru-9b3a093c",
+  "https://artha.link/@eanxt/jobs/networking-specialist-lorven-technologies-bengaluru-urban-8e5ce19b",
+  "https://artha.link/@eanxt/jobs/historian-system-and-software-engineer-recro-bengaluru-75299c5f",
+  "https://artha.link/@eanxt/jobs/azure-fabric-data-engineer-tata-consultancy-kolkata-cf6216da",
+  "https://artha.link/@eanxt/jobs/senior-technical-support-engineer-palo-alto-networks-bengaluru-1c0a168e",
+  "https://artha.link/@eanxt/jobs/senior-engineer-network-security-cloud4c-services-hyderabad-68640a0f",
+  "https://artha.link/@eanxt/jobs/data-engineer-enterprise-minds-inc-pune-district-5b63905f",
+  "https://artha.link/@eanxt/jobs/cyberark-architect-tata-consultancy-hyderabad-f7d411d1",
+  "https://artha.link/@eanxt/jobs/soc-front-end-design-signoff-engineer-amlogic-inc-hyderabad-464fba41",
+  "https://artha.link/@eanxt/jobs/lead-frontend-engineer-shopify-shoptrade-shopify-bengaluru-07f8e955",
+  "https://artha.link/@eanxt/jobs/senior-quality-assurance-engineer-zestiot-hyderabad-ef9b169b"
+];
 
-  // Try to load any remote combined queue or use DEFAULT_QUEUE
   let jobQueue = DEFAULT_QUEUE;
 
   // =========================================================================
@@ -103,10 +1026,10 @@
   let state = loadSavedState();
   let isRunning = false;
   let isPaused = false;
-  let speedMode = "normal"; // fast (3-5s), normal (5-7s), stealth (8-12s)
+  let speedMode = "normal"; // fast (3-4.5s), normal (5-7.5s), stealth (8-12s)
 
   // =========================================================================
-  // 🛡️ HUMAN EVENT EMULATION ENGINE
+  // 🛡️ ADVANCED HUMAN EVENT & ANTI-DETECTION ENGINE
   // =========================================================================
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   const randomDelay = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -120,15 +1043,15 @@
   async function humanClick(element, win = window) {
     if (!element) return false;
 
-    // 1. Smooth scroll
+    // 1. Natural deceleration scroll
     try {
       element.scrollIntoView({ behavior: "smooth", block: "center" });
     } catch (e) {}
-    await sleep(randomDelay(250, 400));
+    await sleep(randomDelay(250, 420));
 
     const rect = element.getBoundingClientRect();
-    const offsetX = randomDelay(-4, 4);
-    const offsetY = randomDelay(-4, 4);
+    const offsetX = randomDelay(-5, 5);
+    const offsetY = randomDelay(-5, 5);
     const x = rect.left + rect.width / 2 + offsetX;
     const y = rect.top + rect.height / 2 + offsetY;
 
@@ -141,17 +1064,19 @@
       screenX: (win.screenX || 0) + x,
       screenY: (win.screenY || 0) + y,
       buttons: 1,
+      which: 1,
     };
 
+    // 2. Full 9-step human pointer cascade
     element.dispatchEvent(new win.PointerEvent("pointerover", mouseEventOptions));
     element.dispatchEvent(new win.MouseEvent("mouseover", mouseEventOptions));
     element.dispatchEvent(new win.PointerEvent("pointerenter", mouseEventOptions));
-    await sleep(randomDelay(40, 80));
+    await sleep(randomDelay(40, 90));
 
     element.dispatchEvent(new win.PointerEvent("pointerdown", mouseEventOptions));
     element.dispatchEvent(new win.MouseEvent("mousedown", mouseEventOptions));
     if (typeof element.focus === "function") element.focus();
-    await sleep(randomDelay(50, 100));
+    await sleep(randomDelay(50, 110));
 
     element.dispatchEvent(new win.PointerEvent("pointerup", mouseEventOptions));
     element.dispatchEvent(new win.MouseEvent("mouseup", mouseEventOptions));
@@ -167,22 +1092,21 @@
   function findApplyButton(doc) {
     if (!doc) return null;
     const byId = doc.getElementById("creator-job-details-apply-job-trigger");
-    if (byId) return { el: byId, strategy: "ID" };
+    if (byId) return { el: byId, strategy: "ID (#creator-job-details-apply-job-trigger)" };
 
     const byExp = doc.querySelector('[data-experiment-id="creator-apply-job-trigger"]');
-    if (byExp) return { el: byExp, strategy: "data-attr" };
+    if (byExp) return { el: byExp, strategy: "Experiment Attr" };
 
     const buttons = Array.from(doc.querySelectorAll("button, a, div[role='button']"));
     const byText = buttons.find((b) => {
       const txt = (b.innerText || b.textContent || "").trim().toLowerCase();
       return txt === "apply now" || txt.includes("apply now") || txt.startsWith("apply");
     });
-    if (byText) return { el: byText, strategy: "text-heuristic" };
+    if (byText) return { el: byText, strategy: "Text Heuristic" };
 
     return null;
   }
 
-  // Helper to extract clean job title from URL slug
   function formatSlug(url) {
     try {
       const parts = url.split("/jobs/");
@@ -190,124 +1114,193 @@
         return parts[1].replace(/-[a-f0-9]{8}$/i, "").replace(/-/g, " ");
       }
     } catch (e) {}
-    return "Job Position";
+    return "Job Opening";
   }
 
   // =========================================================================
-  // 🖥️ GLASSMORPHIC FLOATING CONTROL DASHBOARD (HUD)
+  // 🧹 SMART TRACKER & STORAGE CLEANER
   // =========================================================================
-  const oldHud = document.getElementById("zero-footprint-applier-hud");
+  function cleanTrackingData() {
+    let clearedTrackers = 0;
+    try {
+      // Clean third-party analytics cookies while preserving authentication session
+      const cookies = document.cookie.split(";");
+      const trackingPrefixes = ["_ga", "_gid", "_gat", "_intercom", "mp_", "ajs_", "sentry_", "_utm", "amplitude_"];
+      
+      cookies.forEach((c) => {
+        const name = c.split("=")[0].trim();
+        if (trackingPrefixes.some(p => name.startsWith(p))) {
+          document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          clearedTrackers++;
+        }
+      });
+
+      // Clear tracking sessionStorage keys
+      Object.keys(sessionStorage).forEach((k) => {
+        if (trackingPrefixes.some(p => k.startsWith(p)) || k.includes("intercom") || k.includes("sentry")) {
+          sessionStorage.removeItem(k);
+          clearedTrackers++;
+        }
+      });
+
+      log("Cleaned " + clearedTrackers + " tracker cookies & telemetry markers. Auth session preserved.", "#059669");
+    } catch (e) {
+      console.warn("Storage cleaner notice:", e);
+    }
+  }
+
+  // =========================================================================
+  // 🎨 ULTRA-CLEAN FROSTED GLASS LIGHT THEME HUD (VECTOR SVG ICONS)
+  // =========================================================================
+  const oldHud = document.getElementById("zero-footprint-light-hud");
   if (oldHud) oldHud.remove();
 
+  // Inline Vector SVG Icons
+  const ICONS = {
+    play: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>',
+    pause: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>',
+    skip: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>',
+    reset: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>',
+    broom: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>',
+    shield: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>',
+    minimize: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
+    close: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
+  };
+
   const hud = document.createElement("div");
-  hud.id = "zero-footprint-applier-hud";
+  hud.id = "zero-footprint-light-hud";
   hud.innerHTML = `
     <div style="
       position: fixed;
-      bottom: 20px;
-      right: 20px;
+      bottom: 24px;
+      right: 24px;
       z-index: 99999999;
-      width: 380px;
-      background: rgba(15, 23, 42, 0.96);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(59, 130, 246, 0.45);
-      border-radius: 18px;
-      padding: 16px;
-      color: #f8fafc;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7), 0 0 24px rgba(59, 130, 246, 0.25);
+      width: 385px;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      border-radius: 20px;
+      padding: 18px;
+      color: #0f172a;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0,0,0,0.03), 0 8px 20px -4px rgba(0, 0, 0, 0.06);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     ">
-      <!-- Header -->
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+      <!-- Top Header -->
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
         <div style="display: flex; align-items: center; gap: 8px;">
-          <span id="zfp-status-dot" style="width: 10px; height: 10px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981;"></span>
-          <span style="font-weight: 800; font-size: 13px; letter-spacing: 0.5px; color: #f8fafc;">AUTO-APPLIER (1-BY-1 ENGINE)</span>
+          <span style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: #eff6ff; border-radius: 8px; border: 1px solid #dbeafe;">
+            ${ICONS.shield}
+          </span>
+          <div>
+            <div style="font-weight: 800; font-size: 13px; color: #0f172a; letter-spacing: -0.2px;">ZERO-FOOTPRINT</div>
+            <div style="font-size: 10px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">1-by-1 Auto Applier</div>
+          </div>
         </div>
-        <div style="display: flex; gap: 6px;">
-          <button id="zfp-min-btn" title="Minimize" style="background: none; border: none; color: #94a3b8; font-size: 14px; cursor: pointer; padding: 2px 6px;">_</button>
-          <button id="zfp-close-btn" title="Close" style="background: none; border: none; color: #94a3b8; font-size: 16px; cursor: pointer; padding: 2px 6px;">✕</button>
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <span id="zfp-status-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); margin-right: 6px;"></span>
+          <button id="zfp-min-btn" title="Minimize" style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 7px; color: #475569; cursor: pointer;">${ICONS.minimize}</button>
+          <button id="zfp-close-btn" title="Close" style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 7px; color: #475569; cursor: pointer;">${ICONS.close}</button>
         </div>
       </div>
 
-      <!-- Main Body -->
+      <!-- Collapsible Body -->
       <div id="zfp-body">
         <!-- Progress Bar -->
-        <div style="background: rgba(30, 41, 59, 0.9); border-radius: 8px; height: 6px; width: 100%; margin-bottom: 12px; overflow: hidden;">
-          <div id="zfp-progress-bar" style="background: linear-gradient(90deg, #3b82f6, #10b981); width: 0%; height: 100%; transition: width 0.3s ease;"></div>
+        <div style="background: #f1f5f9; border-radius: 999px; height: 7px; width: 100%; margin-bottom: 12px; overflow: hidden; border: 1px solid #e2e8f0;">
+          <div id="zfp-progress-bar" style="background: linear-gradient(90deg, #2563eb, #10b981); width: 0%; height: 100%; border-radius: 999px; transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);"></div>
         </div>
 
-        <!-- Metrics Grid -->
-        <div style="background: rgba(30, 41, 59, 0.8); border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; font-size: 11px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; line-height: 1.5;">
-          <div>Queue: <b id="zfp-progress-text" style="color: #38bdf8;">${state.currentIndex} / ${jobQueue.length}</b></div>
-          <div>Applied: <b id="zfp-applied-text" style="color: #34d399;">${state.completedCount}</b></div>
-          <div style="grid-column: span 2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-            Target: <span id="zfp-target-text" style="color: #f1f5f9; font-weight: 500;">Ready to start</span>
+        <!-- Info Card -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; font-size: 11px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; line-height: 1.5;">
+          <div>Progress: <b id="zfp-progress-text" style="color: #2563eb; font-weight: 700;">${state.currentIndex} / ${jobQueue.length}</b></div>
+          <div>Applied: <b id="zfp-applied-text" style="color: #059669; font-weight: 700;">${state.completedCount}</b></div>
+          <div style="grid-column: span 2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #64748b;">
+            Active: <span id="zfp-target-text" style="color: #0f172a; font-weight: 600;">Ready to start</span>
           </div>
         </div>
 
-        <!-- Speed & Performance Options -->
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; font-size: 11px; color: #94a3b8;">
-          <span>Pacing:</span>
+        <!-- Speed Selector & Cleaner -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; font-size: 11px;">
           <div style="display: flex; gap: 4px;">
-            <button class="zfp-speed-btn" data-speed="fast" style="background: #1e293b; color: #cbd5e1; border: 1px solid #475569; border-radius: 6px; padding: 3px 8px; font-size: 10px; cursor: pointer;">Fast (3s)</button>
-            <button class="zfp-speed-btn" data-speed="normal" style="background: #2563eb; color: white; border: 1px solid #3b82f6; border-radius: 6px; padding: 3px 8px; font-size: 10px; cursor: pointer; font-weight: bold;">Normal (5s)</button>
-            <button class="zfp-speed-btn" data-speed="stealth" style="background: #1e293b; color: #cbd5e1; border: 1px solid #475569; border-radius: 6px; padding: 3px 8px; font-size: 10px; cursor: pointer;">Stealth (10s)</button>
+            <button class="zfp-speed-btn" data-speed="fast" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 7px; padding: 4px 8px; font-size: 10px; cursor: pointer; font-weight: 500;">Fast (3s)</button>
+            <button class="zfp-speed-btn" data-speed="normal" style="background: #2563eb; color: #ffffff; border: 1px solid #2563eb; border-radius: 7px; padding: 4px 8px; font-size: 10px; cursor: pointer; font-weight: 700; box-shadow: 0 2px 4px rgba(37,99,235,0.2);">Normal (5s)</button>
+            <button class="zfp-speed-btn" data-speed="stealth" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 7px; padding: 4px 8px; font-size: 10px; cursor: pointer; font-weight: 500;">Stealth (10s)</button>
           </div>
+          <button id="zfp-clean-btn" title="Clean tracking cookies" style="display: flex; align-items: center; gap: 4px; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; border-radius: 7px; padding: 4px 8px; font-size: 10px; cursor: pointer; font-weight: 500;">
+            ${ICONS.broom} Clean
+          </button>
         </div>
 
-        <!-- Action Controls -->
+        <!-- Action Control Buttons -->
         <div style="display: flex; gap: 8px; margin-bottom: 10px;">
           <button id="zfp-main-action-btn" style="
             flex: 2;
-            background: #059669;
-            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            background: #2563eb;
+            color: #ffffff;
             border: none;
             border-radius: 10px;
-            padding: 10px;
+            padding: 10px 14px;
             font-size: 12px;
             font-weight: 700;
             cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
             transition: all 0.2s;
-            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
-          ">🚀 Start 1-by-1 Queue</button>
+          ">
+            <span id="zfp-btn-icon">${ICONS.play}</span>
+            <span id="zfp-btn-label">Start 1-by-1 Queue</span>
+          </button>
 
-          <button id="zfp-skip-btn" style="
+          <button id="zfp-skip-btn" title="Skip to next job" style="
             flex: 1;
-            background: #334155;
-            color: #cbd5e1;
-            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            background: #f8fafc;
+            color: #334155;
+            border: 1px solid #cbd5e1;
             border-radius: 10px;
-            padding: 10px;
+            padding: 10px 8px;
             font-size: 11px;
             font-weight: 600;
             cursor: pointer;
-          ">⏩ Skip</button>
+          ">
+            ${ICONS.skip} Skip
+          </button>
 
-          <button id="zfp-reset-btn" title="Reset Progress" style="
-            background: #1e293b;
-            color: #ef4444;
-            border: 1px solid #7f1d1d;
+          <button id="zfp-reset-btn" title="Reset progress back to #1" style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff1f2;
+            color: #e11d48;
+            border: 1px solid #fecdd3;
             border-radius: 10px;
             padding: 10px 12px;
-            font-size: 11px;
-            font-weight: 600;
             cursor: pointer;
-          ">↺</button>
+          ">
+            ${ICONS.reset}
+          </button>
         </div>
 
-        <!-- Activity Log Window -->
+        <!-- Real-Time Activity Log Stream -->
         <div id="zfp-log" style="
-          font-family: 'SFMono-Regular', Consolas, monospace;
+          font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
           font-size: 10px;
-          color: #94a3b8;
-          max-height: 75px;
+          color: #475569;
+          max-height: 70px;
           overflow-y: auto;
-          background: rgba(0,0,0,0.4);
-          padding: 8px;
-          border-radius: 8px;
-          line-height: 1.4;
-          border: 1px solid rgba(255,255,255,0.05);
+          background: #f1f5f9;
+          padding: 8px 10px;
+          border-radius: 9px;
+          line-height: 1.45;
+          border: 1px solid #e2e8f0;
         ">Loaded ${jobQueue.length} jobs in queue. Click Start to begin sequential processing.</div>
       </div>
     </div>
@@ -319,19 +1312,21 @@
   const appliedText = document.getElementById("zfp-applied-text");
   const targetText = document.getElementById("zfp-target-text");
   const mainActionBtn = document.getElementById("zfp-main-action-btn");
+  const btnIcon = document.getElementById("zfp-btn-icon");
+  const btnLabel = document.getElementById("zfp-btn-label");
   const logEl = document.getElementById("zfp-log");
   const statusDot = document.getElementById("zfp-status-dot");
 
   function updateUI() {
     const percent = Math.min(100, Math.round((state.currentIndex / jobQueue.length) * 100));
-    if (progressBar) progressBar.style.width = `${percent}%`;
-    if (progressText) progressText.innerText = `${state.currentIndex} / ${jobQueue.length} (${percent}%)`;
+    if (progressBar) progressBar.style.width = percent + "%";
+    if (progressText) progressText.innerText = state.currentIndex + " / " + jobQueue.length + " (" + percent + "%)";
     if (appliedText) appliedText.innerText = state.completedCount;
   }
   updateUI();
 
-  function log(msg, color = "#38bdf8") {
-    console.log(`%c[AutoApplier] ${msg}`, `color: ${color}; font-weight: 600;`);
+  function log(msg, color = "#2563eb") {
+    console.log("%c[AutoApplier] " + msg, "color: " + color + "; font-weight: 600;");
     if (logEl) {
       logEl.innerText = msg;
       logEl.scrollTop = logEl.scrollHeight;
@@ -346,33 +1341,32 @@
 
     if (state.currentIndex >= jobQueue.length) {
       isRunning = false;
-      if (mainActionBtn) {
-        mainActionBtn.innerText = "🎉 All Jobs Completed!";
-        mainActionBtn.style.background = "#059669";
-      }
+      if (btnLabel) btnLabel.innerText = "All Jobs Completed!";
+      if (btnIcon) btnIcon.innerHTML = ICONS.play;
+      if (mainActionBtn) mainActionBtn.style.background = "#059669";
       if (targetText) targetText.innerText = "Queue Finished!";
       if (statusDot) statusDot.style.background = "#10b981";
-      log(`🎉 Queue Completed! Successfully processed ${state.completedCount} job applications.`, "#10b981");
+      log("🎉 Queue Completed! Successfully processed " + state.completedCount + " job applications.", "#059669");
       return;
     }
 
     const currentUrl = jobQueue[state.currentIndex];
     const roleName = formatSlug(currentUrl);
 
-    if (targetText) targetText.innerText = `[${state.currentIndex + 1}/${jobQueue.length}] ${roleName}`;
+    if (targetText) targetText.innerText = "[" + (state.currentIndex + 1) + "/" + jobQueue.length + "] " + roleName;
     updateUI();
 
     console.log(
-      `%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-      `%c🎯 [JOB ${state.currentIndex + 1}/${jobQueue.length}] %c${roleName}\n` +
-      `%c🔗 URL: %c${currentUrl}`,
-      "color: #475569;",
-      "color: #38bdf8; font-weight: bold;", "color: #f8fafc; font-weight: bold;",
-      "color: #94a3b8;", "color: #60a5fa; text-decoration: underline;"
+      "%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+      "%c🎯 [JOB " + (state.currentIndex + 1) + "/" + jobQueue.length + "] %c" + roleName + "\n" +
+      "%c🔗 URL: %c" + currentUrl,
+      "color: #94a3b8;",
+      "color: #2563eb; font-weight: bold;", "color: #0f172a; font-weight: bold;",
+      "color: #64748b;", "color: #2563eb; text-decoration: underline;"
     );
-    log(`Opening Tab 1 [${state.currentIndex + 1}/${jobQueue.length}]: ${roleName}...`, "#38bdf8");
+    log("Opening Tab 1 [" + (state.currentIndex + 1) + "/" + jobQueue.length + "]: " + roleName + "...", "#2563eb");
 
-    // Track both Tab 1 (job page) and Tab 2 (redirect/employer page)
+    // Track Tab 1 (job page) and Tab 2 (redirect/employer page)
     let tab1 = null;
     let tab2 = null;
 
@@ -381,14 +1375,14 @@
       tab1 = window.open(currentUrl, "_blank", "width=1280,height=850");
 
       if (!tab1) {
-        console.error("%c🚨 [POPUP BLOCKED] Please allow popups for artha.link in your address bar!", "background: #7f1d1d; color: #fca5a5; font-weight: bold; padding: 4px;");
-        log("⚠️ Popup blocked! Click 'Always allow popups' in browser bar.", "#ef4444");
+        console.error("%c🚨 [POPUP BLOCKED] Please click 'Always allow popups' in your browser address bar!", "background: #fff1f2; color: #e11d48; font-weight: bold; padding: 4px;");
+        log("⚠️ Popup blocked! Please allow popups in address bar.", "#e11d48");
         isRunning = false;
-        if (mainActionBtn) mainActionBtn.innerText = "⚠️ Blocked (Allow Popups & Retry)";
+        if (btnLabel) btnLabel.innerText = "Allow Popups & Retry";
         return;
       }
 
-      // Intercept any child window / redirect tab (Tab 2) that Tab 1 might open on apply click
+      // Intercept any child window (Tab 2) that Tab 1 might open on apply click
       try {
         const originalOpen = tab1.open;
         tab1.open = function (...args) {
@@ -398,7 +1392,7 @@
       } catch (e) {}
 
       // 2. Wait for Tab 1 DOM to load & hydrate
-      log(`Tab 1 opened. Waiting 3.5s for page hydration...`, "#94a3b8");
+      log("Tab 1 opened. Waiting 3.5s for page hydration...", "#64748b");
       await sleep(randomDelay(3000, 4500));
 
       if (!isRunning) {
@@ -411,44 +1405,44 @@
       try {
         const match = findApplyButton(tab1.document);
         if (match && match.el) {
-          log(`Found Apply Button in Tab 1 (${match.strategy})! Simulating human click...`, "#10b981");
+          log("Found Apply Button in Tab 1 (" + match.strategy + ")! Simulating click...", "#059669");
           await humanClick(match.el, tab1);
           clicked = true;
           state.completedCount++;
-          console.log(`%c✨ [CLICKED] Apply trigger executed successfully on Tab 1`, "color: #10b981; font-weight: bold;");
+          console.log("%c✨ [CLICKED] Apply trigger executed successfully on Tab 1", "color: #059669; font-weight: bold;");
         } else {
-          log(`⚠️ Apply button not directly located in Tab 1. Triggering standard submit...`, "#f59e0b");
+          log("⚠️ Apply button not directly found in Tab 1. Triggering fallback...", "#d97706");
           state.skippedCount++;
         }
       } catch (domErr) {
         // Cross-origin fallback if page navigated instantly
-        log(`Page initiated redirect. Processing response...`, "#94a3b8");
+        log("Page initiated redirect. Processing response...", "#64748b");
         clicked = true;
         state.completedCount++;
       }
 
       // 4. Wait 2.5s for redirect (Tab 2) and network telemetry to finalize
-      log(`Waiting 2.5s for affiliate tracking & redirect...`, "#94a3b8");
+      log("Waiting 2.5s for tracking beacon & redirect...", "#64748b");
       await sleep(randomDelay(2000, 3000));
 
       // 5. Dual Tab Close: Cleanly close Tab 2 (if spawned) and Tab 1
-      log(`Closing Tab 2 and Tab 1...`, "#a855f7");
+      log("Closing Tab 2 and Tab 1...", "#7c3aed");
       try {
         if (tab2 && !tab2.closed) {
           tab2.close();
-          console.log(`%c🚪 Tab 2 (Redirect/Employer Tab) closed cleanly.`, "color: #94a3b8; font-size: 11px;");
+          console.log("%c🚪 Tab 2 (Redirect/Employer Tab) closed cleanly.", "color: #64748b; font-size: 11px;");
         }
       } catch (e) {}
 
       try {
         if (tab1 && !tab1.closed) {
           tab1.close();
-          console.log(`%c🚪 Tab 1 (Job Page Tab) closed cleanly.`, "color: #94a3b8; font-size: 11px;");
+          console.log("%c🚪 Tab 1 (Job Page Tab) closed cleanly.", "color: #64748b; font-size: 11px;");
         }
       } catch (e) {}
 
     } catch (err) {
-      console.warn("Job step error:", err);
+      console.warn("Job step notice:", err);
       try { if (tab1 && !tab1.closed) tab1.close(); } catch(e) {}
       try { if (tab2 && !tab2.closed) tab2.close(); } catch(e) {}
     }
@@ -458,12 +1452,12 @@
     saveState(state);
     updateUI();
 
-    // 6. Safe Human Pacing Delay before processing the next job
+    // 6. Safe Human Pacing Delay before processing next job
     if (isRunning && !isPaused && state.currentIndex < jobQueue.length) {
       const waitMs = getPacingDelay();
       const waitSec = (waitMs / 1000).toFixed(1);
       if (statusDot) statusDot.style.background = "#f59e0b";
-      log(`⏱️ Human pacing delay: Pausing ${waitSec}s before Job ${state.currentIndex + 1}...`, "#a855f7");
+      log("⏱️ Human pacing delay: Pausing " + waitSec + "s before Job " + (state.currentIndex + 1) + "...", "#7c3aed");
       
       await sleep(waitMs);
       if (statusDot) statusDot.style.background = "#10b981";
@@ -474,29 +1468,33 @@
   }
 
   // =========================================================================
-  // 🎛️ BUTTON CONTROLS & EVENT LISTENERS
+  // 🎛️ CONTROLS & EVENT LISTENERS
   // =========================================================================
   function startQueue() {
     if (isRunning && !isPaused) return;
     isRunning = true;
     isPaused = false;
+    if (btnLabel) btnLabel.innerText = "Pause Queue";
+    if (btnIcon) btnIcon.innerHTML = ICONS.pause;
     if (mainActionBtn) {
-      mainActionBtn.innerText = "⏸️ Pause Queue";
       mainActionBtn.style.background = "#d97706";
+      mainActionBtn.style.boxShadow = "0 4px 12px rgba(217, 119, 6, 0.3)";
     }
     if (statusDot) statusDot.style.background = "#10b981";
-    log(`🚀 Starting sequential 1-by-1 processing from Job ${state.currentIndex + 1}...`, "#10b981");
+    log("🚀 Starting sequential 1-by-1 processing from Job " + (state.currentIndex + 1) + "...", "#059669");
     processNextJob();
   }
 
   function pauseQueue() {
     isPaused = true;
+    if (btnLabel) btnLabel.innerText = "Resume Queue";
+    if (btnIcon) btnIcon.innerHTML = ICONS.play;
     if (mainActionBtn) {
-      mainActionBtn.innerText = "▶️ Resume Queue";
-      mainActionBtn.style.background = "#059669";
+      mainActionBtn.style.background = "#2563eb";
+      mainActionBtn.style.boxShadow = "0 4px 12px rgba(37, 99, 235, 0.3)";
     }
     if (statusDot) statusDot.style.background = "#f59e0b";
-    log(`⏸️ Queue paused at Job ${state.currentIndex + 1} / ${jobQueue.length}.`, "#f59e0b");
+    log("⏸️ Queue paused at Job " + (state.currentIndex + 1) + " / " + jobQueue.length + ".", "#d97706");
   }
 
   function toggleMainAction() {
@@ -513,7 +1511,7 @@
       state.skippedCount++;
       saveState(state);
       updateUI();
-      log(`⏩ Skipped to Job ${state.currentIndex + 1} / ${jobQueue.length}`, "#cbd5e1");
+      log("⏩ Skipped to Job " + (state.currentIndex + 1) + " / " + jobQueue.length, "#475569");
     }
   }
 
@@ -524,34 +1522,39 @@
       state = { currentIndex: 0, completedCount: 0, skippedCount: 0, history: [] };
       saveState(state);
       updateUI();
+      if (btnLabel) btnLabel.innerText = "Start 1-by-1 Queue";
+      if (btnIcon) btnIcon.innerHTML = ICONS.play;
       if (mainActionBtn) {
-        mainActionBtn.innerText = "🚀 Start 1-by-1 Queue";
-        mainActionBtn.style.background = "#059669";
+        mainActionBtn.style.background = "#2563eb";
+        mainActionBtn.style.boxShadow = "0 4px 12px rgba(37, 99, 235, 0.3)";
       }
       if (targetText) targetText.innerText = "Reset to Job #1";
-      log("↺ Progress reset back to Job #1.", "#ef4444");
+      log("↺ Progress reset back to Job #1.", "#e11d48");
     }
   }
 
   mainActionBtn.addEventListener("click", toggleMainAction);
   document.getElementById("zfp-skip-btn").addEventListener("click", skipJob);
   document.getElementById("zfp-reset-btn").addEventListener("click", resetProgress);
+  document.getElementById("zfp-clean-btn").addEventListener("click", cleanTrackingData);
 
   // Speed Mode Buttons
   document.querySelectorAll(".zfp-speed-btn").forEach((btn) => {
     btn.addEventListener("click", (e) => {
       document.querySelectorAll(".zfp-speed-btn").forEach((b) => {
-        b.style.background = "#1e293b";
-        b.style.color = "#cbd5e1";
-        b.style.borderColor = "#475569";
-        b.style.fontWeight = "normal";
+        b.style.background = "#ffffff";
+        b.style.color = "#475569";
+        b.style.borderColor = "#cbd5e1";
+        b.style.fontWeight = "500";
+        b.style.boxShadow = "none";
       });
       btn.style.background = "#2563eb";
-      btn.style.color = "white";
-      btn.style.borderColor = "#3b82f6";
-      btn.style.fontWeight = "bold";
+      btn.style.color = "#ffffff";
+      btn.style.borderColor = "#2563eb";
+      btn.style.fontWeight = "700";
+      btn.style.boxShadow = "0 2px 4px rgba(37,99,235,0.2)";
       speedMode = btn.getAttribute("data-speed");
-      log(`Pacing set to: ${speedMode.toUpperCase()}`, "#38bdf8");
+      log("Pacing set to: " + speedMode.toUpperCase(), "#2563eb");
     });
   });
 
@@ -561,7 +1564,6 @@
     isMinimized = !isMinimized;
     const body = document.getElementById("zfp-body");
     if (body) body.style.display = isMinimized ? "none" : "block";
-    document.getElementById("zfp-min-btn").innerText = isMinimized ? "+" : "_";
   });
 
   // Cleanup Session
@@ -571,7 +1573,7 @@
     hud.remove();
     window.__AUTO_APPLIER_INSTANCE__ = null;
     delete window.__AUTO_APPLIER__;
-    console.log("%c🧹 Auto-Applier HUD removed.", "color: #94a3b8; font-style: italic;");
+    console.log("%c🧹 Auto-Applier session closed.", "color: #64748b; font-style: italic;");
   }
 
   document.getElementById("zfp-close-btn").addEventListener("click", cleanupInstance);
@@ -584,13 +1586,14 @@
     pause: pauseQueue,
     skip: skipJob,
     reset: resetProgress,
+    cleanTracking: cleanTrackingData,
     cleanup: cleanupInstance,
     getState: () => ({ ...state }),
     setQueue: (urls) => {
       if (Array.isArray(urls) && urls.length > 0) {
         jobQueue = urls;
         updateUI();
-        log(`Loaded custom queue with ${urls.length} jobs!`, "#10b981");
+        log("Loaded custom queue with " + urls.length + " jobs!", "#059669");
       }
     }
   };
@@ -598,18 +1601,19 @@
   window.__AUTO_APPLIER_INSTANCE__ = api;
   window.__AUTO_APPLIER__ = api;
 
-  // Startup Banner
   console.log(
-    `%c 🕶️ ZERO-FOOTPRINT: 1-BY-1 SEQUENTIAL AUTO-APPLIER %c READY `,
-    "background: #0f172a; color: #38bdf8; font-size: 13px; font-weight: 800; padding: 6px 10px; border-radius: 6px 0 0 6px; border: 1px solid #38bdf8;",
-    "background: #059669; color: #ffffff; font-size: 13px; font-weight: 800; padding: 6px 10px; border-radius: 0 6px 6px 0; border: 1px solid #38bdf8;"
+    "%c 🕶️ ZERO-FOOTPRINT: 1-BY-1 AUTO-APPLIER %c READY ",
+    "background: #eff6ff; color: #2563eb; font-size: 13px; font-weight: 800; padding: 6px 10px; border-radius: 6px 0 0 6px; border: 1px solid #2563eb;",
+    "background: #2563eb; color: #ffffff; font-size: 13px; font-weight: 800; padding: 6px 10px; border-radius: 0 6px 6px 0; border: 1px solid #2563eb;"
   );
   console.log(
-    `%c📋 Total Queued: %c${jobQueue.length} jobs\n` +
-    `%c💾 Saved Progress: %cJob ${state.currentIndex + 1} of ${jobQueue.length} (Applied: ${state.completedCount})\n` +
-    `%c💡 Instructions: Click '🚀 Start 1-by-1 Queue' on the floating HUD or call window.__AUTO_APPLIER__.start()`,
-    "color: #94a3b8; font-weight: bold;", "color: #38bdf8; font-weight: bold;",
-    "color: #94a3b8; font-weight: bold;", "color: #10b981; font-weight: bold;",
-    "color: #e2e8f0; font-style: italic;"
+    "%c📋 Total Queued: %c" + jobQueue.length + " openings\n" +
+    "%c💾 Saved Progress: %cJob " + (state.currentIndex + 1) + " of " + jobQueue.length + " (Applied: " + state.completedCount + ")\n" +
+    "%c💡 Instructions: Click 'Start 1-by-1 Queue' on the floating HUD or call window.__AUTO_APPLIER__.start()\n" +
+    "%c🧹 Smart Cleaner: Click 'Clean' or call window.__AUTO_APPLIER__.cleanTracking() to clear tracker cookies while keeping login active.",
+    "color: #64748b; font-weight: bold;", "color: #2563eb; font-weight: bold;",
+    "color: #64748b; font-weight: bold;", "color: #059669; font-weight: bold;",
+    "color: #334155; font-style: italic;",
+    "color: #059669; font-style: italic;"
   );
 })();
