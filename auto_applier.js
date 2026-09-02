@@ -1,5 +1,5 @@
 /**
- * 🕶️ Zero-Footprint: Advanced 1-by-1 Sequential In-Browser Auto-Applier
+ * 🕶️ Zero-Footprint PRO: Advanced 1-by-1 Sequential In-Browser Auto-Applier
  * 
  * GitHub: https://github.com/Naman-mahi/zero-footprint
  * CDN: https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js
@@ -12,7 +12,7 @@
  * - 🧹 Smart Session & Tracker Cleaner: Full domain cookie & storage wipe with safe state preservation.
  * - ⏱️ 50-Job Batch Pacing: Automatic cooldown break & storage purge at batch milestones (50, 100, 150...).
  * - 💾 Session Resume: Saves progress in localStorage so you can pause/resume anytime without losing your place.
- * - 🎨 Modern Light-Theme HUD: Ultra-clean frosted glass UI with vector SVG icons and real-time progress indicators.
+ * - 🎨 Ultra-Clean Light-Theme HUD: Positioned at top-right (zero overlap with chat widget), vector SVG icons, and step-by-step instructions.
  */
 
 (function () {
@@ -1190,21 +1190,24 @@
   }
 
   // =========================================================================
-  // 🎨 ULTRA-CLEAN FROSTED GLASS LIGHT THEME HUD (VECTOR SVG ICONS)
+  // 🎨 PURE WHITE LIGHT THEME HUD (VECTOR SVG ICONS & INSTRUCTIONS)
   // =========================================================================
   const oldHud = document.getElementById("zero-footprint-light-hud");
   if (oldHud) oldHud.remove();
+  const oldDarkHud = document.getElementById("zero-footprint-applier-hud");
+  if (oldDarkHud) oldDarkHud.remove();
 
-  // Inline Vector SVG Icons
+  // Inline Vector SVG Icons (No Emojis)
   const ICONS = {
     play: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>',
     pause: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>',
     skip: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>',
     reset: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>',
     broom: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>',
-    shield: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>',
+    shield: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>',
     minimize: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
-    close: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>'
+    close: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+    info: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>'
   };
 
   const hud = document.createElement("div");
@@ -1212,36 +1215,37 @@
   hud.innerHTML = `
     <div style="
       position: fixed;
-      bottom: 24px;
-      right: 24px;
+      top: 20px;
+      right: 20px;
       z-index: 99999999;
-      width: 390px;
-      background: rgba(255, 255, 255, 0.94);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border: 1px solid rgba(226, 232, 240, 0.9);
+      width: 395px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
       border-radius: 20px;
       padding: 18px;
       color: #0f172a;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0,0,0,0.03), 0 8px 20px -4px rgba(0, 0, 0, 0.06);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, Helvetica, Arial, sans-serif;
+      box-shadow: 0 20px 35px -10px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.04), 0 6px 16px -4px rgba(15, 23, 42, 0.06);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     ">
       <!-- Top Header -->
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: #eff6ff; border-radius: 8px; border: 1px solid #dbeafe;">
+        <div style="display: flex; align-items: center; gap: 9px;">
+          <span style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: #eff6ff; border-radius: 8px; border: 1px solid #dbeafe;">
             ${ICONS.shield}
           </span>
           <div>
-            <div style="font-weight: 800; font-size: 13px; color: #0f172a; letter-spacing: -0.2px;">ZERO-FOOTPRINT</div>
-            <div style="font-size: 10px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">1-by-1 Dynamic Applier</div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span style="font-weight: 800; font-size: 13.5px; color: #0f172a; letter-spacing: -0.2px;">ZERO-FOOTPRINT</span>
+              <span style="background: #eff6ff; color: #2563eb; font-size: 9.5px; font-weight: 700; padding: 1px 5px; border-radius: 5px; border: 1px solid #dbeafe;">PRO</span>
+            </div>
+            <div style="font-size: 10.5px; color: #64748b; font-weight: 500;">Autonomous 1-by-1 Job Applier</div>
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 4px;">
           <span id="zfp-status-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); margin-right: 6px;"></span>
-          <button id="zfp-min-btn" title="Minimize" style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 7px; color: #475569; cursor: pointer;">${ICONS.minimize}</button>
-          <button id="zfp-close-btn" title="Close" style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 7px; color: #475569; cursor: pointer;">${ICONS.close}</button>
+          <button id="zfp-min-btn" title="Minimize" style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 7px; color: #475569; cursor: pointer;">${ICONS.minimize}</button>
+          <button id="zfp-close-btn" title="Close" style="display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 7px; color: #475569; cursor: pointer;">${ICONS.close}</button>
         </div>
       </div>
 
@@ -1252,23 +1256,23 @@
           <div id="zfp-progress-bar" style="background: linear-gradient(90deg, #2563eb, #10b981); width: 0%; height: 100%; border-radius: 999px; transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);"></div>
         </div>
 
-        <!-- Info Card -->
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; font-size: 11px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; line-height: 1.5;">
-          <div>Progress: <b id="zfp-progress-text" style="color: #2563eb; font-weight: 700;">${state.currentIndex} / ${jobQueue.length}</b></div>
+        <!-- Metrics Card -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; font-size: 11px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; line-height: 1.5;">
+          <div>Queue: <b id="zfp-progress-text" style="color: #2563eb; font-weight: 700;">${state.currentIndex} / ${jobQueue.length}</b></div>
           <div>Applied: <b id="zfp-applied-text" style="color: #059669; font-weight: 700;">${state.completedCount}</b></div>
           <div style="grid-column: span 2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #64748b;">
             Active: <span id="zfp-target-text" style="color: #0f172a; font-weight: 600;">Ready to start</span>
           </div>
         </div>
 
-        <!-- Speed Selector & Cleaner -->
+        <!-- Pacing Selector & Cleaner -->
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; font-size: 11px;">
           <div style="display: flex; gap: 4px;">
             <button class="zfp-speed-btn" data-speed="fast" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 7px; padding: 4px 8px; font-size: 10px; cursor: pointer; font-weight: 500;">Fast (3s)</button>
             <button class="zfp-speed-btn" data-speed="normal" style="background: #2563eb; color: #ffffff; border: 1px solid #2563eb; border-radius: 7px; padding: 4px 8px; font-size: 10px; cursor: pointer; font-weight: 700; box-shadow: 0 2px 4px rgba(37,99,235,0.2);">Normal (5s)</button>
             <button class="zfp-speed-btn" data-speed="stealth" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 7px; padding: 4px 8px; font-size: 10px; cursor: pointer; font-weight: 500;">Stealth (10s)</button>
           </div>
-          <button id="zfp-clean-btn" title="Purge tracking cookies & domain storage" style="display: flex; align-items: center; gap: 4px; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; border-radius: 7px; padding: 4px 8px; font-size: 10px; cursor: pointer; font-weight: 500;">
+          <button id="zfp-clean-btn" title="Purge tracking cookies & domain storage" style="display: flex; align-items: center; gap: 4px; background: #f8fafc; color: #475569; border: 1px solid #e2e8f0; border-radius: 7px; padding: 4px 8px; font-size: 10px; cursor: pointer; font-weight: 500;">
             ${ICONS.broom} Clean
           </button>
         </div>
@@ -1289,7 +1293,7 @@
             font-size: 12px;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
             transition: all 0.2s;
           ">
             <span id="zfp-btn-icon">${ICONS.play}</span>
@@ -1334,14 +1338,34 @@
           font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
           font-size: 10px;
           color: #475569;
-          max-height: 75px;
+          max-height: 70px;
           overflow-y: auto;
-          background: #f1f5f9;
+          background: #f8fafc;
           padding: 8px 10px;
           border-radius: 9px;
           line-height: 1.45;
           border: 1px solid #e2e8f0;
-        ">Loaded ${jobQueue.length} jobs in queue. Dynamic poller active (up to 10s wait for hydration).</div>
+          margin-bottom: 8px;
+        ">Loaded ${jobQueue.length} jobs in queue. Dynamic poller active (waits up to 10s for DOM hydration).</div>
+
+        <!-- Step-by-Step Instructions Card -->
+        <div style="
+          background: #f1f5f9;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          padding: 8px 10px;
+          font-size: 10px;
+          color: #475569;
+          line-height: 1.5;
+        ">
+          <div style="display: flex; align-items: center; gap: 4px; font-weight: 700; color: #1e293b; margin-bottom: 2px;">
+            ${ICONS.info} How It Works:
+          </div>
+          <div>1. Opens 1 tab at a time (0% lag).</div>
+          <div>2. Dynamic poller finds & clicks Apply.</div>
+          <div>3. Automatically closes both tabs.</div>
+          <div>4. Auto-cleans cookies every 50 jobs & resumes!</div>
+        </div>
       </div>
     </div>
   `;
@@ -1538,7 +1562,7 @@
     if (btnIcon) btnIcon.innerHTML = ICONS.pause;
     if (mainActionBtn) {
       mainActionBtn.style.background = "#d97706";
-      mainActionBtn.style.boxShadow = "0 4px 12px rgba(217, 119, 6, 0.3)";
+      mainActionBtn.style.boxShadow = "0 4px 12px rgba(217, 119, 6, 0.25)";
     }
     if (statusDot) statusDot.style.background = "#10b981";
     log("🚀 Starting sequential 1-by-1 processing from Job " + (state.currentIndex + 1) + "...", "#059669");
@@ -1551,7 +1575,7 @@
     if (btnIcon) btnIcon.innerHTML = ICONS.play;
     if (mainActionBtn) {
       mainActionBtn.style.background = "#2563eb";
-      mainActionBtn.style.boxShadow = "0 4px 12px rgba(37, 99, 235, 0.3)";
+      mainActionBtn.style.boxShadow = "0 4px 12px rgba(37, 99, 235, 0.25)";
     }
     if (statusDot) statusDot.style.background = "#f59e0b";
     log("⏸️ Queue paused at Job " + (state.currentIndex + 1) + " / " + jobQueue.length + ".", "#d97706");
@@ -1586,7 +1610,7 @@
       if (btnIcon) btnIcon.innerHTML = ICONS.play;
       if (mainActionBtn) {
         mainActionBtn.style.background = "#2563eb";
-        mainActionBtn.style.boxShadow = "0 4px 12px rgba(37, 99, 235, 0.3)";
+        mainActionBtn.style.boxShadow = "0 4px 12px rgba(37, 99, 235, 0.25)";
       }
       if (targetText) targetText.innerText = "Reset to Job #1";
       log("↺ Progress reset back to Job #1.", "#e11d48");
@@ -1662,7 +1686,7 @@
   window.__AUTO_APPLIER__ = api;
 
   console.log(
-    "%c 🕶️ ZERO-FOOTPRINT: 1-BY-1 DYNAMIC AUTO-APPLIER %c READY ",
+    "%c 🕶️ ZERO-FOOTPRINT PRO: 1-BY-1 AUTO-APPLIER %c READY ",
     "background: #eff6ff; color: #2563eb; font-size: 13px; font-weight: 800; padding: 6px 10px; border-radius: 6px 0 0 6px; border: 1px solid #2563eb;",
     "background: #2563eb; color: #ffffff; font-size: 13px; font-weight: 800; padding: 6px 10px; border-radius: 0 6px 6px 0; border: 1px solid #2563eb;"
   );
