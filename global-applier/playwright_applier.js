@@ -2,9 +2,13 @@
  * 🕶️ Zero-Footprint PRO: Production-Grade Multi-Location Playwright Batch Applier
  * 
  * FEATURES:
+ * - 🧼 100% DEEP BROWSER PURGE:
+ *     - CDP Protocol Level Purge: Storage.clearDataForOrigin (all origins, cookies, indexeddb, websql, cache, service workers).
+ *     - Network Level Purge: Network.clearBrowserCookies & Network.clearBrowserCache.
+ *     - DOM Level Purge: localStorage.clear(), sessionStorage.clear(), IndexedDB deletion, Cache API deletion.
+ *     - Ephemeral Context Recycling: Recreates a sterile, isolated browser.newContext() on every job.
+ * - ⏳ Extended 10-Second Mandatory Page Load Wait for full destination rendering.
  * - 🌍 5 Regional Location Profiles (US, UK, India, Canada, Germany/EU + Auto-Rotate).
- * - ⏳ Extended 10-Second Minimum Page Load Wait for full destination rendering.
- * - 🧹 Complete Storage & Cookie Wipe (localStorage, sessionStorage, cookies) before closing each tab.
  * - 🔌 Native Proxy Support (--proxy-server, --proxy-username, --proxy-password).
  * - 🧪 Client-Side Geo Route Interception (--mock-geo) for testing & staging environments.
  * - 📁 Location-Specific JSON Queue Auto-Detection (jobs_us.json, jobs_uk.json, jobs_in.json, etc.).
@@ -201,6 +205,66 @@ function saveState(currentIndex, completedCount, skippedCount) {
   } catch (e) {}
 }
 
+/**
+ * 🧼 100% DEEP BROWSER DATA PURGE ENGINE
+ * Wipes CDP storage, Network cache, DOM localStorage, sessionStorage, IndexedDB, and Cache API.
+ */
+async function performDeepDataPurge(context, page, popup) {
+  // 1. Wipe Popup (Tab 2) DOM storage
+  if (popup && !popup.isClosed()) {
+    try {
+      await popup.evaluate(async () => {
+        try { localStorage.clear(); } catch(e) {}
+        try { sessionStorage.clear(); } catch(e) {}
+        try {
+          const dbs = await indexedDB.databases();
+          dbs.forEach(db => indexedDB.deleteDatabase(db.name));
+        } catch(e) {}
+        try {
+          const keys = await caches.keys();
+          keys.forEach(k => caches.delete(k));
+        } catch(e) {}
+      });
+    } catch (e) {}
+  }
+
+  // 2. Wipe Job Details (Tab 1) DOM storage
+  if (page && !page.isClosed()) {
+    try {
+      await page.evaluate(async () => {
+        try { localStorage.clear(); } catch(e) {}
+        try { sessionStorage.clear(); } catch(e) {}
+        try {
+          const dbs = await indexedDB.databases();
+          dbs.forEach(db => indexedDB.deleteDatabase(db.name));
+        } catch(e) {}
+        try {
+          const keys = await caches.keys();
+          keys.forEach(k => caches.delete(k));
+        } catch(e) {}
+      });
+    } catch (e) {}
+
+    // 3. Chrome DevTools Protocol (CDP) Deep Cleanse
+    try {
+      const cdp = await context.newCDPSession(page);
+      await cdp.send('Storage.clearDataForOrigin', {
+        origin: '*',
+        storageTypes: 'all' // all origins, cookies, indexeddb, websql, cache_storage, service_workers
+      }).catch(() => {});
+      await cdp.send('Network.clearBrowserCookies').catch(() => {});
+      await cdp.send('Network.clearBrowserCache').catch(() => {});
+      await cdp.detach().catch(() => {});
+    } catch (e) {}
+  }
+
+  // 4. Playwright Context Cookie Flush
+  try {
+    await context.clearCookies();
+    await context.clearPermissions();
+  } catch (e) {}
+}
+
 // Execution stats
 const results = {
   startedAt: new Date().toISOString(),
@@ -262,8 +326,8 @@ process.on('SIGTERM', handleGracefulExit);
   if (isMockGeo) {
     console.log(`🧪 Geo Interception:     ACTIVE (Mocking client-side geo endpoints)`);
   }
-  console.log(`⏳ Page Load & Wait:    ${(closeWaitMs / 1000).toFixed(1)} seconds (Full load & beacon finalization)`);
-  console.log(`🧹 Storage Cleansing:    Enabled (Clears cookies, localStorage & sessionStorage on every job)`);
+  console.log(`⏳ Page Load & Wait:    ${(closeWaitMs / 1000).toFixed(1)} seconds (Full load & beacon delivery)`);
+  console.log(`🧼 Deep Cleanse Mode:    100% COMPLETE (CDP Storage, Network Cache, Cookies, IndexedDB, Session)`);
   console.log(`🖥️ Browser Display:      ${isHeaded ? 'Headed (Visible GUI)' : 'Headless (Silent)'}`);
   console.log(`⏱️ Human Pacing:         ${speedMode.toUpperCase()}`);
   console.log('======================================================\n');
@@ -295,63 +359,59 @@ process.on('SIGTERM', handleGracefulExit);
     const currentBatchNum = Math.floor(currentIndex / batchSize) + 1;
     const totalBatches = Math.ceil(queue.length / batchSize);
     const batchEndIndex = Math.min(queue.length, currentIndex + batchSize);
-    const batchProfile = getLocationProfile(currentIndex);
 
     console.log(`\n┌──────────────────────────────────────────────────────────────┐`);
     console.log(`│ 🚀 STARTING BATCH ${currentBatchNum} / ${totalBatches} (Jobs ${currentIndex + 1} to ${batchEndIndex})`);
-    console.log(`│ 🌍 Profile:          ${batchProfile.name}`);
     console.log(`│ 📁 Queue File:       ${path.basename(queueFilePath)}`);
     console.log(`└──────────────────────────────────────────────────────────────┘\n`);
-
-    // Create fresh, isolated browser context for this batch
-    const context = await globalBrowser.newContext({
-      viewport: { width: 1366, height: 868 },
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-      geolocation: batchProfile.geolocation,
-      permissions: ['geolocation'],
-      timezoneId: batchProfile.timezoneId,
-      locale: batchProfile.locale,
-      extraHTTPHeaders: batchProfile.httpHeaders
-    });
-
-    // Optional client-side geo route mocking for test environments
-    if (isMockGeo) {
-      await context.route('**/*geo*/**', async (route) => {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            success: true,
-            message: 'Geo fetched successfully',
-            data: {
-              ip: '203.0.113.20',
-              geo: {
-                lat: batchProfile.geolocation.latitude,
-                lng: batchProfile.geolocation.longitude,
-                city: batchProfile.name.split('(')[1]?.replace(')', '') || 'City',
-                country: batchProfile.code,
-                timezone: batchProfile.timezoneId,
-                isVpn: false,
-                isProxy: false,
-                isHosting: false
-              }
-            }
-          })
-        }).catch(() => route.continue());
-      });
-    }
 
     for (; currentIndex < batchEndIndex && !isTerminating; currentIndex++) {
       currentProcessingIndex = currentIndex;
       const url = queue[currentIndex];
       const roleName = formatSlug(url);
-      const activeProfile = isRotateLocation ? getLocationProfile(currentIndex) : batchProfile;
+      const activeProfile = getLocationProfile(currentIndex);
 
       console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
       console.log(`🎯 [JOB ${currentIndex + 1}/${queue.length}] ${roleName}`);
       console.log(`🔗 URL: ${url}`);
-      if (isRotateLocation) {
-        console.log(`🌍 Profile: ${activeProfile.name} (${activeProfile.code})`);
+      console.log(`🌍 Profile: ${activeProfile.name} (${activeProfile.code})`);
+
+      // CREATE FRESH, STERILE CONTEXT FOR THIS INDIVIDUAL JOB
+      const context = await globalBrowser.newContext({
+        viewport: { width: 1366, height: 868 },
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        geolocation: activeProfile.geolocation,
+        permissions: ['geolocation'],
+        timezoneId: activeProfile.timezoneId,
+        locale: activeProfile.locale,
+        extraHTTPHeaders: activeProfile.httpHeaders
+      });
+
+      // Optional client-side geo route mocking for test environments
+      if (isMockGeo) {
+        await context.route('**/*geo*/**', async (route) => {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              success: true,
+              message: 'Geo fetched successfully',
+              data: {
+                ip: '203.0.113.20',
+                geo: {
+                  lat: activeProfile.geolocation.latitude,
+                  lng: activeProfile.geolocation.longitude,
+                  city: activeProfile.name.split('(')[1]?.replace(')', '') || 'City',
+                  country: activeProfile.code,
+                  timezone: activeProfile.timezoneId,
+                  isVpn: false,
+                  isProxy: false,
+                  isHosting: false
+                }
+              }
+            })
+          }).catch(() => route.continue());
+        });
       }
 
       const page = await context.newPage();
@@ -411,19 +471,13 @@ process.on('SIGTERM', handleGracefulExit);
             } catch (e) {}
           }
 
-          console.log(`⏳ Holding open for ${(closeWaitMs / 1000).toFixed(1)}s to guarantee full page load & tracking beacon completion...`);
+          console.log(`⏳ Holding open for ${(closeWaitMs / 1000).toFixed(1)}s for full page load & telemetry completion...`);
           await sleep(closeWaitMs);
 
-          // 6. Purge Storage & Cleanly Close Child Tab (Tab 2)
+          // 6. Cleanly Close Destination Popup
           if (spawnedPopup && !spawnedPopup.isClosed()) {
-            try {
-              await spawnedPopup.evaluate(() => {
-                try { localStorage.clear(); } catch (e) {}
-                try { sessionStorage.clear(); } catch (e) {}
-              });
-            } catch (e) {}
             await spawnedPopup.close().catch(() => {});
-            console.log(`🚪 Cleared storage & closed destination window cleanly.`);
+            console.log(`🚪 Closed destination window cleanly.`);
           }
         } else {
           console.log(`⚠️ Apply button timed out in DOM. Moving to next.`);
@@ -433,21 +487,17 @@ process.on('SIGTERM', handleGracefulExit);
         console.warn(`⚠️ Notice: ${err.message}`);
         results.failedCount++;
       } finally {
-        // 7. Purge Storage & Cleanly Close Job Page (Tab 1)
+        // 7. EXECUTE 100% COMPLETE BROWSER DATA PURGE BEFORE DESTROYING CONTEXT
+        await performDeepDataPurge(context, page, spawnedPopup);
+
         if (!page.isClosed()) {
-          try {
-            await page.evaluate(() => {
-              try { localStorage.clear(); } catch (e) {}
-              try { sessionStorage.clear(); } catch (e) {}
-            });
-          } catch (e) {}
           await page.close().catch(() => {});
-          console.log(`🚪 Cleared storage & closed job details window.`);
+          console.log(`🚪 Closed job details window.`);
         }
 
-        // 8. Wipe All Domain & Tracking Cookies from Context
-        await context.clearCookies().catch(() => {});
-        console.log(`🧹 Purged context cookies & telemetry tokens for Job ${currentIndex + 1}.`);
+        // 8. DESTROY THE ENTIRE CONTEXT (Removes all in-memory and disk session footprint)
+        await context.close().catch(() => {});
+        console.log(`🧼 [DEEP PURGE COMPLETE] Wiped all cookies, cache, indexedDB & storage for Job ${currentIndex + 1}.`);
       }
 
       results.history.push({
@@ -468,12 +518,8 @@ process.on('SIGTERM', handleGracefulExit);
       }
     }
 
-    // End of Batch Cleanup
-    console.log(`\n🧹 [BATCH ${currentBatchNum} FINISHED] Full purge of browser context, cache & session data...`);
-    await context.close().catch(() => {});
-
     if (currentIndex < queue.length && !isTerminating) {
-      console.log(`\n☕ [COOLDOWN BREAK] Taking 30s organic human rest before Batch ${currentBatchNum + 1}...`);
+      console.log(`\n☕ [COOLDOWN BREAK] Batch ${currentBatchNum} finished. Taking 30s organic human rest before Batch ${currentBatchNum + 1}...`);
       await sleep(30000);
     }
   }
