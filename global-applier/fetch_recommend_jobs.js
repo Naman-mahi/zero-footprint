@@ -1,15 +1,19 @@
 /**
- * 🚀 Artha Job Recommendation Fetcher (160 Sorted Records)
+ * 🚀 Artha Job Recommendation Fetcher (Location: IN Only)
  * 
- * Fetches 80 records for sort_by="high_cpc" and 80 records for sort_by="high_cpa",
- * sorts all 160 records by the highest cpc_value / cpa_value descending,
- * and outputs ONLY ONE clean JSON file (jobs_recommend_160.json).
+ * Strictly uses location="IN" to fetch:
+ *   1. High CPC records with non-null cpc_value -> saved to jobs_high_cpc_120.json (sorted descending)
+ *   2. High CPA records with non-null cpa_value -> saved to jobs_high_cpa_120.json (sorted descending)
+ * 
+ * Each item contains minimal short fields:
+ *   - title
+ *   - company_name
+ *   - apply_link
+ *   - cpc_value
+ *   - cpa_value
  * 
  * USAGE:
- *   node fetch_recommend_jobs.js [location] [outputFile]
- * 
- * EXAMPLE:
- *   node fetch_recommend_jobs.js IN jobs_recommend_160.json
+ *   node fetch_recommend_jobs.js
  */
 
 const fs = require('fs');
@@ -17,78 +21,34 @@ const path = require('path');
 
 const RECOMMEND_API_URL = "https://my.artha.link/api/job-api/recommend?pulse_variant=control";
 const BASE_JOB_URL = "https://artha.link/@eanxt/jobs/";
-
-const DEFAULT_NICHE_KEYWORDS = [
-  "cloud security engineer",
-  "devsecops engineer",
-  "application security engineer",
-  "security operations analyst",
-  "site reliability engineer",
-  "cloud infrastructure engineer",
-  "platform engineer",
-  "aws devops engineer",
-  "kubernetes engineer",
-  "security engineer",
-  "e-commerce platform engineer",
-  "cloud systems administrator",
-  "incident response analyst",
-  "security automation engineer",
-  "cloud network engineer",
-  "aws",
-  "azure",
-  "gcp",
-  "kubernetes",
-  "docker",
-  "terraform",
-  "jenkins",
-  "ci cd",
-  "infrastructure as code",
-  "cloud security",
-  "devsecops",
-  "siem",
-  "splunk",
-  "identity access management",
-  "vulnerability management",
-  "incident response",
-  "network security",
-  "zero trust",
-  "container security",
-  "linux administration",
-  "python scripting",
-  "e-commerce platforms",
-  "api security",
-  "security monitoring",
-  "cloud architecture"
-];
-
-const locationCode = (process.argv[2] || 'IN').toUpperCase();
-const outputFileName = process.argv[3] || 'jobs_recommend_160.json';
-const targetCountPerSort = 80;
+const LOCATION_CODE = "IN";
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function fetchRecommendJobs(sortByMode, targetCount = 80) {
-  const items = [];
+/**
+ * Fetch records for CPC or CPA mode for location="IN"
+ */
+async function fetchValidJobsForIndia(mode, targetCount = 120) {
+  const isCpa = mode === 'cpa';
+  const validItems = [];
   let page = 1;
   const pageSize = 25;
+  let zeroMatchPages = 0;
 
-  console.log(`\n⏳ Fetching ${targetCount} records for sort_by="${sortByMode}" (Location: ${locationCode})...`);
+  console.log(`\n⏳ Fetching valid records for High ${mode.toUpperCase()} (Location: ${LOCATION_CODE}, Target: ${targetCount})...`);
 
-  while (items.length < targetCount) {
-    const remaining = targetCount - items.length;
-    const limit = Math.min(pageSize, remaining);
-
+  while (validItems.length < targetCount && page <= 30) {
     const payload = {
       query: "",
       geo_boost: false,
       page: page,
-      limit: limit,
-      location: locationCode,
+      limit: pageSize,
+      location: LOCATION_CODE,
       only_enriched: false,
-      only_cpa: false,
-      categories: ["technology-software"],
-      niche_keywords: DEFAULT_NICHE_KEYWORDS,
-      sort_by: sortByMode
+      only_cpa: isCpa,
+      categories: [],
+      niche_keywords: [],
+      sort_by: isCpa ? "high_cpa" : "high_cpc"
     };
 
     try {
@@ -110,77 +70,91 @@ async function fetchRecommendJobs(sortByMode, targetCount = 80) {
       const result = await response.json();
       const rawItems = result.items || [];
 
-      if (rawItems.length === 0) {
-        console.log(`ℹ️ No more items returned at page ${page}.`);
-        break;
-      }
+      if (rawItems.length === 0) break;
 
+      let addedThisPage = 0;
       for (const item of rawItems) {
-        if (items.length >= targetCount) break;
+        if (validItems.length >= targetCount) break;
 
-        items.push({
+        const cpcVal = item.cpc_value !== undefined ? item.cpc_value : null;
+        const cpaVal = item.cpa_value !== undefined ? item.cpa_value : null;
+
+        // Ensure non-null value for target mode
+        if (isCpa && cpaVal === null) continue;
+        if (!isCpa && cpcVal === null) continue;
+
+        validItems.push({
           title: item.title,
           company_name: item.company_info?.name || item.company || "Unknown Company",
           apply_link: item.slug ? `${BASE_JOB_URL}${item.slug}` : (item.url || null),
-          cpc_value: item.cpc_value !== undefined ? item.cpc_value : null,
-          cpa_value: item.cpa_value !== undefined ? item.cpa_value : null
+          country: item.country || item.company_info?.country || LOCATION_CODE,
+          cpc_value: cpcVal,
+          cpa_value: cpaVal
         });
+        addedThisPage++;
       }
 
-      console.log(`  📦 Page ${page}: Received ${rawItems.length} items | Total fetched: ${items.length}/${targetCount}`);
+      console.log(`  📦 Page ${page}: Received ${rawItems.length} items (${addedThisPage} valid ${mode.toUpperCase()}) | Total valid: ${validItems.length}`);
+
+      if (addedThisPage === 0) {
+        zeroMatchPages++;
+        if (zeroMatchPages >= 2) {
+          console.log(`ℹ️ Stopping fetch for ${mode.toUpperCase()} after 2 consecutive pages with no additional valid ${mode.toUpperCase()} items.`);
+          break;
+        }
+      } else {
+        zeroMatchPages = 0;
+      }
 
       page++;
-      await sleep(300);
+      await sleep(250);
     } catch (err) {
       console.error(`❌ Fetch error on page ${page}:`, err.message);
       break;
     }
   }
 
-  return items;
+  // Sort descending by highest value
+  validItems.sort((a, b) => {
+    const valA = isCpa ? (a.cpa_value || 0) : (a.cpc_value || 0);
+    const valB = isCpa ? (b.cpa_value || 0) : (b.cpc_value || 0);
+    return valB - valA;
+  });
+
+  return validItems;
 }
 
 (async () => {
   console.log('======================================================');
-  console.log('🚀 ARTHA RECOMMENDATION JOB FETCHER (SINGLE 160 SORTED FILE)');
+  console.log(`🚀 ARTHA JOB FETCHER (LOCATION: ${LOCATION_CODE} ONLY)`);
   console.log('======================================================');
-  console.log(`📍 Location: ${locationCode}`);
+  console.log(`📍 Location: ${LOCATION_CODE}`);
   console.log(`🌐 Endpoint: ${RECOMMEND_API_URL}`);
   console.log('======================================================\n');
 
-  // 1. Fetch 80 records for sort_by = "high_cpc"
-  const cpcJobs = await fetchRecommendJobs("high_cpc", targetCountPerSort);
+  // 1. Fetch High CPC jobs for location="IN"
+  const cpcJobs = await fetchValidJobsForIndia('cpc', 120);
 
-  // 2. Fetch 80 records for sort_by = "high_cpa"
-  const cpaJobs = await fetchRecommendJobs("high_cpa", targetCountPerSort);
+  // 2. Fetch High CPA jobs for location="IN"
+  const cpaJobs = await fetchValidJobsForIndia('cpa', 120);
 
-  // Combine all 160 items
-  const allItems = [...cpcJobs, ...cpaJobs];
+  // Save to two separate files
+  const cpcFilePath = path.join(__dirname, 'jobs_high_cpc_120.json');
+  const cpaFilePath = path.join(__dirname, 'jobs_high_cpa_120.json');
 
-  // Sort descending by highest value (cpc_value or cpa_value)
-  allItems.sort((a, b) => {
-    const aVal = Math.max(a.cpc_value || 0, a.cpa_value || 0);
-    const bVal = Math.max(b.cpc_value || 0, b.cpa_value || 0);
-    return bVal - aVal;
-  });
+  fs.writeFileSync(cpcFilePath, JSON.stringify(cpcJobs, null, 2), 'utf8');
+  fs.writeFileSync(cpaFilePath, JSON.stringify(cpaJobs, null, 2), 'utf8');
 
-  // Write ONLY ONE single output file
-  const mainOutputPath = path.isAbsolute(outputFileName)
-    ? outputFileName
-    : path.join(__dirname, outputFileName);
-
-  fs.writeFileSync(mainOutputPath, JSON.stringify(allItems, null, 2), 'utf8');
-
-  // Clean up any old multi-file outputs if they exist
-  const cleanupFiles = [
+  // Clean up any old files
+  const oldFiles = [
+    'jobs_recommend_160.json',
     'data_recommend_80.json',
     'jobs_recommend_queue.json',
     'jobs_recommend_minimal.json',
     'jobs_high_cpc_minimal.json',
     'jobs_high_cpa_minimal.json'
   ];
-
-  for (const f of cleanupFiles) {
+  for (const f of oldFiles) {
     const p = path.join(__dirname, f);
     if (fs.existsSync(p)) {
       try { fs.unlinkSync(p); } catch (e) {}
@@ -188,10 +162,9 @@ async function fetchRecommendJobs(sortByMode, targetCount = 80) {
   }
 
   console.log('\n======================================================');
-  console.log('🎉 FETCH COMPLETED & SORTED SUCCESSFULLY');
+  console.log('🎉 FETCH COMPLETED SUCCESSFULLY');
   console.log('======================================================');
-  console.log(`✨ Total Records:   ${allItems.length} records`);
-  console.log(`📊 Sorted By:       Highest cpc_value & cpa_value (Descending)`);
-  console.log(`📁 Single File:     ${path.basename(mainOutputPath)} (${(fs.statSync(mainOutputPath).size / 1024).toFixed(1)} KB)`);
+  console.log(`📁 High CPC File: jobs_high_cpc_120.json (${cpcJobs.length} records, ${(fs.statSync(cpcFilePath).size / 1024).toFixed(1)} KB)`);
+  console.log(`📁 High CPA File: jobs_high_cpa_120.json (${cpaJobs.length} records, ${(fs.statSync(cpaFilePath).size / 1024).toFixed(1)} KB)`);
   console.log('======================================================\n');
 })();
