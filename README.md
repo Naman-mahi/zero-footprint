@@ -84,7 +84,7 @@ Modern web platforms detect bots through automated browser fingerprinting and be
 
 ### Method 1: Direct Browser Console (Zero Install)
 
-1. Open your target website (e.g. [https://artha.link](https://artha.link)) in Chrome, Brave, Edge, or Firefox.
+1. Open your target website (e.g. [https://example-job-portal.com](https://example-job-portal.com)) in Chrome, Brave, Edge, or Firefox.
 2. Ensure you are logged into your account.
 3. Open Developer Tools: Press **`F12`** (or **`Ctrl + Shift + I`** on Windows / **`Cmd + Option + I`** on macOS) and navigate to the **Console** tab.
 4. Copy the entire contents of [`auto_applier.js`](file:///d:/DEVELOPMENT/all-bots/auto_applier.js) and paste it into the console.
@@ -130,7 +130,7 @@ For complete automation on every visit, create a userscript:
 // @version      2.0.0
 // @description  100% undetectable sequential 1-by-1 auto applier
 // @author       Naman-mahi
-// @match        https://artha.link/*
+// @match        https://example-job-portal.com/*
 // @grant        none
 // ==/UserScript==
 

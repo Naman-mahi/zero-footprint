@@ -52,7 +52,7 @@ https://cdn.jsdelivr.net/gh/<USER>/<REPO>@<VERSION>/<FILE>
 
 ### Method A: Browser DevTools Console One-Liner
 
-Open Developer Tools (`F12` -> Console) on your target page (e.g., `https://artha.link`) and run:
+Open Developer Tools (`F12` -> Console) on your target page (e.g., `https://example-job-portal.com`) and run:
 
 ```javascript
 fetch(`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js?_t=${Date.now()}`)
@@ -78,7 +78,7 @@ javascript:(function(){const s=document.createElement('script');s.type='text/jav
 ```
 
 5. Click **Save**.
-6. Whenever you are on `https://artha.link`, simply click the bookmark in your bookmarks bar. The floating HUD will immediately inject and appear.
+6. Whenever you are on `https://example-job-portal.com`, simply click the bookmark in your bookmarks bar. The floating HUD will immediately inject and appear.
 
 ---
 
@@ -93,7 +93,7 @@ For automated loading every time you visit the target site:
 // @version      1.0.0
 // @description  Loads the latest undetectable apply bot from jsDelivr CDN
 // @author       Naman-mahi
-// @match        https://artha.link/*
+// @match        https://example-job-portal.com/*
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
@@ -101,10 +101,10 @@ For automated loading every time you visit the target site:
 (function() {
     'use strict';
     // Prevent duplicate injections
-    if (document.getElementById('artha-bot-cdn-script')) return;
+    if (document.getElementById('auto-applier-cdn-script')) return;
 
     const script = document.createElement('script');
-    script.id = 'artha-bot-cdn-script';
+    script.id = 'auto-applier-cdn-script';
     script.type = 'text/javascript';
     script.src = `https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js?_t=${Date.now()}`;
     document.body.appendChild(script);

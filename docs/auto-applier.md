@@ -77,7 +77,7 @@ You have full control over what happens at every 50-job milestone (50, 100, 150,
 
 ### Option 1: DevTools Console One-Liner (jsDelivr CDN)
 
-Open Developer Tools (`F12` -> Console) on [https://artha.link](https://artha.link) and run:
+Open Developer Tools (`F12` -> Console) on [https://example-job-portal.com](https://example-job-portal.com) and run:
 
 ```javascript
 fetch(`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js?_t=${Date.now()}`)

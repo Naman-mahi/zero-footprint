@@ -35,7 +35,7 @@ Learn why standard automation bots fail and how this in-browser engine guarantee
 
 ### 3. 🤖 [Browser Bot Technical Reference (`browser_bot.js`)](file:///d:/DEVELOPMENT/all-bots/docs/browser-bot.md)
 Complete breakdown of the main script:
-- **Concurrency & Singleton Lock**: `window.__ARTHA_BOT_INSTANCE__`.
+- **Concurrency & Singleton Lock**: `window.__AUTO_APPLIER_INSTANCE__`.
 - **Target Job Queue Architecture**: Managing batch applications across multiple openings.
 - **Button Detection Strategies**: Multi-tier selector resolution (`id`, `data-experiment-id`, inner text heuristics).
 - **Floating HUD Component**: Real-time glassmorphic UI, progress tracking, dynamic state transitions, and responsive controls.

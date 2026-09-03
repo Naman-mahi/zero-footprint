@@ -8,7 +8,7 @@ This document provides a comprehensive technical overview and module-by-module b
 
 ```text
 browser_bot.js (Self-Executing IIFE)
-├── 🔄 Auto-Reset & Instance Manager (window.__ARTHA_BOT_INSTANCE__)
+├── 🔄 Auto-Reset & Instance Manager (window.__AUTO_APPLIER_INSTANCE__)
 ├── 📋 Target Job Queue (JOB_QUEUE array with 16 verified roles)
 ├── 🎨 Styled Console Startup Banner & Live Link Table
 ├── 🛡️ Human Event Simulator (sleep, randomDelay, humanClick)
@@ -16,7 +16,7 @@ browser_bot.js (Self-Executing IIFE)
 ├── 🖥️ Floating Glassmorphic Control Panel (HUD Component)
 ├── ⚡ Single-Page Apply Controller (applyOnCurrentPage)
 ├── 🚀 Batch Queue Orchestrator (startBatchQueue & stopBatchQueue)
-├── 🌐 Global Control Interface (window.__ARTHA_BOT__)
+├── 🌐 Global Control Interface (window.__AUTO_APPLIER__)
 └── 🎛️ Event Listeners & Auto-Trigger Hook
 ```
 
@@ -27,10 +27,10 @@ browser_bot.js (Self-Executing IIFE)
 Lines: [`browser_bot.js:L28-L38`](file:///d:/DEVELOPMENT/all-bots/browser_bot.js#L28-L38)
 
 ```javascript
-if (window.__ARTHA_BOT_INSTANCE__) {
+if (window.__AUTO_APPLIER_INSTANCE__) {
   console.log("%c🔄 Existing bot instance detected. Resetting and initializing clean session...", "color: #38bdf8; font-weight: bold;");
   try {
-    window.__ARTHA_BOT_INSTANCE__.cleanup();
+    window.__AUTO_APPLIER_INSTANCE__.cleanup();
   } catch (e) {
     console.warn("Cleaned previous instance:", e);
   }
@@ -49,9 +49,9 @@ An array of job targets containing position IDs, titles, and direct web applicat
 
 ```javascript
 const JOB_QUEUE = [
-  { id: 1, title: "Data Engineer @ micro1", url: "https://artha.link/@ritu_singh_647119359/jobs/data-engineer-micro1-467d5920" },
-  { id: 2, title: "Senior Database Reliability Engineer @ micro1", url: "https://artha.link/@ritu_singh_647119359/jobs/senior-database-reliability-engineer-micro1-8ef9e2c8" },
-  { id: 3, title: "QA Engineer @ micro1", url: "https://artha.link/@ritu_singh_647119359/jobs/qa-engineer-micro1-d29d2b9c" },
+  { id: 1, title: "Data Engineer @ micro1", url: "https://example-job-portal.com/@ritu_singh_647119359/jobs/data-engineer-micro1-467d5920" },
+  { id: 2, title: "Senior Database Reliability Engineer @ micro1", url: "https://example-job-portal.com/@ritu_singh_647119359/jobs/senior-database-reliability-engineer-micro1-8ef9e2c8" },
+  { id: 3, title: "QA Engineer @ micro1", url: "https://example-job-portal.com/@ritu_singh_647119359/jobs/qa-engineer-micro1-d29d2b9c" },
   // ... 16 target roles
 ];
 ```
@@ -116,25 +116,25 @@ The HUD provides a styled floating interface placed in the bottom-right corner (
 
 ---
 
-## 🌐 Module 6: Global API Interface (`window.__ARTHA_BOT__`)
+## 🌐 Module 6: Global API Interface (`window.__AUTO_APPLIER__`)
 
 In addition to the visual HUD, you can interact with the bot programmatically via DevTools:
 
 ```javascript
 // Start the batch application queue
-window.__ARTHA_BOT__.startBatch();
+window.__AUTO_APPLIER__.startBatch();
 
 // Stop active batch
-window.__ARTHA_BOT__.stopBatch();
+window.__AUTO_APPLIER__.stopBatch();
 
 // Apply on active page
-window.__ARTHA_BOT__.applyCurrent();
+window.__AUTO_APPLIER__.applyCurrent();
 
 // View all 16 queued jobs in console table
-window.__ARTHA_BOT__.showJobs();
+window.__AUTO_APPLIER__.showJobs();
 
 // Cleanly close HUD and remove session
-window.__ARTHA_BOT__.cleanup();
+window.__AUTO_APPLIER__.cleanup();
 ```
 
 ---

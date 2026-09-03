@@ -17,8 +17,8 @@ This document details the structure, properties, and usage of [`data.json`](file
       "slug": "director-of-infrastructure-engineering-micro1-3edbafcb",
       "description": "<p><strong>Job Title:</strong> ...</p>",
       "company": "micro1",
-      "logo": "https://cdn-static.artha.link/company-logos/micro1/...",
-      "url": "https://r.artha.link/redirect/...",
+      "logo": "https://cdn.example-job-portal.com/company-logos/micro1/...",
+      "url": "https://redirect.example-job-portal.com/redirect/...",
       "job_type": "contract",
       "work_mode": "remote",
       "skills": ["Terraform", "CI/CD", "observability", "security by default", "SRE practices"],
@@ -116,7 +116,7 @@ const jobQueue = allJobs
   .filter(j => j.title && j.slug)
   .map(j => ({
     title: `${j.title} @ ${j.company || 'Direct'}`,
-    url: `https://artha.link/@creator_feed/jobs/${j.slug}`
+    url: `https://example-job-portal.com/@creator_feed/jobs/${j.slug}`
   }));
 
 console.log(`Extracted ${jobQueue.length} jobs! Sample:`);
@@ -152,7 +152,7 @@ for i, chunk in enumerate(chunks):
 queue = [
     {
         "title": f"{j.get('title')} @ {j.get('company', 'Direct')}",
-        "url": f"https://artha.link/@creator_feed/jobs/{j.get('slug')}"
+        "url": f"https://example-job-portal.com/@creator_feed/jobs/{j.get('slug')}"
     }
     for j in all_jobs if j.get("slug") and j.get("title")
 ]

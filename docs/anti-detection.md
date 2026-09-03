@@ -153,7 +153,7 @@ To maintain total invisibility while using the bot:
 
 1. **Keep Browser Window Visible**: Do not minimize the browser window completely, as modern browsers throttle background tab timers (`requestAnimationFrame` / `setTimeout`). Keep the window open in the background.
 2. **Do Not Over-Accelerate**: Keep the inter-job delay at `5s - 8s`. Reducing delays below 2s increases rate-limiting risks on endpoint servers.
-3. **Allow Popups on the Domain**: When launching batch queues, ensure the browser is permitted to open popups for the target domain (`https://artha.link`).
+3. **Allow Popups on the Domain**: When launching batch queues, ensure the browser is permitted to open popups for the target domain (`https://example-job-portal.com`).
 4. **Use Staggered Batches**: If applying to 50+ positions, run 15–20 applications per batch with a 5-minute break in between.
 
 ---
