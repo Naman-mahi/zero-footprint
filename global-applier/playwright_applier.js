@@ -298,12 +298,18 @@ if (customQueueArg) {
   }
 }
 
-const queueFilePath = path.isAbsolute(queueFileName) ? queueFileName : path.join(__dirname, queueFileName);
+let queueFilePath = path.isAbsolute(queueFileName) ? queueFileName : path.join(__dirname, queueFileName);
+if (!fs.existsSync(queueFilePath)) {
+  const rootCandidate = path.join(__dirname, '..', queueFileName);
+  if (fs.existsSync(rootCandidate)) {
+    queueFilePath = rootCandidate;
+  }
+}
 const stateFilePath = path.join(__dirname, 'progress_state.json');
 
 if (!fs.existsSync(queueFilePath)) {
   console.error(`❌ Error: Queue file not found at ${queueFilePath}`);
-  console.error(`💡 Tip: Fetch jobs first using: node fetch_by_location.js ${requestedCountry} 500`);
+  console.error(`💡 Tip: Fetch jobs first using: node fetch_recommend_jobs.js`);
   process.exit(1);
 }
 
