@@ -200,21 +200,22 @@ USAGE:
 
 BROWSER OPTIONS:
   --browser <name>        Browser selection mode:
-                          'rotate' / 'all' - Cycle through all available browsers per job (default)
-                          'random'         - Randomly select a browser for each job
+                          'rotate' / 'all' - Cycle through Chrome & Edge per job (default)
+                          'random'         - Randomly select Chrome or Edge for each job
                           'chrome'         - Google Chrome (native channel)
                           'msedge'         - Microsoft Edge (native channel)
                           'firefox'        - Mozilla Firefox (Gecko engine)
                           'webkit'         - Apple WebKit (Safari engine)
                           'chromium'       - Bundled Chromium
-  --browser-list <list>   Comma-separated list of browsers to rotate (e.g. chrome,firefox,msedge)
+  --browser-list <list>   Comma-separated list of browsers to rotate (e.g. chrome,msedge)
   --browser-per <unit>    Rotation frequency: 'job' (default, rotate each job) or 'batch'
 
 BATCH & LOCATION OPTIONS:
   --location <code|all>   Target country: IN, US, UK, CA, DE, or ROTATE (default: IN)
   --batch <number>        Number of jobs per batch (default: 50)
   --batch-num <number>    Jump directly to specific batch number (e.g. 2, 3)
-  --start <number>        Zero-based starting job index (default: 0)
+  --start <number>        Starting job index (e.g. 500)
+  --end <number>          Ending job index limit (e.g. 900)
   --auto-next             Automatically progress to next batch after 30s cooldown
   --resume                Resume execution from saved state in progress_state.json
 
@@ -230,9 +231,11 @@ PROXY OPTIONS:
   --proxy-password <pass> Proxy authentication password
 
 EXAMPLES:
+  # Run Jobs 500 to 900 rotating Chrome & Edge in headed mode:
+  node playwright_applier.js --start 500 --end 900 --batch 50 --browser rotate --headed
+
+  # Run Batch 1 in India with Chrome & Edge:
   node playwright_applier.js --location IN --batch 50 --browser rotate --headed
-  node playwright_applier.js --location IN --batch 50 --browser firefox --headed
-  node playwright_applier.js --location US --batch 50 --browser random --auto-next
   node playwright_applier.js --resume --headed
 `);
   process.exit(0);
@@ -255,7 +258,8 @@ const browserArg = (getArg('browser', 'rotate')).toLowerCase();
 const customBrowserListArg = getArg('browser-list', null);
 const browserPerArg = (getArg('browser-per', 'job')).toLowerCase(); // 'job' or 'batch'
 
-const DEFAULT_BROWSER_ROTATION = ['chrome', 'msedge', 'firefox', 'webkit', 'chromium'];
+// Restrict default rotation pool to Google Chrome and Microsoft Edge only as requested
+const DEFAULT_BROWSER_ROTATION = ['chrome', 'msedge'];
 let activeBrowserList = [];
 
 if (customBrowserListArg) {
@@ -271,7 +275,7 @@ if (customBrowserListArg) {
 } else if (BROWSER_DATABASE[browserArg]) {
   activeBrowserList = [browserArg];
 } else {
-  console.warn(`⚠️ Warning: Unknown browser '${browserArg}', defaulting to full browser rotation pool.`);
+  console.warn(`⚠️ Warning: Unknown browser '${browserArg}', defaulting to Chrome & Edge rotation pool.`);
   activeBrowserList = [...DEFAULT_BROWSER_ROTATION];
 }
 
@@ -305,7 +309,7 @@ if (!fs.existsSync(queueFilePath)) {
 
 const queue = JSON.parse(fs.readFileSync(queueFilePath, 'utf8'));
 
-// Determine starting index
+// Determine range boundaries (--start and --end)
 let startIndex = 0;
 if (batchNumArg) {
   const bNum = Math.max(1, Number(batchNumArg));
@@ -321,6 +325,9 @@ if (batchNumArg) {
     }
   } catch (e) {}
 }
+
+const endArg = getArg('end', null);
+const maxEndIndex = endArg !== null ? Math.min(queue.length, Number(endArg)) : queue.length;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const randomDelay = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -523,13 +530,13 @@ process.on('SIGTERM', handleGracefulExit);
 
   let currentIndex = startIndex;
 
-  while (currentIndex < queue.length && !isTerminating) {
+  while (currentIndex < maxEndIndex && !isTerminating) {
     const currentBatchNum = Math.floor(currentIndex / batchSize) + 1;
     const totalBatches = Math.ceil(queue.length / batchSize);
-    const batchEndIndex = Math.min(queue.length, currentIndex + batchSize);
+    const batchEndIndex = Math.min(maxEndIndex, currentIndex + batchSize);
 
     console.log(`\n┌──────────────────────────────────────────────────────────────┐`);
-    console.log(`│ 🚀 RUNNING BATCH ${currentBatchNum} / ${totalBatches} (Jobs ${currentIndex + 1} to ${batchEndIndex})`);
+    console.log(`│ 🚀 RUNNING BATCH ${currentBatchNum} / ${totalBatches} (Jobs ${currentIndex + 1} to ${batchEndIndex} of ${queue.length})`);
     console.log(`│ 📁 Queue File: ${path.basename(queueFilePath)}`);
     console.log(`└──────────────────────────────────────────────────────────────┘\n`);
 
@@ -619,7 +626,8 @@ process.on('SIGTERM', handleGracefulExit);
         });
       }
 
-      const page = await context.newPage();
+      const pages = context.pages();
+      const page = pages.length > 0 ? pages[0] : await context.newPage();
       let isApplied = false;
       let spawnedPopup = null;
 
@@ -734,7 +742,7 @@ process.on('SIGTERM', handleGracefulExit);
     console.log(`🎉 BATCH ${currentBatchNum} / ${totalBatches} FINISHED (Processed up to Job ${currentIndex})`);
     console.log(`======================================================`);
 
-    if (currentIndex < queue.length && !isTerminating) {
+    if (currentIndex < maxEndIndex && !isTerminating) {
       if (isAutoNext) {
         console.log(`\n☕ [AUTO-NEXT COOLDOWN] Taking 30s organic human rest before Batch ${currentBatchNum + 1}...`);
         await sleep(30000);
