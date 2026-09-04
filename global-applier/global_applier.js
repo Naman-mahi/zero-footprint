@@ -674,6 +674,9 @@
       return;
     }
 
+    // 🧹 ALWAYS purge domain cookies, localStorage & sessionStorage before opening next job
+    wipeAllStorageAndCookies(true);
+
     const currentUrl = jobQueue[state.currentIndex];
     const roleName = formatSlug(currentUrl);
 

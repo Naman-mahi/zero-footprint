@@ -660,6 +660,9 @@
       return;
     }
 
+    // 🧹 ALWAYS purge domain cookies, localStorage & sessionStorage before opening next job
+    wipeAllStorageAndCookies(true);
+
     const currentUrl = jobQueue[state.currentIndex];
     const roleName = formatSlug(currentUrl);
 
@@ -680,7 +683,7 @@
     let tab2 = null;
 
     try {
-      // 1. Open Tab 1: The Job Details Page on artha.link
+      // 1. Open Tab 1: The Job Details Page
       tab1 = window.open(currentUrl, "_blank", "width=1280,height=850");
 
       if (!tab1) {
@@ -691,7 +694,7 @@
         return;
       }
 
-      // Intercept any child window (Tab 2) that Tab 1 might open on apply click
+      // Intercept any child window (Tab 2) that Tab 1 opens on apply click
       try {
         const originalOpen = tab1.open;
         tab1.open = function (...args) {
@@ -712,7 +715,8 @@
       }
 
       if (!isRunning) {
-        try { if (tab1) tab1.close(); } catch(e) {}
+        try { if (tab1 && !tab1.closed) tab1.close(); } catch(e) {}
+        try { if (tab2 && !tab2.closed) tab2.close(); } catch(e) {}
         return;
       }
 
@@ -727,31 +731,38 @@
         state.skippedCount++;
       }
 
-      // 4. Wait 2.5s for redirect (Tab 2) and network telemetry to finalize
-      log("Waiting 2.5s for tracking beacon & redirect...", "#64748b");
-      await sleep(randomDelay(2000, 3000));
+      // 4. Wait for redirect (Tab 2) and network telemetry to finalize
+      log("Waiting for tracking beacon & redirect on Tab 2...", "#64748b");
+      await sleep(randomDelay(2500, 3500));
 
-      // 5. Dual Tab Close: Cleanly close Tab 2 (if spawned) and Tab 1
-      log("Closing Tab 2 and Tab 1...", "#7c3aed");
+      // 5. Dual Tab Close: Cleanly close BOTH Tab 2 (Employer/Redirect Tab) and Tab 1 (Job Details Tab)
+      log("Closing 2 tabs (Tab 1 & Tab 2)...", "#7c3aed");
       try {
         if (tab2 && !tab2.closed) {
+          try { tab2.localStorage.clear(); } catch (e) {}
+          try { tab2.sessionStorage.clear(); } catch (e) {}
           tab2.close();
-          console.log("%c🚪 Tab 2 (Redirect/Employer Tab) closed cleanly.", "color: #64748b; font-size: 11px;");
+          console.log("%c🚪 Tab 2 (Redirect/Employer Tab) closed cleanly.", "color: #059669; font-size: 11px; font-weight: bold;");
         }
       } catch (e) {}
 
       try {
         if (tab1 && !tab1.closed) {
+          try { tab1.localStorage.clear(); } catch (e) {}
+          try { tab1.sessionStorage.clear(); } catch (e) {}
           tab1.close();
-          console.log("%c🚪 Tab 1 (Job Page Tab) closed cleanly.", "color: #64748b; font-size: 11px;");
+          console.log("%c🚪 Tab 1 (Job Details Tab) closed cleanly.", "color: #059669; font-size: 11px; font-weight: bold;");
         }
       } catch (e) {}
 
     } catch (err) {
       console.warn("Job step notice:", err);
-      try { if (tab1 && !tab1.closed) tab1.close(); } catch(e) {}
       try { if (tab2 && !tab2.closed) tab2.close(); } catch(e) {}
+      try { if (tab1 && !tab1.closed) tab1.close(); } catch(e) {}
     }
+
+    // 🧹 Purge storage and cookies immediately after job step completes
+    wipeAllStorageAndCookies(true);
 
     // Advance queue index & save persistent state
     state.currentIndex++;
