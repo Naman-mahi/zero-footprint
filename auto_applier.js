@@ -678,9 +678,10 @@
     );
     log("Opening Tab 1 [" + (state.currentIndex + 1) + "/" + jobQueue.length + "]: " + roleName + "...", "#2563eb");
 
-    // Track Tab 1 (job page) and Tab 2 (redirect/employer page)
+    // Track Tab 1 (Job Details), Tab 2 (Gateway/Redirect), and Tab 3 (Destination Employer/ATS)
     let tab1 = null;
     let tab2 = null;
+    let tab3 = null;
 
     try {
       // 1. Open Tab 1: The Job Details Page
@@ -694,12 +695,26 @@
         return;
       }
 
-      // Intercept any child window (Tab 2) that Tab 1 opens on apply click
+      // Intercept window openings: Tab 1 -> Tab 2 -> Tab 3
       try {
-        const originalOpen = tab1.open;
+        const origOpen1 = tab1.open;
         tab1.open = function (...args) {
-          tab2 = originalOpen.apply(this, args);
-          return tab2;
+          const child = origOpen1.apply(this, args);
+          if (!tab2) {
+            tab2 = child;
+            try {
+              if (tab2) {
+                const origOpen2 = tab2.open;
+                tab2.open = function (...args2) {
+                  tab3 = origOpen2.apply(this, args2);
+                  return tab3;
+                };
+              }
+            } catch (e2) {}
+          } else if (!tab3) {
+            tab3 = child;
+          }
+          return child;
         };
       } catch (e) {}
 
@@ -715,8 +730,9 @@
       }
 
       if (!isRunning) {
-        try { if (tab1 && !tab1.closed) tab1.close(); } catch(e) {}
+        try { if (tab3 && !tab3.closed) tab3.close(); } catch(e) {}
         try { if (tab2 && !tab2.closed) tab2.close(); } catch(e) {}
+        try { if (tab1 && !tab1.closed) tab1.close(); } catch(e) {}
         return;
       }
 
@@ -731,18 +747,27 @@
         state.skippedCount++;
       }
 
-      // 4. Wait for redirect (Tab 2) and network telemetry to finalize
-      log("Waiting for tracking beacon & redirect on Tab 2...", "#64748b");
+      // 4. Wait for redirect (Tab 2 & Tab 3) and network telemetry to finalize
+      log("Waiting for tracking beacon & redirect on Tab 2 & Tab 3...", "#64748b");
       await sleep(randomDelay(2500, 3500));
 
-      // 5. Dual Tab Close: Cleanly close BOTH Tab 2 (Employer/Redirect Tab) and Tab 1 (Job Details Tab)
-      log("Closing 2 tabs (Tab 1 & Tab 2)...", "#7c3aed");
+      // 5. Triple Tab Close: Cleanly close Tab 3 (Employer ATS), Tab 2 (Redirect Gateway), and Tab 1 (Job Details)
+      log("Closing 3 tabs (Tab 1, Tab 2 & Tab 3)...", "#7c3aed");
+      try {
+        if (tab3 && !tab3.closed) {
+          try { tab3.localStorage.clear(); } catch (e) {}
+          try { tab3.sessionStorage.clear(); } catch (e) {}
+          tab3.close();
+          console.log("%c🚪 Tab 3 (Final Employer/ATS Destination Tab) closed cleanly.", "color: #059669; font-size: 11px; font-weight: bold;");
+        }
+      } catch (e) {}
+
       try {
         if (tab2 && !tab2.closed) {
           try { tab2.localStorage.clear(); } catch (e) {}
           try { tab2.sessionStorage.clear(); } catch (e) {}
           tab2.close();
-          console.log("%c🚪 Tab 2 (Redirect/Employer Tab) closed cleanly.", "color: #059669; font-size: 11px; font-weight: bold;");
+          console.log("%c🚪 Tab 2 (Redirect Gateway Tab) closed cleanly.", "color: #059669; font-size: 11px; font-weight: bold;");
         }
       } catch (e) {}
 
@@ -757,6 +782,7 @@
 
     } catch (err) {
       console.warn("Job step notice:", err);
+      try { if (tab3 && !tab3.closed) tab3.close(); } catch(e) {}
       try { if (tab2 && !tab2.closed) tab2.close(); } catch(e) {}
       try { if (tab1 && !tab1.closed) tab1.close(); } catch(e) {}
     }

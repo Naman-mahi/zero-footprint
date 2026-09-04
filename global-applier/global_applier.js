@@ -692,28 +692,43 @@
     );
     log("Opening Tab 1 [" + (state.currentIndex + 1) + "/" + jobQueue.length + "]: " + roleName + "...", "#2563eb");
 
-    // Track Tab 1 (job page) and Tab 2 (redirect/employer page)
+    // Track Tab 1 (Job Details), Tab 2 (Gateway/Redirect), and Tab 3 (Destination Employer/ATS)
     let tab1 = null;
     let tab2 = null;
+    let tab3 = null;
 
     try {
-      // 1. Open Tab 1: The Job Details Page on artha.link (Standard new tab)
+      // 1. Open Tab 1: The Job Details Page
       tab1 = window.open(currentUrl, "_blank");
 
       if (!tab1 || tab1.closed || typeof tab1.closed === "undefined") {
-        console.error("%c🚨 [POPUP BLOCKED] Please click the popup icon in your Chrome URL bar and select 'Always allow popups on artha.link'!", "background: #fff1f2; color: #e11d48; font-weight: bold; padding: 4px;");
+        console.error("%c🚨 [POPUP BLOCKED] Please click the popup icon in your Chrome URL bar and select 'Always allow popups'!", "background: #fff1f2; color: #e11d48; font-weight: bold; padding: 4px;");
         log("⚠️ Popups blocked by Chrome! Allow popups in URL bar & click Start.", "#e11d48");
         isRunning = false;
         if (btnLabel) btnLabel.innerText = "Allow Popups & Click Start";
         return;
       }
 
-      // Intercept any child window (Tab 2) that Tab 1 might open on apply click
+      // Intercept window openings: Tab 1 -> Tab 2 -> Tab 3
       try {
-        const originalOpen = tab1.open;
+        const origOpen1 = tab1.open;
         tab1.open = function (...args) {
-          tab2 = originalOpen.apply(this, args);
-          return tab2;
+          const child = origOpen1.apply(this, args);
+          if (!tab2) {
+            tab2 = child;
+            try {
+              if (tab2) {
+                const origOpen2 = tab2.open;
+                tab2.open = function (...args2) {
+                  tab3 = origOpen2.apply(this, args2);
+                  return tab3;
+                };
+              }
+            } catch (e2) {}
+          } else if (!tab3) {
+            tab3 = child;
+          }
+          return child;
         };
       } catch (e) {}
 
@@ -729,7 +744,9 @@
       }
 
       if (!isRunning) {
-        try { if (tab1) tab1.close(); } catch(e) {}
+        try { if (tab3 && !tab3.closed) tab3.close(); } catch(e) {}
+        try { if (tab2 && !tab2.closed) tab2.close(); } catch(e) {}
+        try { if (tab1 && !tab1.closed) tab1.close(); } catch(e) {}
         return;
       }
 
@@ -748,14 +765,23 @@
       log("Waiting 10s for destination page hydration & affiliate telemetry...", "#64748b");
       await sleep(randomDelay(10000, 11500));
 
-      // 5. Dual Tab Close: Cleanly wipe storage and close Tab 2 (if spawned) and Tab 1
-      log("Purging storage & closing windows...", "#7c3aed");
+      // 5. Triple Tab Close: Cleanly wipe storage and close Tab 3, Tab 2, and Tab 1
+      log("Purging storage & closing 3 windows...", "#7c3aed");
+      try {
+        if (tab3 && !tab3.closed) {
+          try { tab3.localStorage.clear(); } catch (e) {}
+          try { tab3.sessionStorage.clear(); } catch (e) {}
+          tab3.close();
+          console.log("%c🚪 Tab 3 (Final Employer/ATS Destination Tab) storage wiped & closed cleanly.", "color: #059669; font-size: 11px; font-weight: bold;");
+        }
+      } catch (e) {}
+
       try {
         if (tab2 && !tab2.closed) {
           try { tab2.localStorage.clear(); } catch (e) {}
           try { tab2.sessionStorage.clear(); } catch (e) {}
           tab2.close();
-          console.log("%c🚪 Tab 2 (Redirect/Employer Tab) storage wiped & closed cleanly.", "color: #64748b; font-size: 11px;");
+          console.log("%c🚪 Tab 2 (Redirect Gateway Tab) storage wiped & closed cleanly.", "color: #059669; font-size: 11px; font-weight: bold;");
         }
       } catch (e) {}
 
@@ -764,7 +790,7 @@
           try { tab1.localStorage.clear(); } catch (e) {}
           try { tab1.sessionStorage.clear(); } catch (e) {}
           tab1.close();
-          console.log("%c🚪 Tab 1 (Job Page Tab) storage wiped & closed cleanly.", "color: #64748b; font-size: 11px;");
+          console.log("%c🚪 Tab 1 (Job Details Tab) storage wiped & closed cleanly.", "color: #059669; font-size: 11px; font-weight: bold;");
         }
       } catch (e) {}
 
@@ -773,8 +799,9 @@
 
     } catch (err) {
       console.warn("Job step notice:", err);
-      try { if (tab1 && !tab1.closed) tab1.close(); } catch(e) {}
+      try { if (tab3 && !tab3.closed) tab3.close(); } catch(e) {}
       try { if (tab2 && !tab2.closed) tab2.close(); } catch(e) {}
+      try { if (tab1 && !tab1.closed) tab1.close(); } catch(e) {}
     }
 
     // Advance queue index & save persistent state
