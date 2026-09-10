@@ -141,9 +141,17 @@ async function fetchValidJobsForIndia(mode, targetCount = 120) {
   // Save to two separate files
   const cpcFilePath = path.join(__dirname, 'jobs_high_cpc_120.json');
   const cpaFilePath = path.join(__dirname, 'jobs_high_cpa_120.json');
+  const queueFilePath = path.join(__dirname, 'jobs_queue.json');
 
   fs.writeFileSync(cpcFilePath, JSON.stringify(cpcJobs, null, 2), 'utf8');
   fs.writeFileSync(cpaFilePath, JSON.stringify(cpaJobs, null, 2), 'utf8');
+
+  // 3. Generate combined deduplicated queue for auto applier
+  const queueUrls = Array.from(new Set([
+    ...cpcJobs.map(j => j.apply_link).filter(Boolean),
+    ...cpaJobs.map(j => j.apply_link).filter(Boolean)
+  ]));
+  fs.writeFileSync(queueFilePath, JSON.stringify(queueUrls, null, 2), 'utf8');
 
   // Clean up any old files
   const oldFiles = [
@@ -166,5 +174,6 @@ async function fetchValidJobsForIndia(mode, targetCount = 120) {
   console.log('======================================================');
   console.log(`📁 High CPC File: jobs_high_cpc_120.json (${cpcJobs.length} records, ${(fs.statSync(cpcFilePath).size / 1024).toFixed(1)} KB)`);
   console.log(`📁 High CPA File: jobs_high_cpa_120.json (${cpaJobs.length} records, ${(fs.statSync(cpaFilePath).size / 1024).toFixed(1)} KB)`);
+  console.log(`📁 Queue File: jobs_queue.json (${queueUrls.length} unique URLs, ${(fs.statSync(queueFilePath).size / 1024).toFixed(1)} KB)`);
   console.log('======================================================\n');
 })();
