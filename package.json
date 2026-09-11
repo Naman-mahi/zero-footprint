@@ -7,7 +7,12 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "fetch:recommend": "node fetch_recommend_jobs.js",
+    "fetch:cpc": "node fetch_all_cpc_pages.js",
+    "apply:playwright": "node global-applier/playwright_applier.js",
+    "apply:cpc": "node global-applier/playwright_applier.js --queue jobs_all_high_cpc_queue.json --headed",
+    "apply:rotate": "node global-applier/playwright_applier.js --browser rotate --headed"
   },
   "repository": {
     "type": "git",

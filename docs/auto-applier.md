@@ -1,6 +1,10 @@
-# ⚡ High-Performance 1-by-1 Sequential Auto-Applier (`auto_applier.js`)
+# ⚡ In-Browser Auto-Appliers: `cpc_applier.js` & `auto_applier.js`
 
-This guide explains [`auto_applier.js`](file:///d:/DEVELOPMENT/all-bots/auto_applier.js), our flagship in-browser automation engine featuring a **Pure White Light-Theme HUD**, **vector SVG icons**, **1-Click Cookie/Storage Purge Button**, and **intelligent 50-Job Batch Milestone Handling**.
+This guide details our flagship in-browser automation engines:
+1. **`cpc_applier.js`**: Dedicated engine for the **10,000 High-CPC queue** (`cpc_value: 0.048` & `sort_by: "high_cpc"`).
+2. **`auto_applier.js`**: Engine for the **8,987 Recommendation queue**.
+
+Both scripts feature a **pure white light-theme floating HUD**, **dynamic user-selectable batch sizes (25 / 50 / 100)**, **per-job zero-footprint cookie & storage purge**, **10-second mandatory destination hydration**, and **3-tab auto-closing**.
 
 ---
 
@@ -12,35 +16,42 @@ flowchart TD
     B --> C[Dynamic Poller: Wait up to 10s for React DOM]
     C --> D[Dispatch 9-Stage Human Pointer Cascade]
     D --> E[Intercept Tab 2: Affiliate Redirect]
-    E --> F[Cleanly Close Tab 2 and Tab 1]
-    F --> G[Save Progress in localStorage]
-    G --> H{Is Job Multiple of 50?}
-    H -->|Yes| I[Milestone: Auto-Purge Cookies & Storage]
-    I --> J{Milestone Mode}
-    J -->|Auto-Continue| K[Pause 30s for Human Rest -> Start Job 51+]
-    J -->|Pause & Wait| L[Pause Queue -> Wait for User Click]
-    H -->|No| M[Human Pacing Delay 3s-7s]
-    M --> B
-    K --> B
+    E --> F[Intercept Tab 3: Final Destination Hold 10s]
+    F --> G[Cleanly Close Tab 3, Tab 2, and Tab 1]
+    G --> H[🧹 Zero-Footprint Deep Purge: Cookies, Local/Session Storage, IndexedDB]
+    H --> I[Save Progress in localStorage]
+    I --> J{Is Job at Batch Milestone?}
+    J -->|Yes| K{Milestone Mode}
+    K -->|Auto-Continue| L[Pause 30s for Human Rest -> Start Next Batch]
+    K -->|Pause & Wait| M[Pause Queue -> Wait for User Click]
+    J -->|No| N[Human Pacing Delay 3s-7s]
+    N --> B
+    L --> B
 ```
 
 ---
 
 ## ✨ Key Capabilities
 
-### 1. 🧹 1-Click Cookie, SessionStorage & LocalStorage Purge
-A dedicated button is available right on the HUD:
-- **`🧹 Wipe All Cookies, Session & Local Storage`**
-- Instantly purges domain tracking cookies (`_ga`, `_gid`, `_intercom`, `sentry_*`, `mp_*`, `_utm*`), clears `localStorage`, and flushes `sessionStorage`.
-- Automatically backs up and restores your bot queue progress so you don't lose your place!
+### 1. 🎯 User-Selectable Batch Sizes (25 / 50 / 100)
+Directly on the floating HUD, you can select your preferred batch size:
+- **`[25]`**: Ideal for quick validation sessions and light testing.
+- **`[50]`**: Standard recommended batch size with optimal rest intervals.
+- **`[100]`**: High-volume unattended execution.
 
-### 2. 🛑 What Happens After Reaching 50 Jobs?
-You have full control over what happens at every 50-job milestone (50, 100, 150, ..., 974):
+The engine recalibrates batch progress (e.g. `Batch 3 of 400`) and milestone checks in real time upon selection.
 
-| Milestone Setting | Behavior | Best Use Case |
-| :--- | :--- | :--- |
-| **`Auto-Continue`** *(Default)* | Purges all cookies/storage, takes a **30-second organic human break**, and automatically resumes with Job 51–100. | Hands-free background queue execution |
-| **`Pause & Wait`** | Purges all cookies/storage, pauses execution, and waits for you to click **"Start Batch 2"**. | Controlled manual oversight per batch |
+### 2. 🧼 Per-Job Deep Zero-Footprint Storage & Cookie Purge
+Unlike basic bots that only clear storage at batch boundaries, Zero-Footprint executes a **full storage & cookie purge on EVERY SINGLE job application**:
+- **Domain & Subdomain Cookies**: Scans `document.cookie` and deletes every cookie across root domain and all parent/subdomain scopes (`domain=.artha.link`, `domain=my.artha.link`, `path=/`).
+- **Web Storage**: Executes `localStorage.clear()` (safely retaining the bot's own isolated progress key) and `sessionStorage.clear()`.
+- **IndexedDB**: Iterates `window.indexedDB.databases()` and drops tracking/session databases.
+
+### 3. ⏳ 10-Second Mandatory Destination Hydration
+When the apply button is clicked and redirects to the employer portal or affiliate landing page:
+- Tab 3 is monitored and held open for **10 full seconds**.
+- Guarantees that affiliate tracking pixels, UTM analytics beacons, and conversion scripts complete their network requests.
+- Closes Tab 3, Tab 2, and Tab 1 sequentially without leaving orphan browser tabs.
 
 ---
 
@@ -48,26 +59,27 @@ You have full control over what happens at every 50-job milestone (50, 100, 150,
 
 ```text
 ┌────────────────────────────────────────────────────────┐
-│ 🛡️ ZERO-FOOTPRINT PRO                           _  ✕  │
+│ 💎 ZERO-FOOTPRINT PRO (10K CPC)                 _  ✕  │
 │   Autonomous 1-by-1 Job Applier       🟢 (Active Dot)  │
 ├────────────────────────────────────────────────────────┤
-│ [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░] 50%                   │
-│ Progress: 50 / 974 (5%)    Applied: 48                 │
-│ Active:   [51/974] Senior Data Engineer                │
-│ Batch:    Batch 2 of 20 (Jobs 51–100)                  │
+│ [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░] 25%                   │
+│ Progress: 25 / 10000 (0.25%)    Applied: 25            │
+│ Active:   [26/10000] Senior Data Engineer              │
+│ Batch:    Batch 2 of 200 (Jobs 51–100)                 │
 ├────────────────────────────────────────────────────────┤
+│ Batch Size:     [ 25 ]  [[ 50 ]]  [ 100 ]              │
 │ Pacing:         [Fast (3s)]  [[ Normal (5s) ]] [Stealth]│
-│ At 50 Jobs:     [[ Auto-Continue ]]   [Pause & Wait]   │
+│ At Batch End:   [[ Auto-Continue ]]   [Pause & Wait]   │
 ├────────────────────────────┬─────────────┬─────────────┤
 │ [▶ Start 1-by-1 Queue]     │ [⏭ Skip]   │ [↺ Reset]   │
 ├────────────────────────────┴─────────────┴─────────────┤
 │ [🧹 Wipe All Cookies, Session & Local Storage]         │
 ├────────────────────────────────────────────────────────┤
-│ 💡 How It Works:                                       │
-│ 1. Opens 1 tab at a time (0% lag).                     │
-│ 2. Dynamic poller finds & clicks Apply (up to 10s).    │
-│ 3. Automatically closes both tabs cleanly.             │
-│ 4. Auto-cleans cookies every 50 jobs & resumes!        │
+│ 💡 Operational Guarantees:                             │
+│ • Runs strictly 1-by-1 (0% machine RAM/CPU lag).       │
+│ • Clears cookies & session storage after EACH job.     │
+│ • Holds destination pages for 10s tracking hydration.  │
+│ • Auto-closes all 3 tabs cleanly.                      │
 └────────────────────────────────────────────────────────┘
 ```
 
@@ -75,46 +87,59 @@ You have full control over what happens at every 50-job milestone (50, 100, 150,
 
 ## 🚀 Execution Methods
 
-### Option 1: DevTools Console One-Liner (jsDelivr CDN)
+### 💎 10,000 High-CPC Applier (`cpc_applier.js`)
 
-Open Developer Tools (`F12` -> Console) on [https://example-job-portal.com](https://example-job-portal.com) and run:
+#### DevTools Console One-Liner:
+```javascript
+fetch(`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/cpc_applier.js?_t=${Date.now()}`)
+  .then(r => r.text())
+  .then(eval);
+```
 
+#### 1-Click Bookmarklet:
+```javascript
+javascript:(function(){const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/cpc_applier.js?t='+Date.now();document.head.appendChild(s);})();
+```
+
+---
+
+### ⚡ Standard Recommendation Applier (`auto_applier.js`)
+
+#### DevTools Console One-Liner:
 ```javascript
 fetch(`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js?_t=${Date.now()}`)
   .then(r => r.text())
   .then(eval);
 ```
 
-### Option 2: 1-Click Browser Bookmarklet
-
-Create a browser bookmark named **`⚡ 1-by-1 Auto Applier`** with this URL:
-
+#### 1-Click Bookmarklet:
 ```javascript
 javascript:(function(){const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js?t='+Date.now();document.head.appendChild(s);})();
 ```
 
 ---
 
-## 🌐 Global Developer Controls (`window.__AUTO_APPLIER__`)
+## 🌐 Programmatic Developer API
 
-Control the engine programmatically from the console:
+Control the engine directly from the browser console:
 
 ```javascript
-// Start or resume queue
-window.__AUTO_APPLIER__.start();
+// Start or resume execution
+window.__CPC_APP_INSTANCE__.start(); // For CPC applier
+window.__AUTO_APPLIER__.start();     // For standard applier
 
 // Pause queue
-window.__AUTO_APPLIER__.pause();
+window.__CPC_APP_INSTANCE__.pause();
 
 // Skip current job
-window.__AUTO_APPLIER__.skip();
+window.__CPC_APP_INSTANCE__.skip();
 
-// Reset progress back to 1
-window.__AUTO_APPLIER__.reset();
+// Reset queue progress back to 1
+window.__CPC_APP_INSTANCE__.reset();
 
-// Wipe all cookies, localStorage, and sessionStorage
-window.__AUTO_APPLIER__.wipeStorage();
+// Manually trigger deep cookie/storage purge
+window.__CPC_APP_INSTANCE__.wipeStorage();
 
-// Inspect progress state
-console.log(window.__AUTO_APPLIER__.getState());
+// Inspect live progress state
+console.log(window.__CPC_APP_INSTANCE__.getState());
 ```

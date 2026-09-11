@@ -212,6 +212,7 @@ BROWSER OPTIONS:
 
 BATCH & LOCATION OPTIONS:
   --location <code|all>   Target country: IN, US, UK, CA, DE, or ROTATE (default: IN)
+  --queue <path>          Path to custom queue JSON (e.g. jobs_all_high_cpc_queue.json)
   --batch <number>        Number of jobs per batch (default: 50)
   --batch-num <number>    Jump directly to specific batch number (e.g. 2, 3)
   --start <number>        Starting job index (e.g. 500)
@@ -231,6 +232,9 @@ PROXY OPTIONS:
   --proxy-password <pass> Proxy authentication password
 
 EXAMPLES:
+  # Run 10,000 High-CPC queue rotating Chrome & Edge:
+  node playwright_applier.js --queue jobs_all_high_cpc_queue.json --batch 50 --browser rotate --headed
+
   # Run Jobs 500 to 900 rotating Chrome & Edge in headed mode:
   node playwright_applier.js --start 500 --end 900 --batch 50 --browser rotate --headed
 

@@ -1,12 +1,12 @@
 # 🚀 Production Playwright Multi-City & Multi-Browser Runner (`playwright_applier.js`)
 
-This technical reference documents **`global-applier/playwright_applier.js`**, our production-grade Node.js Playwright automation runner featuring **dual-browser rotation across Google Chrome & Microsoft Edge**, **job range filtering (`--start 500 --end 900`)**, **100% OS-level disposable temporary profiles**, **multi-city domestic geo-rotation with spatial GPS jitter**, **10-second destination page load timers**, and **batch navigation**.
+This technical reference documents **`global-applier/playwright_applier.js`**, our production-grade Node.js Playwright automation runner featuring **dual-browser rotation across Google Chrome & Microsoft Edge**, **custom queue selection (`--queue jobs_all_high_cpc_queue.json`)**, **job range slicing (`--start 500 --end 900`)**, **100% OS-level disposable temporary profiles**, **multi-city domestic geo-rotation with spatial GPS jitter**, and **10-second destination hydration timers**.
 
 ---
 
 ## 🌐 Dual-Browser Engine Matrix (Chrome & Edge)
 
-By default, the engine alternates each application between native **Google Chrome** and **Microsoft Edge** binaries:
+By default, the engine alternates each job between native **Google Chrome** and **Microsoft Edge** binaries:
 
 | Browser Target | Engine | Channel / Mode | Anti-Detection & Profile Capabilities |
 | :--- | :--- | :--- | :--- |
@@ -17,28 +17,48 @@ By default, the engine alternates each application between native **Google Chrom
 
 ---
 
-## 🎯 Commands for Running Jobs 500 to 900
+## 🎯 Command Reference
 
-To run specifically the section between **Job 500 and Job 900** using Chrome and Edge rotation in headed mode:
+### 1. 💎 Running the 10,000 High-CPC Queue
 
 ```powershell
-node playwright_applier.js --start 500 --end 900 --batch 50 --browser rotate --headed
+# Using npm shortcut:
+npm run apply:cpc
+
+# Or direct Node command with Chrome/Edge rotation in headed mode:
+node global-applier/playwright_applier.js --queue jobs_all_high_cpc_queue.json --batch 50 --browser rotate --headed
 ```
 
-### Additional Command Variations
+### 2. 🎯 Running Targeted Job Slices (e.g. Jobs 500 to 900)
+
+To run specifically the section between **Job 500 and Job 900**:
 
 ```powershell
-# 1. Run Jobs 500 to 900 with Auto-Next continuous execution
-node playwright_applier.js --start 500 --end 900 --batch 50 --browser rotate --auto-next --headed
+node global-applier/playwright_applier.js --queue jobs_all_high_cpc_queue.json --start 500 --end 900 --batch 50 --browser rotate --headed
+```
 
-# 2. Run Jobs 500 to 900 strictly in Google Chrome
-node playwright_applier.js --start 500 --end 900 --batch 50 --browser chrome --headed
+### 3. ⚡ Continuous Execution with Auto-Next
 
-# 3. Run Jobs 500 to 900 strictly in Microsoft Edge
-node playwright_applier.js --start 500 --end 900 --batch 50 --browser msedge --headed
+To let the runner automatically progress through batches with a 30-second cooldown:
 
-# 4. Resume execution from saved state
-node playwright_applier.js --resume --headed
+```powershell
+node global-applier/playwright_applier.js --queue jobs_all_high_cpc_queue.json --batch 50 --auto-next --headed
+```
+
+### 4. 📌 Pinned Single Browser Execution
+
+```powershell
+# Strictly in Google Chrome:
+node global-applier/playwright_applier.js --queue jobs_all_high_cpc_queue.json --browser chrome --headed
+
+# Strictly in Microsoft Edge:
+node global-applier/playwright_applier.js --queue jobs_all_high_cpc_queue.json --browser msedge --headed
+```
+
+### 5. 💾 Resume from Saved State
+
+```powershell
+node global-applier/playwright_applier.js --resume --headed
 ```
 
 ---
@@ -65,11 +85,15 @@ Each job automatically rotates across major tech hubs with **$\pm 500\text{m}$ s
 
 | Parameter | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
+| `--queue` | `string` | `jobs_queue.json` | Path to target queue file (e.g. `jobs_all_high_cpc_queue.json`). |
 | `--start` | `number` | `0` | Zero-based starting job index (e.g. `500`). |
 | `--end` | `number` | `null` | Ending job index boundary (e.g. `900`). |
-| `--browser` | `string` | `rotate` | Browser mode: `rotate` (Chrome & Edge), `chrome`, `msedge`, `firefox`, `webkit`. |
-| `--batch` | `number` | `50` | Jobs per batch (`50` or `100`). |
+| `--browser` | `string` | `rotate` | Mode: `rotate` (Chrome & Edge), `chrome`, `msedge`, `firefox`, `webkit`. |
+| `--batch` | `number` | `50` | Jobs per batch (`25`, `50`, or `100`). |
+| `--batch-num` | `number` | `null` | Jump directly to a specific batch number (e.g. `2`). |
 | `--location` | `string` | `IN` | Regional profile (`IN`, `US`, `UK`, `CA`, `DE`, `ROTATE`). |
+| `--close-wait` | `number` | `10000` | Milliseconds to hold destination page open (minimum 10000ms). |
 | `--auto-next` | `flag` | `false` | Automatically proceeds to next batch after 30s rest. |
 | `--resume` | `flag` | `false` | Resumes from exact index in `progress_state.json`. |
 | `--headed` | `flag` | `false` | Displays visible GUI browser window. |
+| `--speed` | `string` | `normal` | Pacing mode: `fast` (3-4.5s), `normal` (4.5-7s), `stealth` (8-12s). |

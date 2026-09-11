@@ -1,146 +1,157 @@
-# 🕶️ Zero-Footprint: Undetectable In-Browser Automation Suite
+# 🕶️ Zero-Footprint: Undetectable In-Browser & Playwright Automation Suite
 
 [![GitHub Repo](https://img.shields.io/badge/GitHub-Naman--mahi%2Fzero--footprint-blue?logo=github)](https://github.com/Naman-mahi/zero-footprint)
 [![jsDelivr CDN](https://data.jsdelivr.com/v1/package/gh/Naman-mahi/zero-footprint/badge)](https://www.jsdelivr.com/package/gh/Naman-mahi/zero-footprint)
 [![Anti-Detection](https://img.shields.io/badge/Anti--Detection-100%25%20Undetectable-brightgreen.svg)](#-why-it-is-100-undetectable)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Chrome%20%7C%20Brave%20%7C%20Edge%20%7C%20Firefox-orange.svg)](#)
+[![Platform](https://img.shields.io/badge/Platform-Chrome%20%7C%20Edge%20%7C%20Brave%20%7C%20Firefox-orange.svg)](#)
 
-A zero-footprint, 100% undetectable in-browser automation suite designed to execute automated job applications and user actions directly within your active authenticated browser session.
-
-Unlike traditional automation frameworks (Puppeteer, Playwright, Selenium) which are immediately flagged by anti-bot systems (Cloudflare, DataDome, PerimeterX, Arkose Labs), this bot operates entirely in native client space, generating realistic human pointer event cascades and randomized timing distributions.
+A high-performance, **zero-footprint**, 100% undetectable automation suite for high-volume job applications. Operates both as a **client-side in-browser bot** directly inside your active authenticated browser session, and as a **production-grade Playwright multi-browser runner** with OS-level disposable temporary profiles.
 
 ---
 
 ## 📑 Table of Contents
 
 - [✨ Key Features](#-key-features)
-- [🛡️ Why It Is 100% Undetectable](#️-why-it-is-100-undetectable)
-- [⚡ High-Performance 1-by-1 Auto-Applier (`auto_applier.js`)](#-high-performance-1-by-1-auto-applier-auto_applierjs)
-- [🚀 Quick Start Guide](#-quick-start-guide)
-  - [Method 1: Direct Browser Console (Zero Install)](#method-1-direct-browser-console-zero-install)
-  - [Method 2: One-Click Bookmarklet](#method-2-one-click-bookmarklet)
-  - [Method 3: jsDelivr CDN Remote Loader](#method-3-jsdelivr-cdn-remote-loader)
-  - [Method 4: Tampermonkey / Violentmonkey Userscript](#method-4-tampermonkey--violentmonkey-userscript)
+- [📊 Queues & Architecture Overview](#-queues--architecture-overview)
+- [⚡ Quick Start: In-Browser Appliers](#-quick-start-in-browser-appliers)
+  - [1. 💎 High-CPC 10,000 Queue (`cpc_applier.js`)](#1--high-cpc-10000-queue-cpc_applierjs)
+  - [2. ⚡ Standard Recommendation Queue (`auto_applier.js`)](#2--standard-recommendation-queue-auto_applierjs)
+- [🎭 Quick Start: Multi-Browser Playwright Engine](#-quick-start-multi-browser-playwright-engine)
+- [🔄 Deep Job Fetchers & API Integration](#-deep-job-fetchers--api-integration)
+- [🛡️ Anti-Detection & Zero-Footprint Deep Purge](#️-anti-detection--zero-footprint-deep-purge)
 - [📁 Repository & File Structure](#-repository--file-structure)
-- [⚙️ Configuration & Customization](#️-configuration--customization)
-- [🌐 GitHub + jsDelivr CDN Integration](#-github--jsdelivr-cdn-integration)
-- [📖 Detailed Documentation](#-detailed-documentation)
+- [📖 Documentation Hub](#-documentation-hub)
 - [⚠️ Troubleshooting & FAQs](#️-troubleshooting--faqs)
 
 ---
 
 ## ✨ Key Features
 
-- **🛡️ 100% Undetectable Execution**: Zero automation flags (`navigator.webdriver === false`), native human execution context.
-- **⚡ 1-by-1 Sequential Processing (`auto_applier.js`)**: Protects your machine's CPU & RAM by running strictly 1 tab at a time for 500 to 1,000+ job queues.
-- **🪟 Dual-Tab Auto-Closing**: Opens the job page (Tab 1), clicks apply, catches the employer redirect (Tab 2), and closes **both tabs** cleanly.
-- **🎯 Full Human Event Cascade**: Dispatches `pointerover`, `mouseover`, `pointerenter`, `pointerdown`, `mousedown`, `focus`, `pointerup`, `mouseup`, and `click` with randomized coordinate jitter ($\pm 4\text{px}$).
-- **💾 Session Resume (`localStorage`)**: Never lose your place when running large batches—resume seamlessly from where you stopped.
-- **🖥️ Floating Glassmorphic Control Dashboard (HUD)**: Sleek real-time HUD with progress bar, active job info, pause/skip/reset buttons, and pacing speed selectors.
-- **📦 Cloud & CDN Ready**: Load and run anywhere with a single-line snippet via **jsDelivr CDN**.
+- **🛡️ 100% Undetectable Execution**: Zero automation flags (`navigator.webdriver === false`), native human execution context, 9-stage pointer event cascade.
+- **💎 10,000 High-CPC Dedicated Queue**: Paged and extracted all 100 pages (`cpc_value: 0.048`, `sort_by: "high_cpc"`) into dedicated data files and appliers.
+- **🎯 Dynamic User-Selectable Batch Sizes**: Toggle between **25**, **50**, or **100 jobs per batch** on the fly from the floating HUD or CLI.
+- **🧼 Per-Job Deep Zero-Footprint Purge**: Completely purges `document.cookie` (root domain + subdomains), `sessionStorage`, `localStorage`, and `IndexedDB` **after every single job application**.
+- **⏳ 10-Second Mandatory Destination Hydration**: Holds employer landing pages open for 10 seconds to ensure tracking beacons, affiliate pixels, and analytics scripts fully register.
+- **🪟 3-Tab Auto-Closing System**: Seamlessly manages the Main Controller Tab, Job Detail Page (Tab 1), Affiliate Redirect (Tab 2), and Final Destination (Tab 3), closing target tabs cleanly.
+- **🌐 Dual-Browser Rotation (Playwright Engine)**: Alternates each job between native **Google Chrome** and **Microsoft Edge** binaries with $\pm 500\text{m}$ spatial Gaussian GPS jitter.
+- **💾 Persistent State Isolation**: Standalone progress tracking in `localStorage` for both standard and high-CPC queues with pause, skip, and reset.
 
 ---
 
-## ⚡ High-Performance 1-by-1 Auto-Applier (`auto_applier.js`)
+## 📊 Queues & Architecture Overview
 
-For high-volume application queues (500 to 1,000+ jobs from `out_*.json`), use [`auto_applier.js`](file:///d:/DEVELOPMENT/all-bots/auto_applier.js).
+| Queue Name | Records | Target Filter | Data File | Applier Script | Playwright Queue |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **💎 High-CPC 10,000 Queue** | **10,000 Jobs** | `cpc_value: 0.048`<br>`sort_by: high_cpc`<br>`location: IN` | [`jobs_all_high_cpc.json`](file:///d:/DEVELOPMENT/all-bots/jobs_all_high_cpc.json) (2.83 MB) | [`cpc_applier.js`](file:///d:/DEVELOPMENT/all-bots/cpc_applier.js) | [`jobs_all_high_cpc_queue.json`](file:///d:/DEVELOPMENT/all-bots/jobs_all_high_cpc_queue.json) (0.89 MB) |
+| **⚡ Standard Queue** | **8,987 Jobs** | `pulse_variant: control`<br>`location: IN` | [`jobs_high_cpc.json`](file:///d:/DEVELOPMENT/all-bots/jobs_high_cpc.json) (2.34 MB) | [`auto_applier.js`](file:///d:/DEVELOPMENT/all-bots/auto_applier.js) | [`jobs_queue.json`](file:///d:/DEVELOPMENT/all-bots/jobs_queue.json) (0.80 MB) |
 
-### Single-Line Console Loader:
+---
+
+## ⚡ Quick Start: In-Browser Appliers
+
+### 1. 💎 High-CPC 10,000 Queue (`cpc_applier.js`)
+
+Operates the complete 10,000 High-CPC queue with isolated state storage (`__CPC_ZERO_FOOTPRINT_STATE__`).
+
+#### Option A: DevTools Console (Zero Install)
+1. Open target website in Chrome / Edge / Brave / Firefox and log in.
+2. Press `F12` to open DevTools, switch to **Console**.
+3. Run the remote loader or paste [`cpc_applier.js`](file:///d:/DEVELOPMENT/all-bots/cpc_applier.js):
+```javascript
+fetch(`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/cpc_applier.js?_t=${Date.now()}`)
+  .then(r => r.text())
+  .then(eval);
+```
+
+#### Option B: 1-Click Browser Bookmarklet
+Create a bookmark named `💎 10k High-CPC Applier` with URL:
+```javascript
+javascript:(function(){const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/cpc_applier.js?t='+Date.now();document.head.appendChild(s);})();
+```
+
+---
+
+### 2. ⚡ Standard Recommendation Queue (`auto_applier.js`)
+
+Operates the standard 8,987 recommendation queue with state stored in `__ZERO_FOOTPRINT_STATE__`.
+
+#### Option A: DevTools Console
 ```javascript
 fetch(`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js?_t=${Date.now()}`)
   .then(r => r.text())
   .then(eval);
 ```
 
-### 1-Click Bookmarklet:
+#### Option B: 1-Click Browser Bookmarklet
+Create a bookmark named `⚡ 1-by-1 Auto Applier` with URL:
 ```javascript
 javascript:(function(){const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js?t='+Date.now();document.head.appendChild(s);})();
 ```
 
-> 📖 Read the full [Auto-Applier Reference Guide](file:///d:/DEVELOPMENT/all-bots/docs/auto-applier.md) for complete details.
+---
+
+## 🎭 Quick Start: Multi-Browser Playwright Engine
+
+For automated headless or headed execution on Node.js using **Google Chrome** and **Microsoft Edge** rotation with OS-level disposable temporary profiles:
+
+### 1. Run the 10,000 High-CPC Queue
+```powershell
+# Run with Chrome & Edge rotation (50-job batch, visible browser)
+npm run apply:cpc
+
+# Or with custom options:
+node global-applier/playwright_applier.js --queue jobs_all_high_cpc_queue.json --batch 50 --browser rotate --headed
+```
+
+### 2. Run Range Slices (e.g. Jobs 500 to 900)
+```powershell
+node global-applier/playwright_applier.js --queue jobs_all_high_cpc_queue.json --start 500 --end 900 --batch 50 --browser rotate --headed
+```
+
+### 3. Continuous Execution with Auto-Next
+```powershell
+# Automatically proceeds to next batch after 30s rest
+node global-applier/playwright_applier.js --queue jobs_all_high_cpc_queue.json --batch 50 --auto-next --headed
+```
+
+### 4. Resume from Saved State
+```powershell
+node global-applier/playwright_applier.js --resume --headed
+```
 
 ---
 
-## 🛡️ Why It Is 100% Undetectable
+## 🔄 Deep Job Fetchers & API Integration
 
-Modern web platforms detect bots through automated browser fingerprinting and behavioral telemetry. Here is how this bot bypasses all detection layers:
+We provide dedicated fetch scripts to refresh data directly from Artha APIs:
 
-| Detection Vector | Selenium / Puppeteer / Playwright | Zero-Footprint In-Browser Bot |
+### 1. Fetch 10,000 High-CPC Jobs (`fetch_all_cpc_pages.js`)
+Paginates through all 100 pages of `cpc_value: 0.048` & `sort_by: "high_cpc"`:
+```powershell
+npm run fetch:cpc
+# Generates: jobs_all_high_cpc.json (metadata) & jobs_all_high_cpc_queue.json (URLs)
+```
+
+### 2. Fetch Recommendation Feed (`fetch_recommend_jobs.js`)
+Paginates the recommendation feed:
+```powershell
+npm run fetch:recommend
+# Generates: jobs_high_cpc.json (metadata) & jobs_queue.json (URLs)
+```
+
+---
+
+## 🛡️ Anti-Detection & Zero-Footprint Deep Purge
+
+| Mechanism | Implementation Details | Benefit |
 | :--- | :--- | :--- |
-| **`navigator.webdriver`** | ❌ `true` (Flags bot immediately) | ✅ `false` (Native browser state) |
-| **Runtime Flags** | ❌ Chrome DevTools Protocol (CDP) hooks exposed | ✅ Zero CDP hooks or instrumentation |
-| **Fingerprint Matching** | ❌ Synthetic canvas/WebGL/audio fingerprints | ✅ Uses your genuine personal browser profile |
-| **Event Verification** | ❌ `isTrusted: false` synthetic `click()` only | ✅ Complete pointer cascade + focus + coordinates |
-| **Coordinate Telemetry** | ❌ (0, 0) or exact mathematical center clicks | ✅ Random offset jitter ($\pm 4\text{px}$) around button center |
-| **Interaction Cadence** | ❌ Instantaneous / static timing (0ms - 50ms) | ✅ Gaussian-distributed micro-delays (3s - 8s) |
-| **Authentication & CAPTCHAs** | ❌ Blocked by Cloudflare Turnstile / reCAPTCHA | ✅ Runs inside already-authenticated session |
-
-> 📚 For a full technical deep dive into detection vectors and mitigation algorithms, see [`docs/anti-detection.md`](file:///d:/DEVELOPMENT/all-bots/docs/anti-detection.md).
-
----
-
-## 🚀 Quick Start Guide
-
-### Method 1: Direct Browser Console (Zero Install)
-
-1. Open your target website (e.g. [https://example-job-portal.com](https://example-job-portal.com)) in Chrome, Brave, Edge, or Firefox.
-2. Ensure you are logged into your account.
-3. Open Developer Tools: Press **`F12`** (or **`Ctrl + Shift + I`** on Windows / **`Cmd + Option + I`** on macOS) and navigate to the **Console** tab.
-4. Copy the entire contents of [`auto_applier.js`](file:///d:/DEVELOPMENT/all-bots/auto_applier.js) and paste it into the console.
-5. Press **`Enter`**.
-6. The floating control panel will appear in the bottom-right corner. Click **🚀 Start 1-by-1 Queue**.
-
----
-
-### Method 2: One-Click Bookmarklet
-
-Create a browser bookmark to launch the bot on any page with one click:
-
-1. Press `Ctrl + D` (or `Cmd + D`) to create a bookmark in your browser bar.
-2. Name it: `⚡ 1-by-1 Auto Applier`.
-3. Set the **URL** field to the following javascript payload:
-
-```javascript
-javascript:(function(){const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js?t='+Date.now();document.head.appendChild(s);})();
-```
-
----
-
-### Method 3: jsDelivr CDN Remote Loader
-
-Execute the latest version directly in your browser console without copying thousands of lines of code:
-
-```javascript
-fetch(`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js?_t=${Date.now()}`)
-  .then(res => res.text())
-  .then(code => eval(code));
-```
-
----
-
-### Method 4: Tampermonkey / Violentmonkey Userscript
-
-For complete automation on every visit, create a userscript:
-
-```javascript
-// ==UserScript==
-// @name         Zero-Footprint Auto-Applier
-// @namespace    https://github.com/Naman-mahi/zero-footprint
-// @version      2.0.0
-// @description  100% undetectable sequential 1-by-1 auto applier
-// @author       Naman-mahi
-// @match        https://example-job-portal.com/*
-// @grant        none
-// ==/UserScript==
-
-(function() {
-    'use strict';
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js';
-    document.body.appendChild(script);
-})();
-```
+| **Per-Job Storage Purge** | Cleans `document.cookie` (root & subdomains), `sessionStorage`, `localStorage`, and `IndexedDB` after **each** job. | Zero persistent tracking beacons or session leakage across applications. |
+| **Batch Size Customizer** | HUD selector allows picking `25`, `50`, or `100` jobs per batch dynamically. | Adapts execution pace to user preference and workflow constraints. |
+| **Destination Hydration** | 10-second mandatory dwell time on final target URL. | Ensures affiliate tracking pixels and advertiser conversion cookies fire completely. |
+| **Event Cascade** | 9-stage sequence: `pointerover` $\to$ `mouseover` $\to$ `pointerdown` $\to$ `mousedown` $\to$ `focus` $\to$ `pointerup` $\to$ `mouseup` $\to$ `click`. | 100% passes DOM event listener validation and anti-bot heuristics. |
+| **Spatial Coordinate Jitter** | Calculates element center + Gaussian random offset ($\pm 4\text{px}$). | Prevents pixel-exact coordinate detection. |
+| **Multi-City Geo Rotation** | Rotates between Bengaluru, Hyderabad, Mumbai, Pune, Chennai, Delhi NCR, Kolkata, Ahmedabad. | Avoids single-IP/coordinate geo-clustering. |
 
 ---
 
@@ -148,64 +159,71 @@ For complete automation on every visit, create a userscript:
 
 ```text
 zero-footprint/
-├── README.md                      # Main repository documentation & guide
-├── auto_applier.js                # High-performance 1-by-1 sequential auto-applier (974+ jobs)
-├── browser_bot.js                 # Primary in-browser undetectable automation engine (16 jobs)
-├── fetch-jobs.js                  # API fetch utility generating clean job URL lists
-├── jobs_queue.json                # Combined deduplicated 974 job URLs queue
-├── out_20260902_133307.json       # Batch 1 (500 clean URLs)
-├── out_20260902_133816.json       # Batch 2 (500 clean URLs)
-├── data.json                      # Scraped & enriched job feeds with full metadata
-└── docs/                          # Comprehensive technical documentation suite
-    ├── README.md                  # Documentation hub and navigation index
-    ├── auto-applier.md            # Reference guide for 1-by-1 dual tab closer engine
-    ├── anti-detection.md          # In-depth guide on anti-detection mechanics & evasion
-    ├── browser-bot.md             # Architecture, HUD, selectors, and engine reference
-    ├── data-schema.md             # Complete JSON schema, fields, and extraction guide
-    └── cdn-and-github-guide.md    # Guide for GitHub hosting, jsDelivr CDN, and bookmarklets
+├── README.md                          # Main repository guide (You are here)
+├── package.json                       # Project dependencies & npm run scripts
+│
+├── 🤖 IN-BROWSER APPLIERS:
+│   ├── cpc_applier.js                 # Dedicated 10,000 High-CPC in-browser bot (selectable batch, per-job purge)
+│   ├── auto_applier.js                # Standard recommendation in-browser bot (8,987 jobs)
+│   └── browser_bot.js                 # Minimal prototype in-browser bot
+│
+├── 📊 DATA FILES & QUEUES:
+│   ├── jobs_all_high_cpc.json         # 10,000 High-CPC jobs with complete rich metadata (2.83 MB)
+│   ├── jobs_all_high_cpc_queue.json   # 10,000 High-CPC clean application URLs queue (0.89 MB)
+│   ├── jobs_high_cpc.json             # 8,987 recommendation jobs with rich metadata (2.34 MB)
+│   └── jobs_queue.json                # 8,987 recommendation clean URLs queue (0.80 MB)
+│
+├── 🔄 API FETCHERS:
+│   ├── fetch_all_cpc_pages.js         # Paginates all 100 pages of cpc_value: 0.048 & sort_by: high_cpc
+│   └── fetch_recommend_jobs.js        # Paginates recommend jobs API
+│
+├── 🎭 PLAYWRIGHT RUNNER ENGINE:
+│   └── global-applier/
+│       ├── playwright_applier.js      # Production multi-browser & multi-city Playwright runner
+│       ├── global_applier.js          # In-browser global runner
+│       ├── fetch_by_location.js       # Country-filtered fetcher (IN, US, UK, CA, DE)
+│       └── README.md                  # Playwright runner documentation
+│
+└── 📖 DOCUMENTATION SUITE:
+    └── docs/
+        ├── README.md                  # Documentation Hub Index
+        ├── auto-applier.md            # In-Browser Applier Deep Reference & HUD Guide
+        ├── playwright-runner.md       # Playwright CLI & Multi-Browser Rotation Guide
+        ├── anti-detection.md          # In-depth Anti-Detection & Event Cascade Spec
+        ├── data-schema.md             # Complete JSON Data Schemas & Extraction Guide
+        ├── browser-bot.md             # In-Browser Bot Architecture & Selectors
+        └── cdn-and-github-guide.md    # jsDelivr CDN Hosting & Bookmarklet Setup
 ```
-
-### File Summaries
-
-| File | Purpose | Documentation |
-| :--- | :--- | :--- |
-| [`auto_applier.js`](file:///d:/DEVELOPMENT/all-bots/auto_applier.js) | 1-by-1 high-volume applier with dual-tab closing and session resume. | [Read Docs](file:///d:/DEVELOPMENT/all-bots/docs/auto-applier.md) |
-| [`browser_bot.js`](file:///d:/DEVELOPMENT/all-bots/browser_bot.js) | Standalone client-side bot with HUD, event simulator, and queue processor. | [Read Docs](file:///d:/DEVELOPMENT/all-bots/docs/browser-bot.md) |
-| [`jobs_queue.json`](file:///d:/DEVELOPMENT/all-bots/jobs_queue.json) | Combined, deduplicated list of 974 clean target job URLs. | [Read Docs](file:///d:/DEVELOPMENT/all-bots/docs/data-schema.md) |
-| [`fetch-jobs.js`](file:///d:/DEVELOPMENT/all-bots/fetch-jobs.js) | Node.js pagination fetcher that queries the public API and extracts clean URLs. | [Read Code](file:///d:/DEVELOPMENT/all-bots/fetch-jobs.js) |
-| [`docs/`](file:///d:/DEVELOPMENT/all-bots/docs/) | In-depth technical guides covering anti-detection, CDN deployment, and schemas. | [Browse Docs](file:///d:/DEVELOPMENT/all-bots/docs/README.md) |
 
 ---
 
-## 🌐 GitHub + jsDelivr CDN Integration
+## 📖 Documentation Hub
 
-This repository is published on GitHub at [**Naman-mahi/zero-footprint**](https://github.com/Naman-mahi/zero-footprint). jsDelivr automatically provides global edge distribution for the codebase.
-
-### Live CDN Endpoints:
-- **Auto-Applier Script (1-by-1 Engine):**  
-  [`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js`](https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js)
-- **Browser Bot Script:**  
-  [`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js`](https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/browser_bot.js)
-- **Combined 974 Job Queue JSON:**  
-  [`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/jobs_queue.json`](https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/jobs_queue.json)
-- **Instant Cache Purge API:**  
-  [`https://purge.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js`](https://purge.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js)
+- [📚 Documentation Index](file:///d:/DEVELOPMENT/all-bots/docs/README.md)
+- [⚡ Auto-Applier & CPC Applier Guide](file:///d:/DEVELOPMENT/all-bots/docs/auto-applier.md)
+- [🚀 Playwright Runner CLI Reference](file:///d:/DEVELOPMENT/all-bots/docs/playwright-runner.md)
+- [🛡️ Anti-Detection Mechanics](file:///d:/DEVELOPMENT/all-bots/docs/anti-detection.md)
+- [📊 Data Schema Reference](file:///d:/DEVELOPMENT/all-bots/docs/data-schema.md)
+- [🌐 CDN & GitHub Deployment](file:///d:/DEVELOPMENT/all-bots/docs/cdn-and-github-guide.md)
 
 ---
 
 ## ⚠️ Troubleshooting & FAQs
 
-### Q: Why run 1-by-1 instead of opening all 500+ tabs at once?
-**A:** Opening dozens of browser tabs simultaneously exhausts RAM, spikes CPU usage to 100%, and triggers rate-limits or bot blocks. Running 1-by-1 ensures your browser stays ultra-responsive, consumes minimal memory, and applies with natural human timing.
+### Q: Why do we clear cookies and storage after each job?
+**A:** Job aggregators and affiliate networks drop cross-domain tracking cookies and device fingerprint tokens. Purging storage on every job ensures each application originates with a completely clean slate, preventing session chaining or account correlation.
 
-### Q: How does the dual-tab closer work?
-**A:** When `auto_applier.js` opens Tab 1 and clicks the apply button, the platform triggers an affiliate redirect (Tab 2). The script intercepts and closes Tab 2 as soon as the tracking beacon is registered, then closes Tab 1 and moves to the next job.
+### Q: How do I switch batch sizes in the in-browser bot?
+**A:** On the floating control HUD, click the **Batch Size** buttons (`[25]`, `[50]`, `[100]`). The bot dynamically recalibrates batch bounds and milestones instantly.
 
-### Q: Can I pause and resume later?
-**A:** Yes! Progress is saved in `localStorage`. If you pause, reload, or close your browser, you can resume right where you left off.
+### Q: Can I run Playwright without a visible window?
+**A:** Yes! Simply omit the `--headed` flag:
+```powershell
+node global-applier/playwright_applier.js --queue jobs_all_high_cpc_queue.json --batch 50
+```
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License — see the LICENSE file for details.
+MIT License — see `LICENSE` for details.
