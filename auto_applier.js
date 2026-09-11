@@ -6,11 +6,12 @@
  * 
  * FEATURES:
  * - ⚡ 1-by-1 Sequential Processing: Never overloads CPU/RAM with hundreds of open tabs.
+ * - 🎯 Configurable Batch Size (25 / 50 / 100): Easily adjust application batch limits on the fly.
  * - 🔍 Dynamic Polling Resolver: Waits up to 10-12s for React/Next.js DOM hydration so NO button is missed.
  * - 🪟 Dual-Tab Auto-Closer: Opens Job Page (Tab 1), clicks apply, handles redirect (Tab 2), and closes BOTH tabs cleanly.
  * - 🛡️ Advanced Anti-Detection: 9-step human pointer cascade, deceleration scroll, and Gaussian spatial jitter.
- * - ⏩ Batch Navigator (50 Jobs per Batch): Easy Next/Prev batch controls (Batches 1–20 across all 974 jobs).
- * - 🧹 1-Click Storage & Cookie Purge Button: Wipes domain cookies, localStorage & sessionStorage instantly.
+ * - ⏩ Batch Navigator: Next/Prev batch controls across all jobs in queue.
+ * - 🧼 0-Footprint Per-Job Deep Purge: Wipes domain cookies, sessionStorage & localStorage after EACH job applied.
  * - 💾 Session Resume: Saves progress in localStorage so you can pause/resume anytime without losing your place.
  * - 🎨 Ultra-Clean Pure White HUD: Top-right positioning (zero overlap with chat widget), vector SVGs, and step-by-step instructions.
  */
@@ -25,196 +26,196 @@
   }
 
   // =========================================================================
-  // 📋 EMBEDDED JOB URL QUEUE (974 Openings from out_*.json feeds)
+  // 📋 EMBEDDED JOB URL QUEUE (183 Openings from fresh recommendation feeds)
   // =========================================================================
   const DEFAULT_QUEUE = [
-    "https://artha.link/@eanxt/jobs/senior-appian-technical-consultant-polariseme-india-307d1e20",
-    "https://artha.link/@eanxt/jobs/product-designer-mirabelle-korea-bengaluru-f85e96d6",
-    "https://artha.link/@eanxt/jobs/staff-level-ii-accountant-1065-op-re-tax-withum-bengaluru-3bb68d8a",
-    "https://artha.link/@eanxt/jobs/director-of-business-development-krown-kumarappa-madurai-5a829949",
-    "https://artha.link/@eanxt/jobs/physics-tutor-for-igcse-ibdp-and-alevels-undoubtme-educare-india-e6df816c",
-    "https://artha.link/@eanxt/jobs/project-manager-at-site-jv-ventures-hyderabad-8b456182",
-    "https://artha.link/@eanxt/jobs/senior-design-verification-engineer-l-t-technology-bengaluru-203faff2",
-    "https://artha.link/@eanxt/jobs/asic-design-verification-l-t-technology-bengaluru-7a0030f5",
-    "https://artha.link/@eanxt/jobs/senior-statistical-programmer-acl-digital-bengaluru-f859c6c3",
-    "https://artha.link/@eanxt/jobs/design-verification-lead-acl-digital-bengaluru-663909fb",
-    "https://artha.link/@eanxt/jobs/design-team-lead-truww-bengaluru-4df109ec",
-    "https://artha.link/@eanxt/jobs/bim-engineer-mars-bim-solutions-ahmedabad-237b8375",
-    "https://artha.link/@eanxt/jobs/photographer-cinematographer-uk-international-aa51794e",
-    "https://artha.link/@eanxt/jobs/senior-accountant-1065-operating-withum-bengaluru-87463400",
-    "https://artha.link/@eanxt/jobs/accountant-s-lokanadham-co-hyderabad-480222e7",
-    "https://artha.link/@eanxt/jobs/sales-assistant-rambhajo-s-84feabd7",
-    "https://artha.link/@eanxt/jobs/area-sales-manager-marico-limited-guwahati-764715c2",
-    "https://artha.link/@eanxt/jobs/unity-3d-programmer-appy-monkeys-bengaluru-a1fffb77",
-    "https://artha.link/@eanxt/jobs/data-analyst-arcana-coimbatore-4e23e891",
-    "https://artha.link/@eanxt/jobs/faculty-teacher-education-indus-training-and-bengaluru-fb7d38cb",
-    "https://artha.link/@eanxt/jobs/peering-provisioning-engineer-infogain-bengaluru-126d3db1",
-    "https://artha.link/@eanxt/jobs/frontend-developer-reactjs-6-years-dbiz-ai-kochi-2c8881c4",
-    "https://artha.link/@eanxt/jobs/video-editing-internship-airlearn-bengaluru-de524802",
-    "https://artha.link/@eanxt/jobs/video-editor-intern-airlearn-bengaluru-180ef100",
-    "https://artha.link/@eanxt/jobs/software-engineer-backend-sde-2-arcana-bangalore-urban-f19d4110",
-    "https://artha.link/@eanxt/jobs/principal-sas-programmer-advanced-clinical-ahmedabad-c665d952",
-    "https://artha.link/@eanxt/jobs/customer-support-international-voice-movate-chennai-58048801",
-    "https://artha.link/@eanxt/jobs/dermatologist-sanjeevani-cos-bengaluru-f5271f5f",
-    "https://artha.link/@eanxt/jobs/relationship-manager-pcg-sales-chola-securities-hyderabad-e59d9f77",
-    "https://artha.link/@eanxt/jobs/relationship-manager-pcg-advisory-chola-securities-kolkata-90cdbfb3",
-    "https://artha.link/@eanxt/jobs/assistant-professor-associate-professor-alliance-university-bengaluru-f105fecb",
-    "https://artha.link/@eanxt/jobs/senior-accountant-qubs-kpo-services-ahmedabad-17a067ef",
-    "https://artha.link/@eanxt/jobs/ibm-planning-analytics-tm1-support-pepsico-hyderabad-4d848d74",
-    "https://artha.link/@eanxt/jobs/sales-engineer-pei-genesis-pune-district-5ba31f5e",
-    "https://artha.link/@eanxt/jobs/field-sales-executive-fmcg-cravana-16515f08",
-    "https://artha.link/@eanxt/jobs/structural-design-engineer-devang-sutaria-mumbai-bd41714d",
-    "https://artha.link/@eanxt/jobs/relationship-manager-policybazaar-com-coimbatore-a86aa2b1",
-    "https://artha.link/@eanxt/jobs/design-verification-engineer-dv-l-t-technology-bengaluru-08565361",
-    "https://artha.link/@eanxt/jobs/senior-rtl-design-engineer-l-t-technology-bengaluru-ad8c4acb",
-    "https://artha.link/@eanxt/jobs/senior-dv-engineers-uvm-verliog-l-t-technology-bengaluru-626d9583",
-    "https://artha.link/@eanxt/jobs/senior-dv-engineer-l-t-technology-bengaluru-a5794bc0",
-    "https://artha.link/@eanxt/jobs/senior-design-verification-engineer-l-t-technology-bengaluru-a6a0df5c",
-    "https://artha.link/@eanxt/jobs/ams-verification-engineer-l-t-technology-bengaluru-1181fbea",
-    "https://artha.link/@eanxt/jobs/memory-layout-engineer-acl-digital-noida-e4e8b688",
-    "https://artha.link/@eanxt/jobs/soc-design-verification-lead-l-t-technology-bengaluru-a54b728e",
-    "https://artha.link/@eanxt/jobs/sr-lead-design-verification-acl-digital-bengaluru-ac10aa80",
-    "https://artha.link/@eanxt/jobs/design-verification-engineer-acl-digital-bengaluru-89863081",
-    "https://artha.link/@eanxt/jobs/design-verification-engineer-acl-digital-bengaluru-ad23093a",
-    "https://artha.link/@eanxt/jobs/rtl-design-engineer-acl-digital-hyderabad-9596bf13",
-    "https://artha.link/@eanxt/jobs/functional-safety-engineer-acl-digital-bengaluru-6e239392",
-    "https://artha.link/@eanxt/jobs/design-verification-lead-l-t-technology-bengaluru-7bae3b72",
-    "https://artha.link/@eanxt/jobs/fpga-design-engineer-acl-digital-bengaluru-dec8a368",
-    "https://artha.link/@eanxt/jobs/asic-design-engineer-acl-digital-bengaluru-fdf38508",
-    "https://artha.link/@eanxt/jobs/ddr-pcie-nvme-ucie-verification-engineer-acl-digital-bengaluru-a07e420c",
-    "https://artha.link/@eanxt/jobs/lead-design-engineer-acl-digital-bengaluru-c285b09b",
-    "https://artha.link/@eanxt/jobs/analog-layout-engineer-acl-digital-bengaluru-61f4e1fc",
-    "https://artha.link/@eanxt/jobs/sr-design-engineer-pprtl-prime-power-acl-digital-hyderabad-e4ddc0e2",
-    "https://artha.link/@eanxt/jobs/senior-design-verification-engineer-acl-digital-hyderabad-e7c4b6fc",
-    "https://artha.link/@eanxt/jobs/senior-design-verification-engineer-l-t-technology-bengaluru-f3cd9849",
-    "https://artha.link/@eanxt/jobs/analog-layout-engineer-acl-digital-bengaluru-c7a6bf79",
-    "https://artha.link/@eanxt/jobs/ams-circuit-design-engineer-acl-digital-hyderabad-3c230688",
-    "https://artha.link/@eanxt/jobs/senior-design-verification-engineers-acl-digital-bengaluru-a5173aa4",
-    "https://artha.link/@eanxt/jobs/senior-design-verification-engineer-acl-digital-bengaluru-5054e2cc",
-    "https://artha.link/@eanxt/jobs/gfx-ip-verification-engineer-acl-digital-bengaluru-b854b823",
-    "https://artha.link/@eanxt/jobs/staff-engineer-acl-digital-bengaluru-8d77a677",
-    "https://artha.link/@eanxt/jobs/senior-design-verification-engineer-l-t-technology-bangalore-urban-4bd7e34e",
-    "https://artha.link/@eanxt/jobs/rtl-design-verification-engineer-acl-digital-bengaluru-5745739e",
-    "https://artha.link/@eanxt/jobs/cpu-verification-engineer-acl-digital-bengaluru-919ed8b9",
-    "https://artha.link/@eanxt/jobs/senior-design-verification-engineer-acl-digital-bengaluru-47eea715",
-    "https://artha.link/@eanxt/jobs/lead-rtl-design-engineer-acl-digital-bengaluru-6b994a35",
-    "https://artha.link/@eanxt/jobs/formal-verification-engineer-acl-digital-bengaluru-aa49b505",
-    "https://artha.link/@eanxt/jobs/functional-verification-engineer-acl-digital-bengaluru-6e1c418d",
-    "https://artha.link/@eanxt/jobs/lead-fpga-design-engineers-acl-digital-bengaluru-26bf0543",
-    "https://artha.link/@eanxt/jobs/fpga-design-engineer-acl-digital-hyderabad-f6af89e0",
-    "https://artha.link/@eanxt/jobs/rtl-design-engineer-acl-digital-hyderabad-c1dd92fc",
-    "https://artha.link/@eanxt/jobs/fpga-design-engineer-acl-digital-hyderabad-4963ecef",
-    "https://artha.link/@eanxt/jobs/memory-design-engineers-acl-digital-bengaluru-88aa8018",
-    "https://artha.link/@eanxt/jobs/analog-layout-engineers-acl-digital-bengaluru-0e153585",
-    "https://artha.link/@eanxt/jobs/io-layout-engineer-acl-digital-bengaluru-55873cd6",
-    "https://artha.link/@eanxt/jobs/ip-verification-engineer-acl-digital-bengaluru-fb1eb672",
-    "https://artha.link/@eanxt/jobs/design-verification-lead-acl-digital-bengaluru-04a316d2",
-    "https://artha.link/@eanxt/jobs/formal-verification-engineer-acl-digital-bengaluru-742698b9",
-    "https://artha.link/@eanxt/jobs/functional-verification-engineer-acl-digital-bengaluru-8f431ab0",
-    "https://artha.link/@eanxt/jobs/rtl-design-engineer-acl-digital-hyderabad-8a221e23",
-    "https://artha.link/@eanxt/jobs/senior-rtl-design-engineer-acl-digital-bengaluru-aa945f58",
-    "https://artha.link/@eanxt/jobs/verification-lead-acl-digital-hyderabad-c2bfecf9",
-    "https://artha.link/@eanxt/jobs/senior-fs-audit-withum-bengaluru-271e50c2",
-    "https://artha.link/@eanxt/jobs/senior-verification-engineer-acl-digital-bengaluru-74ab8376",
-    "https://artha.link/@eanxt/jobs/noc-verification-engineer-acl-digital-bengaluru-a2f49ed6",
-    "https://artha.link/@eanxt/jobs/manager-oil-gas-audit-withum-ahmedabad-36de8267",
-    "https://artha.link/@eanxt/jobs/pd-emir-engineer-acl-digital-bengaluru-3c36e88c",
-    "https://artha.link/@eanxt/jobs/senior-accountant-nfp-audit-blr-withum-bengaluru-81528b61",
-    "https://artha.link/@eanxt/jobs/senior-design-verification-engineer-acl-digital-hyderabad-1454585b",
-    "https://artha.link/@eanxt/jobs/staff-level-ii-accountant-1040-hni-tax-withum-bengaluru-54addf4e",
-    "https://artha.link/@eanxt/jobs/rtl-design-engineer-acl-digital-hyderabad-a3b2a59a",
-    "https://artha.link/@eanxt/jobs/ams-verification-acl-digital-bengaluru-f4f20206",
-    "https://artha.link/@eanxt/jobs/lead-rtl-design-engineer-acl-digital-chennai-5f1d0266",
-    "https://artha.link/@eanxt/jobs/staff-level-ii-accountant-1065-tax-amd-withum-ahmedabad-0b5a9b6f",
-    "https://artha.link/@eanxt/jobs/manager-real-estate-tangible-assets-withum-bengaluru-bfb58de8",
-    "https://artha.link/@eanxt/jobs/senior-accountant-technology-audit-withum-ahmedabad-0fc0c375",
-    "https://artha.link/@eanxt/jobs/clinical-data-manager-iqvia-india-bengaluru-824d1b82",
-    "https://artha.link/@eanxt/jobs/copywriter-publicis-groupe-mumbai-91e61bbf",
-    "https://artha.link/@eanxt/jobs/associate-erp-technical-consultant-highshine-it-chennai-c32f58b4",
-    "https://artha.link/@eanxt/jobs/leader-of-silicon-engineering-nvm-mixed-texas-instruments-bengaluru-c031dc98",
-    "https://artha.link/@eanxt/jobs/lead-analog-design-engineer-isolation-texas-instruments-bengaluru-8dc62edf",
-    "https://artha.link/@eanxt/jobs/seino-mll-logistics-greater-delhi-751447c9",
-    "https://artha.link/@eanxt/jobs/senior-rfic-mixed-signal-design-texas-instruments-bengaluru-c1c5dc99",
-    "https://artha.link/@eanxt/jobs/sales-director-referral-partner-macrohire-india-5e4393ec",
-    "https://artha.link/@eanxt/jobs/sap-fico-consultant-ltm-bengaluru-78ef4a8a",
-    "https://artha.link/@eanxt/jobs/program-advisor-us-sales-interview-kickstart-india-9e9d383e",
-    "https://artha.link/@eanxt/jobs/intern-copy-writing-airlearn-bengaluru-992bf1b0",
-    "https://artha.link/@eanxt/jobs/security-incident-response-analyst-endava-bengaluru-aadfd5fd",
-    "https://artha.link/@eanxt/jobs/internship-copy-content-writing-airlearn-bengaluru-bdfdd8a8",
-    "https://artha.link/@eanxt/jobs/senior-fashion-designer-kavitha-gutta-a8098885",
-    "https://artha.link/@eanxt/jobs/tax-senior-1065-private-equity-elliott-davis-bengaluru-3a7f11cd",
-    "https://artha.link/@eanxt/jobs/icertis-integration-consultant-sap-ust-bengaluru-b51039fe",
-    "https://artha.link/@eanxt/jobs/field-sales-executive-policybazaar-com-coimbatore-03455dc1",
-    "https://artha.link/@eanxt/jobs/area-sales-manager-policybazaar-com-bangalore-urban-4dd3234f",
-    "https://artha.link/@eanxt/jobs/senior-dft-engineer-acl-digital-bengaluru-ed6a4e99",
-    "https://artha.link/@eanxt/jobs/interior-designer-moboutique-gurugram-bdc2bc79",
-    "https://artha.link/@eanxt/jobs/legal-counsel-procter-gamble-mumbai-f1739963",
-    "https://artha.link/@eanxt/jobs/supply-planning-strategy-associate-procter-gamble-hyderabad-0f3d30ac",
-    "https://artha.link/@eanxt/jobs/graphic-specialist-procter-gamble-hyderabad-1a0a03c2",
-    "https://artha.link/@eanxt/jobs/colour-specialist-procter-gamble-hyderabad-a6ce4cfb",
-    "https://artha.link/@eanxt/jobs/i-trade-customs-business-process-expert-procter-gamble-mumbai-d4b292d3",
-    "https://artha.link/@eanxt/jobs/medical-manager-procter-gamble-mumbai-c34dd764",
-    "https://artha.link/@eanxt/jobs/r-d-director-procter-gamble-mumbai-184e822c",
-    "https://artha.link/@eanxt/jobs/r-d-packaging-leader-procter-gamble-mumbai-f70bf666",
-    "https://artha.link/@eanxt/jobs/scientist-procter-gamble-mumbai-e06c9e37",
-    "https://artha.link/@eanxt/jobs/senior-adjuster-fm-mumbai-1d38c502",
-    "https://artha.link/@eanxt/jobs/territory-sales-executive-pharma-selling-procter-gamble-mumbai-1ec1b5dc",
-    "https://artha.link/@eanxt/jobs/territory-business-executive-pharma-procter-gamble-mumbai-ad8a4aac",
-    "https://artha.link/@eanxt/jobs/senior-executive-assistant-bangalore-boston-consulting-bengaluru-1afb2507",
-    "https://artha.link/@eanxt/jobs/senior-executive-assistant-boston-consulting-gurgaon-49637c10",
-    "https://artha.link/@eanxt/jobs/india-hr-specialist-ug-campus-boston-consulting-bengaluru-34e0c4c1",
-    "https://artha.link/@eanxt/jobs/global-it-configuration-engineer-manager-boston-consulting-gurgaon-5141cef7",
-    "https://artha.link/@eanxt/jobs/global-real-estate-data-strategy-boston-consulting-gurgaon-6f3a04c7",
-    "https://artha.link/@eanxt/jobs/india-senior-analyst-finance-fp-a-boston-consulting-gurgaon-72744d7e",
-    "https://artha.link/@eanxt/jobs/global-product-director-boston-consulting-gurgaon-8a85c967",
-    "https://artha.link/@eanxt/jobs/global-cybersecurity-senior-manager-boston-consulting-gurgaon-320962ec",
-    "https://artha.link/@eanxt/jobs/senior-creative-hybrid-boston-consulting-bengaluru-52f3075b",
-    "https://artha.link/@eanxt/jobs/ep-p-analyst-supplier-risk-screening-boston-consulting-gurgaon-15fd77b2",
-    "https://artha.link/@eanxt/jobs/bi-a-senior-analyst-boston-consulting-gurgaon-d842bb1a",
-    "https://artha.link/@eanxt/jobs/senior-creative-hybrid-ai-technologist-boston-consulting-bengaluru-265b1328",
-    "https://artha.link/@eanxt/jobs/manager-bcg-vantage-boston-consulting-gurgaon-fdac1cd4",
-    "https://artha.link/@eanxt/jobs/asia-pacific-senior-finance-analyst-boston-consulting-gurgaon-bfc18ee6",
-    "https://artha.link/@eanxt/jobs/ap-people-analytics-senior-specialist-boston-consulting-gurgaon-5c4afb51",
-    "https://artha.link/@eanxt/jobs/global-practice-area-senior-manager-boston-consulting-gurgaon-84ce9b11",
-    "https://artha.link/@eanxt/jobs/global-l-d-assistant-faculty-coe-boston-consulting-gurgaon-6d697857",
-    "https://artha.link/@eanxt/jobs/global-data-steward-senior-manager-boston-consulting-gurgaon-b050fd73",
-    "https://artha.link/@eanxt/jobs/senior-analyst-bcg-vantage-boston-consulting-gurgaon-2ed9606d",
-    "https://artha.link/@eanxt/jobs/global-it-executive-director-digital-boston-consulting-gurgaon-3d7c4107",
-    "https://artha.link/@eanxt/jobs/hr-manager-global-businesses-functions-boston-consulting-gurgaon-2287fd29",
-    "https://artha.link/@eanxt/jobs/global-ai-ml-engineer-manager-boston-consulting-gurgaon-a4b77514",
-    "https://artha.link/@eanxt/jobs/bcg-x-ap-people-development-senior-boston-consulting-gurgaon-9b3e48d5",
-    "https://artha.link/@eanxt/jobs/global-finance-and-operations-senior-boston-consulting-gurgaon-483912ee",
-    "https://artha.link/@eanxt/jobs/asia-pacific-regional-consulting-l-d-boston-consulting-gurgaon-ce6bf695",
-    "https://artha.link/@eanxt/jobs/global-l-d-shared-services-operations-boston-consulting-gurgaon-6ff91e3c",
-    "https://artha.link/@eanxt/jobs/global-it-data-architect-senior-manager-boston-consulting-gurgaon-528f4117",
-    "https://artha.link/@eanxt/jobs/asia-pacific-senior-finance-analyst-boston-consulting-gurgaon-1430afaf",
-    "https://artha.link/@eanxt/jobs/administrative-assistant-boston-consulting-gurgaon-8811cd9f",
-    "https://artha.link/@eanxt/jobs/executive-support-services-team-manager-boston-consulting-gurgaon-6a39918c",
-    "https://artha.link/@eanxt/jobs/talent-sourcing-specialist-it-tech-boston-consulting-gurgaon-54db2a42",
-    "https://artha.link/@eanxt/jobs/bcg-x-finance-intern-boston-consulting-gurgaon-c95698f3",
-    "https://artha.link/@eanxt/jobs/india-human-resources-specialist-talent-boston-consulting-gurgaon-c1a7aae5",
-    "https://artha.link/@eanxt/jobs/global-finance-planning-analysis-manager-boston-consulting-gurgaon-241a628c",
-    "https://artha.link/@eanxt/jobs/source-to-pay-product-manager-boston-consulting-gurgaon-cf3efa70",
-    "https://artha.link/@eanxt/jobs/global-cybersecurity-manager-governance-boston-consulting-gurgaon-fdebab9c",
-    "https://artha.link/@eanxt/jobs/operational-innovations-senior-analyst-boston-consulting-gurgaon-c8aafbb9",
-    "https://artha.link/@eanxt/jobs/manager-bcg-vantage-boston-consulting-mumbai-a1287b2e",
-    "https://artha.link/@eanxt/jobs/ap-practice-area-coordinator-people-boston-consulting-gurgaon-df5ec02c",
-    "https://artha.link/@eanxt/jobs/senior-analyst-bcg-vantage-boston-consulting-gurgaon-1433a26e",
-    "https://artha.link/@eanxt/jobs/global-finance-data-governance-senior-boston-consulting-gurgaon-fc0ddbab",
-    "https://artha.link/@eanxt/jobs/india-team-leader-human-resources-boston-consulting-gurgaon-86399f4e",
-    "https://artha.link/@eanxt/jobs/india-lead-specialist-human-resources-boston-consulting-gurgaon-527919aa",
-    "https://artha.link/@eanxt/jobs/sr-identity-engineer-iam-big-it-jobs-big-it-jobs-692e4c73",
-    "https://artha.link/@eanxt/jobs/staff-systems-engineer-vistance-networks-bangalore-1a00dc6f",
-    "https://artha.link/@eanxt/jobs/backend-engineer-big-it-jobs-big-it-jobs-0e9abf31",
-    "https://artha.link/@eanxt/jobs/senior-operations-engineer-big-it-jobs-big-it-jobs-089c03d0",
-    "https://artha.link/@eanxt/jobs/qa-automation-engineer-big-it-jobs-big-it-jobs-cc8830d8",
-    "https://artha.link/@eanxt/jobs/inside-sales-associate-medibuddy-medibuddy-indore-madhya-709fc127",
-    "https://artha.link/@eanxt/jobs/ot-security-architect-lonza-hyderabad-1037f55b",
-    "https://artha.link/@eanxt/jobs/quality-senior-professional-customer-lonza-hyderabad-4f1b4156"
-  ];
+  "https://artha.link/@eanxt/jobs/senior-appian-technical-consultant-polariseme-india-307d1e20",
+  "https://artha.link/@eanxt/jobs/product-designer-mirabelle-korea-bengaluru-f85e96d6",
+  "https://artha.link/@eanxt/jobs/staff-level-ii-accountant-1065-op-re-tax-withum-bengaluru-3bb68d8a",
+  "https://artha.link/@eanxt/jobs/director-of-business-development-krown-kumarappa-madurai-5a829949",
+  "https://artha.link/@eanxt/jobs/physics-tutor-for-igcse-ibdp-and-alevels-undoubtme-educare-india-e6df816c",
+  "https://artha.link/@eanxt/jobs/project-manager-at-site-jv-ventures-hyderabad-8b456182",
+  "https://artha.link/@eanxt/jobs/senior-design-verification-engineer-l-t-technology-bengaluru-203faff2",
+  "https://artha.link/@eanxt/jobs/asic-design-verification-l-t-technology-bengaluru-7a0030f5",
+  "https://artha.link/@eanxt/jobs/senior-statistical-programmer-acl-digital-bengaluru-f859c6c3",
+  "https://artha.link/@eanxt/jobs/design-verification-lead-acl-digital-bengaluru-663909fb",
+  "https://artha.link/@eanxt/jobs/design-team-lead-truww-bengaluru-4df109ec",
+  "https://artha.link/@eanxt/jobs/bim-engineer-mars-bim-solutions-ahmedabad-237b8375",
+  "https://artha.link/@eanxt/jobs/photographer-cinematographer-uk-international-aa51794e",
+  "https://artha.link/@eanxt/jobs/senior-accountant-1065-operating-withum-bengaluru-87463400",
+  "https://artha.link/@eanxt/jobs/accountant-s-lokanadham-co-hyderabad-480222e7",
+  "https://artha.link/@eanxt/jobs/sales-assistant-rambhajo-s-84feabd7",
+  "https://artha.link/@eanxt/jobs/area-sales-manager-marico-limited-guwahati-764715c2",
+  "https://artha.link/@eanxt/jobs/unity-3d-programmer-appy-monkeys-bengaluru-a1fffb77",
+  "https://artha.link/@eanxt/jobs/data-analyst-arcana-coimbatore-4e23e891",
+  "https://artha.link/@eanxt/jobs/faculty-teacher-education-indus-training-and-bengaluru-fb7d38cb",
+  "https://artha.link/@eanxt/jobs/peering-provisioning-engineer-infogain-bengaluru-126d3db1",
+  "https://artha.link/@eanxt/jobs/frontend-developer-reactjs-6-years-dbiz-ai-kochi-2c8881c4",
+  "https://artha.link/@eanxt/jobs/video-editing-internship-airlearn-bengaluru-de524802",
+  "https://artha.link/@eanxt/jobs/video-editor-intern-airlearn-bengaluru-180ef100",
+  "https://artha.link/@eanxt/jobs/software-engineer-backend-sde-2-arcana-bangalore-urban-f19d4110",
+  "https://artha.link/@eanxt/jobs/principal-sas-programmer-advanced-clinical-ahmedabad-c665d952",
+  "https://artha.link/@eanxt/jobs/customer-support-international-voice-movate-chennai-58048801",
+  "https://artha.link/@eanxt/jobs/dermatologist-sanjeevani-cos-bengaluru-f5271f5f",
+  "https://artha.link/@eanxt/jobs/relationship-manager-pcg-sales-chola-securities-hyderabad-e59d9f77",
+  "https://artha.link/@eanxt/jobs/relationship-manager-pcg-advisory-chola-securities-kolkata-90cdbfb3",
+  "https://artha.link/@eanxt/jobs/assistant-professor-associate-professor-alliance-university-bengaluru-f105fecb",
+  "https://artha.link/@eanxt/jobs/senior-accountant-qubs-kpo-services-ahmedabad-17a067ef",
+  "https://artha.link/@eanxt/jobs/ibm-planning-analytics-tm1-support-pepsico-hyderabad-4d848d74",
+  "https://artha.link/@eanxt/jobs/sales-engineer-pei-genesis-pune-district-5ba31f5e",
+  "https://artha.link/@eanxt/jobs/field-sales-executive-fmcg-cravana-16515f08",
+  "https://artha.link/@eanxt/jobs/structural-design-engineer-devang-sutaria-mumbai-bd41714d",
+  "https://artha.link/@eanxt/jobs/relationship-manager-policybazaar-com-coimbatore-a86aa2b1",
+  "https://artha.link/@eanxt/jobs/design-verification-engineer-dv-l-t-technology-bengaluru-08565361",
+  "https://artha.link/@eanxt/jobs/senior-rtl-design-engineer-l-t-technology-bengaluru-ad8c4acb",
+  "https://artha.link/@eanxt/jobs/senior-dv-engineers-uvm-verliog-l-t-technology-bengaluru-626d9583",
+  "https://artha.link/@eanxt/jobs/senior-dv-engineer-l-t-technology-bengaluru-a5794bc0",
+  "https://artha.link/@eanxt/jobs/senior-design-verification-engineer-l-t-technology-bengaluru-a6a0df5c",
+  "https://artha.link/@eanxt/jobs/ams-verification-engineer-l-t-technology-bengaluru-1181fbea",
+  "https://artha.link/@eanxt/jobs/memory-layout-engineer-acl-digital-noida-e4e8b688",
+  "https://artha.link/@eanxt/jobs/soc-design-verification-lead-l-t-technology-bengaluru-a54b728e",
+  "https://artha.link/@eanxt/jobs/sr-lead-design-verification-acl-digital-bengaluru-ac10aa80",
+  "https://artha.link/@eanxt/jobs/design-verification-engineer-acl-digital-bengaluru-89863081",
+  "https://artha.link/@eanxt/jobs/design-verification-engineer-acl-digital-bengaluru-ad23093a",
+  "https://artha.link/@eanxt/jobs/rtl-design-engineer-acl-digital-hyderabad-9596bf13",
+  "https://artha.link/@eanxt/jobs/functional-safety-engineer-acl-digital-bengaluru-6e239392",
+  "https://artha.link/@eanxt/jobs/design-verification-lead-l-t-technology-bengaluru-7bae3b72",
+  "https://artha.link/@eanxt/jobs/fpga-design-engineer-acl-digital-bengaluru-dec8a368",
+  "https://artha.link/@eanxt/jobs/asic-design-engineer-acl-digital-bengaluru-fdf38508",
+  "https://artha.link/@eanxt/jobs/ddr-pcie-nvme-ucie-verification-engineer-acl-digital-bengaluru-a07e420c",
+  "https://artha.link/@eanxt/jobs/lead-design-engineer-acl-digital-bengaluru-c285b09b",
+  "https://artha.link/@eanxt/jobs/analog-layout-engineer-acl-digital-bengaluru-61f4e1fc",
+  "https://artha.link/@eanxt/jobs/sr-design-engineer-pprtl-prime-power-acl-digital-hyderabad-e4ddc0e2",
+  "https://artha.link/@eanxt/jobs/senior-design-verification-engineer-acl-digital-hyderabad-e7c4b6fc",
+  "https://artha.link/@eanxt/jobs/senior-design-verification-engineer-l-t-technology-bengaluru-f3cd9849",
+  "https://artha.link/@eanxt/jobs/analog-layout-engineer-acl-digital-bengaluru-c7a6bf79",
+  "https://artha.link/@eanxt/jobs/ams-circuit-design-engineer-acl-digital-hyderabad-3c230688",
+  "https://artha.link/@eanxt/jobs/senior-design-verification-engineers-acl-digital-bengaluru-a5173aa4",
+  "https://artha.link/@eanxt/jobs/senior-design-verification-engineer-acl-digital-bengaluru-5054e2cc",
+  "https://artha.link/@eanxt/jobs/gfx-ip-verification-engineer-acl-digital-bengaluru-b854b823",
+  "https://artha.link/@eanxt/jobs/staff-engineer-acl-digital-bengaluru-8d77a677",
+  "https://artha.link/@eanxt/jobs/senior-design-verification-engineer-l-t-technology-bangalore-urban-4bd7e34e",
+  "https://artha.link/@eanxt/jobs/rtl-design-verification-engineer-acl-digital-bengaluru-5745739e",
+  "https://artha.link/@eanxt/jobs/cpu-verification-engineer-acl-digital-bengaluru-919ed8b9",
+  "https://artha.link/@eanxt/jobs/senior-design-verification-engineer-acl-digital-bengaluru-47eea715",
+  "https://artha.link/@eanxt/jobs/lead-rtl-design-engineer-acl-digital-bengaluru-6b994a35",
+  "https://artha.link/@eanxt/jobs/formal-verification-engineer-acl-digital-bengaluru-aa49b505",
+  "https://artha.link/@eanxt/jobs/functional-verification-engineer-acl-digital-bengaluru-6e1c418d",
+  "https://artha.link/@eanxt/jobs/lead-fpga-design-engineers-acl-digital-bengaluru-26bf0543",
+  "https://artha.link/@eanxt/jobs/fpga-design-engineer-acl-digital-hyderabad-f6af89e0",
+  "https://artha.link/@eanxt/jobs/rtl-design-engineer-acl-digital-hyderabad-c1dd92fc",
+  "https://artha.link/@eanxt/jobs/fpga-design-engineer-acl-digital-hyderabad-4963ecef",
+  "https://artha.link/@eanxt/jobs/memory-design-engineers-acl-digital-bengaluru-88aa8018",
+  "https://artha.link/@eanxt/jobs/analog-layout-engineers-acl-digital-bengaluru-0e153585",
+  "https://artha.link/@eanxt/jobs/io-layout-engineer-acl-digital-bengaluru-55873cd6",
+  "https://artha.link/@eanxt/jobs/ip-verification-engineer-acl-digital-bengaluru-fb1eb672",
+  "https://artha.link/@eanxt/jobs/design-verification-lead-acl-digital-bengaluru-04a316d2",
+  "https://artha.link/@eanxt/jobs/formal-verification-engineer-acl-digital-bengaluru-742698b9",
+  "https://artha.link/@eanxt/jobs/functional-verification-engineer-acl-digital-bengaluru-8f431ab0",
+  "https://artha.link/@eanxt/jobs/rtl-design-engineer-acl-digital-hyderabad-8a221e23",
+  "https://artha.link/@eanxt/jobs/senior-rtl-design-engineer-acl-digital-bengaluru-aa945f58",
+  "https://artha.link/@eanxt/jobs/verification-lead-acl-digital-hyderabad-c2bfecf9",
+  "https://artha.link/@eanxt/jobs/senior-fs-audit-withum-bengaluru-271e50c2",
+  "https://artha.link/@eanxt/jobs/senior-verification-engineer-acl-digital-bengaluru-74ab8376",
+  "https://artha.link/@eanxt/jobs/noc-verification-engineer-acl-digital-bengaluru-a2f49ed6",
+  "https://artha.link/@eanxt/jobs/manager-oil-gas-audit-withum-ahmedabad-36de8267",
+  "https://artha.link/@eanxt/jobs/pd-emir-engineer-acl-digital-bengaluru-3c36e88c",
+  "https://artha.link/@eanxt/jobs/senior-accountant-nfp-audit-blr-withum-bengaluru-81528b61",
+  "https://artha.link/@eanxt/jobs/senior-design-verification-engineer-acl-digital-hyderabad-1454585b",
+  "https://artha.link/@eanxt/jobs/staff-level-ii-accountant-1040-hni-tax-withum-bengaluru-54addf4e",
+  "https://artha.link/@eanxt/jobs/rtl-design-engineer-acl-digital-hyderabad-a3b2a59a",
+  "https://artha.link/@eanxt/jobs/ams-verification-acl-digital-bengaluru-f4f20206",
+  "https://artha.link/@eanxt/jobs/lead-rtl-design-engineer-acl-digital-chennai-5f1d0266",
+  "https://artha.link/@eanxt/jobs/staff-level-ii-accountant-1065-tax-amd-withum-ahmedabad-0b5a9b6f",
+  "https://artha.link/@eanxt/jobs/manager-real-estate-tangible-assets-withum-bengaluru-bfb58de8",
+  "https://artha.link/@eanxt/jobs/senior-accountant-technology-audit-withum-ahmedabad-0fc0c375",
+  "https://artha.link/@eanxt/jobs/clinical-data-manager-iqvia-india-bengaluru-824d1b82",
+  "https://artha.link/@eanxt/jobs/copywriter-publicis-groupe-mumbai-91e61bbf",
+  "https://artha.link/@eanxt/jobs/associate-erp-technical-consultant-highshine-it-chennai-c32f58b4",
+  "https://artha.link/@eanxt/jobs/leader-of-silicon-engineering-nvm-mixed-texas-instruments-bengaluru-c031dc98",
+  "https://artha.link/@eanxt/jobs/lead-analog-design-engineer-isolation-texas-instruments-bengaluru-8dc62edf",
+  "https://artha.link/@eanxt/jobs/seino-mll-logistics-greater-delhi-751447c9",
+  "https://artha.link/@eanxt/jobs/senior-rfic-mixed-signal-design-texas-instruments-bengaluru-c1c5dc99",
+  "https://artha.link/@eanxt/jobs/sales-director-referral-partner-macrohire-india-5e4393ec",
+  "https://artha.link/@eanxt/jobs/sap-fico-consultant-ltm-bengaluru-78ef4a8a",
+  "https://artha.link/@eanxt/jobs/program-advisor-us-sales-interview-kickstart-india-9e9d383e",
+  "https://artha.link/@eanxt/jobs/intern-copy-writing-airlearn-bengaluru-992bf1b0",
+  "https://artha.link/@eanxt/jobs/security-incident-response-analyst-endava-bengaluru-aadfd5fd",
+  "https://artha.link/@eanxt/jobs/internship-copy-content-writing-airlearn-bengaluru-bdfdd8a8",
+  "https://artha.link/@eanxt/jobs/senior-fashion-designer-kavitha-gutta-a8098885",
+  "https://artha.link/@eanxt/jobs/tax-senior-1065-private-equity-elliott-davis-bengaluru-3a7f11cd",
+  "https://artha.link/@eanxt/jobs/icertis-integration-consultant-sap-ust-bengaluru-b51039fe",
+  "https://artha.link/@eanxt/jobs/field-sales-executive-policybazaar-com-coimbatore-03455dc1",
+  "https://artha.link/@eanxt/jobs/area-sales-manager-policybazaar-com-bangalore-urban-4dd3234f",
+  "https://artha.link/@eanxt/jobs/senior-dft-engineer-acl-digital-bengaluru-ed6a4e99",
+  "https://artha.link/@eanxt/jobs/interior-designer-moboutique-gurugram-bdc2bc79",
+  "https://artha.link/@eanxt/jobs/legal-counsel-procter-gamble-mumbai-f1739963",
+  "https://artha.link/@eanxt/jobs/supply-planning-strategy-associate-procter-gamble-hyderabad-0f3d30ac",
+  "https://artha.link/@eanxt/jobs/graphic-specialist-procter-gamble-hyderabad-1a0a03c2",
+  "https://artha.link/@eanxt/jobs/colour-specialist-procter-gamble-hyderabad-a6ce4cfb",
+  "https://artha.link/@eanxt/jobs/i-trade-customs-business-process-expert-procter-gamble-mumbai-d4b292d3",
+  "https://artha.link/@eanxt/jobs/medical-manager-procter-gamble-mumbai-c34dd764",
+  "https://artha.link/@eanxt/jobs/r-d-director-procter-gamble-mumbai-184e822c",
+  "https://artha.link/@eanxt/jobs/r-d-packaging-leader-procter-gamble-mumbai-f70bf666",
+  "https://artha.link/@eanxt/jobs/scientist-procter-gamble-mumbai-e06c9e37",
+  "https://artha.link/@eanxt/jobs/senior-adjuster-fm-mumbai-1d38c502",
+  "https://artha.link/@eanxt/jobs/territory-sales-executive-pharma-selling-procter-gamble-mumbai-1ec1b5dc",
+  "https://artha.link/@eanxt/jobs/territory-business-executive-pharma-procter-gamble-mumbai-ad8a4aac",
+  "https://artha.link/@eanxt/jobs/senior-executive-assistant-bangalore-boston-consulting-bengaluru-1afb2507",
+  "https://artha.link/@eanxt/jobs/senior-executive-assistant-boston-consulting-gurgaon-49637c10",
+  "https://artha.link/@eanxt/jobs/india-hr-specialist-ug-campus-boston-consulting-bengaluru-34e0c4c1",
+  "https://artha.link/@eanxt/jobs/global-it-configuration-engineer-manager-boston-consulting-gurgaon-5141cef7",
+  "https://artha.link/@eanxt/jobs/global-real-estate-data-strategy-boston-consulting-gurgaon-6f3a04c7",
+  "https://artha.link/@eanxt/jobs/india-senior-analyst-finance-fp-a-boston-consulting-gurgaon-72744d7e",
+  "https://artha.link/@eanxt/jobs/global-product-director-boston-consulting-gurgaon-8a85c967",
+  "https://artha.link/@eanxt/jobs/global-cybersecurity-senior-manager-boston-consulting-gurgaon-320962ec",
+  "https://artha.link/@eanxt/jobs/senior-creative-hybrid-boston-consulting-bengaluru-52f3075b",
+  "https://artha.link/@eanxt/jobs/ep-p-analyst-supplier-risk-screening-boston-consulting-gurgaon-15fd77b2",
+  "https://artha.link/@eanxt/jobs/bi-a-senior-analyst-boston-consulting-gurgaon-d842bb1a",
+  "https://artha.link/@eanxt/jobs/senior-creative-hybrid-ai-technologist-boston-consulting-bengaluru-265b1328",
+  "https://artha.link/@eanxt/jobs/manager-bcg-vantage-boston-consulting-gurgaon-fdac1cd4",
+  "https://artha.link/@eanxt/jobs/asia-pacific-senior-finance-analyst-boston-consulting-gurgaon-bfc18ee6",
+  "https://artha.link/@eanxt/jobs/ap-people-analytics-senior-specialist-boston-consulting-gurgaon-5c4afb51",
+  "https://artha.link/@eanxt/jobs/global-practice-area-senior-manager-boston-consulting-gurgaon-84ce9b11",
+  "https://artha.link/@eanxt/jobs/global-l-d-assistant-faculty-coe-boston-consulting-gurgaon-6d697857",
+  "https://artha.link/@eanxt/jobs/global-data-steward-senior-manager-boston-consulting-gurgaon-b050fd73",
+  "https://artha.link/@eanxt/jobs/senior-analyst-bcg-vantage-boston-consulting-gurgaon-2ed9606d",
+  "https://artha.link/@eanxt/jobs/global-it-executive-director-digital-boston-consulting-gurgaon-3d7c4107",
+  "https://artha.link/@eanxt/jobs/hr-manager-global-businesses-functions-boston-consulting-gurgaon-2287fd29",
+  "https://artha.link/@eanxt/jobs/global-ai-ml-engineer-manager-boston-consulting-gurgaon-a4b77514",
+  "https://artha.link/@eanxt/jobs/bcg-x-ap-people-development-senior-boston-consulting-gurgaon-9b3e48d5",
+  "https://artha.link/@eanxt/jobs/global-finance-and-operations-senior-boston-consulting-gurgaon-483912ee",
+  "https://artha.link/@eanxt/jobs/asia-pacific-regional-consulting-l-d-boston-consulting-gurgaon-ce6bf695",
+  "https://artha.link/@eanxt/jobs/global-l-d-shared-services-operations-boston-consulting-gurgaon-6ff91e3c",
+  "https://artha.link/@eanxt/jobs/global-it-data-architect-senior-manager-boston-consulting-gurgaon-528f4117",
+  "https://artha.link/@eanxt/jobs/asia-pacific-senior-finance-analyst-boston-consulting-gurgaon-1430afaf",
+  "https://artha.link/@eanxt/jobs/administrative-assistant-boston-consulting-gurgaon-8811cd9f",
+  "https://artha.link/@eanxt/jobs/executive-support-services-team-manager-boston-consulting-gurgaon-6a39918c",
+  "https://artha.link/@eanxt/jobs/talent-sourcing-specialist-it-tech-boston-consulting-gurgaon-54db2a42",
+  "https://artha.link/@eanxt/jobs/bcg-x-finance-intern-boston-consulting-gurgaon-c95698f3",
+  "https://artha.link/@eanxt/jobs/india-human-resources-specialist-talent-boston-consulting-gurgaon-c1a7aae5",
+  "https://artha.link/@eanxt/jobs/global-finance-planning-analysis-manager-boston-consulting-gurgaon-241a628c",
+  "https://artha.link/@eanxt/jobs/source-to-pay-product-manager-boston-consulting-gurgaon-cf3efa70",
+  "https://artha.link/@eanxt/jobs/global-cybersecurity-manager-governance-boston-consulting-gurgaon-fdebab9c",
+  "https://artha.link/@eanxt/jobs/operational-innovations-senior-analyst-boston-consulting-gurgaon-c8aafbb9",
+  "https://artha.link/@eanxt/jobs/manager-bcg-vantage-boston-consulting-mumbai-a1287b2e",
+  "https://artha.link/@eanxt/jobs/ap-practice-area-coordinator-people-boston-consulting-gurgaon-df5ec02c",
+  "https://artha.link/@eanxt/jobs/senior-analyst-bcg-vantage-boston-consulting-gurgaon-1433a26e",
+  "https://artha.link/@eanxt/jobs/global-finance-data-governance-senior-boston-consulting-gurgaon-fc0ddbab",
+  "https://artha.link/@eanxt/jobs/india-team-leader-human-resources-boston-consulting-gurgaon-86399f4e",
+  "https://artha.link/@eanxt/jobs/india-lead-specialist-human-resources-boston-consulting-gurgaon-527919aa",
+  "https://artha.link/@eanxt/jobs/sr-identity-engineer-iam-big-it-jobs-big-it-jobs-692e4c73",
+  "https://artha.link/@eanxt/jobs/staff-systems-engineer-vistance-networks-bangalore-1a00dc6f",
+  "https://artha.link/@eanxt/jobs/backend-engineer-big-it-jobs-big-it-jobs-0e9abf31",
+  "https://artha.link/@eanxt/jobs/senior-operations-engineer-big-it-jobs-big-it-jobs-089c03d0",
+  "https://artha.link/@eanxt/jobs/qa-automation-engineer-big-it-jobs-big-it-jobs-cc8830d8",
+  "https://artha.link/@eanxt/jobs/inside-sales-associate-medibuddy-medibuddy-indore-madhya-709fc127",
+  "https://artha.link/@eanxt/jobs/ot-security-architect-lonza-hyderabad-1037f55b",
+  "https://artha.link/@eanxt/jobs/quality-senior-professional-customer-lonza-hyderabad-4f1b4156"
+];
 
   let jobQueue = DEFAULT_QUEUE;
-  const BATCH_SIZE = 50;
+  let batchSize = 50; // default 50 (configurable: 25, 50, 100)
 
   // =========================================================================
   // 💾 STATE MANAGEMENT & LOCAL STORAGE PERSISTENCE
@@ -305,48 +306,58 @@
   // =========================================================================
   // 🔍 DYNAMIC POLLING RESOLVER (Waits up to 10-12s for React/Next.js DOM)
   // =========================================================================
-  async function waitForApplyButton(doc, maxWaitMs = 10000) {
+  async function waitForApplyButton(tabWin, maxWaitMs = 10000) {
     const startTime = Date.now();
     while (Date.now() - startTime < maxWaitMs) {
-      if (!doc) break;
+      if (!tabWin || tabWin.closed) break;
 
+      let doc = null;
       try {
-        // Tier 1: Canonical Apply Trigger ID
-        const byId = doc.getElementById("creator-job-details-apply-job-trigger");
-        if (byId && byId.offsetParent !== null) {
-          return { el: byId, strategy: "ID (#creator-job-details-apply-job-trigger)" };
-        }
+        doc = tabWin.document;
+      } catch (crossOriginErr) {
+        // Tab redirected to external employer site
+        return null;
+      }
 
-        // Tier 2: Experiment attribute
-        const byExp = doc.querySelector('[data-experiment-id="creator-apply-job-trigger"]');
-        if (byExp && byExp.offsetParent !== null) {
-          return { el: byExp, strategy: "Experiment Attribute" };
-        }
+      if (doc) {
+        try {
+          // Tier 1: Canonical Apply Trigger ID
+          const byId = doc.getElementById("creator-job-details-apply-job-trigger");
+          if (byId && byId.offsetParent !== null) {
+            return { el: byId, strategy: "ID (#creator-job-details-apply-job-trigger)" };
+          }
 
-        // Tier 3: Direct redirect links
-        const byRedirect = doc.querySelector('a[href*="/redirect/"], a[href*="r.artha.link"]');
-        if (byRedirect && byRedirect.offsetParent !== null) {
-          return { el: byRedirect, strategy: "Direct Redirect Link" };
-        }
+          // Tier 2: Experiment attribute
+          const byExp = doc.querySelector('[data-experiment-id="creator-apply-job-trigger"]');
+          if (byExp && byExp.offsetParent !== null) {
+            return { el: byExp, strategy: "Experiment Attribute" };
+          }
 
-        // Tier 4: Heuristic semantic text match
-        const clickables = Array.from(doc.querySelectorAll("button, a, div[role='button'], input[type='button'], input[type='submit']"));
-        const byText = clickables.find((el) => {
-          if (el.offsetParent === null) return false;
-          const txt = (el.innerText || el.textContent || "").trim().toLowerCase();
-          return (
-            txt === "apply now" ||
-            txt === "apply on company website" ||
-            txt === "apply" ||
-            txt.includes("apply now") ||
-            (txt.startsWith("apply") && !txt.includes("notify"))
-          );
-        });
+          // Tier 3: Direct redirect links
+          const byRedirect = doc.querySelector('a[href*="/redirect/"], a[href*="r.artha.link"]');
+          if (byRedirect && byRedirect.offsetParent !== null) {
+            return { el: byRedirect, strategy: "Direct Redirect Link" };
+          }
 
-        if (byText) {
-          return { el: byText, strategy: "Text Heuristic ('" + (byText.innerText || byText.textContent || "").trim() + "')" };
-        }
-      } catch (e) {}
+          // Tier 4: Heuristic semantic text match
+          const clickables = Array.from(doc.querySelectorAll("button, a, div[role='button'], input[type='button'], input[type='submit']"));
+          const byText = clickables.find((el) => {
+            if (el.offsetParent === null) return false;
+            const txt = (el.innerText || el.textContent || "").trim().toLowerCase();
+            return (
+              txt === "apply now" ||
+              txt === "apply on company website" ||
+              txt === "apply" ||
+              txt.includes("apply now") ||
+              (txt.startsWith("apply") && !txt.includes("notify"))
+            );
+          });
+
+          if (byText) {
+            return { el: byText, strategy: "Text Heuristic ('" + (byText.innerText || byText.textContent || "").trim() + "')" };
+          }
+        } catch (e) {}
+      }
 
       await sleep(250);
     }
@@ -369,13 +380,14 @@
   // =========================================================================
   function wipeAllStorageAndCookies(isQuiet = false) {
     if (!isQuiet) {
-      console.log("%c[Cleanup] Clearing domain cookies, sessionStorage, and localStorage...", "color: #2563eb; font-weight: bold;");
+      console.log("%c🧼 [Zero-Footprint Purge] Clearing domain cookies, sessionStorage, and localStorage...", "color: #2563eb; font-weight: bold;");
     }
 
     const savedState = { ...state };
 
     try {
       const domain = window.location.hostname;
+      const hostParts = domain.split(".");
       const cookies = document.cookie.split(";");
       for (let cookie of cookies) {
         const eqPos = cookie.indexOf("=");
@@ -384,18 +396,29 @@
         document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;";
         document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=" + domain + ";";
         document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=." + domain + ";";
+        if (hostParts.length > 2) {
+          const rootDomain = hostParts.slice(-2).join(".");
+          document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=." + rootDomain + ";";
+        }
       }
     } catch (e) {}
 
     try {
       sessionStorage.clear();
       localStorage.clear();
+      if (window.indexedDB && window.indexedDB.databases) {
+        window.indexedDB.databases().then((dbs) => {
+          for (let db of dbs) {
+            if (db.name) window.indexedDB.deleteDatabase(db.name);
+          }
+        }).catch(() => {});
+      }
     } catch (e) {}
 
     // Restore bot progress index
     saveState(savedState);
     if (!isQuiet) {
-      log("Wiped all cookies, localStorage & sessionStorage cleanly!", "#059669");
+      log("🧼 Purged cookies, sessionStorage & localStorage cleanly for Job " + (state.currentIndex + 1) + "!", "#059669");
     }
   }
 
@@ -477,19 +500,23 @@
           </div>
         </div>
 
-        <!-- Batch Navigation Selector (Next / Prev Batch Controls) -->
+        <!-- Batch Size & Navigation Row -->
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 6px 10px;">
-          <button id="zfp-prev-batch-btn" title="Go to Previous Batch" style="display: flex; align-items: center; gap: 3px; background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; padding: 3px 8px; font-size: 10px; cursor: pointer; font-weight: 600;">
-            ${ICONS.chevronLeft} Prev 50
-          </button>
-          
-          <div id="zfp-batch-badge" style="font-size: 11px; font-weight: 700; color: #2563eb;">
-            Batch ${Math.floor(state.currentIndex / BATCH_SIZE) + 1} / ${Math.ceil(jobQueue.length / BATCH_SIZE)}
+          <div style="display: flex; align-items: center; gap: 3px;">
+            <span style="font-size: 10px; color: #64748b; font-weight: 600; margin-right: 1px;">Batch:</span>
+            <button id="zfp-size-25-btn" class="zfp-size-btn" data-size="25" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 5px; padding: 2px 6px; font-size: 10px; cursor: pointer; font-weight: 500;">25</button>
+            <button id="zfp-size-50-btn" class="zfp-size-btn" data-size="50" style="background: #2563eb; color: #ffffff; border: 1px solid #2563eb; border-radius: 5px; padding: 2px 6px; font-size: 10px; cursor: pointer; font-weight: 700; box-shadow: 0 1px 3px rgba(37,99,235,0.2);">50</button>
+            <button id="zfp-size-100-btn" class="zfp-size-btn" data-size="100" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 5px; padding: 2px 6px; font-size: 10px; cursor: pointer; font-weight: 500;">100</button>
           </div>
 
-          <button id="zfp-next-batch-btn" title="Move to Next Batch" style="display: flex; align-items: center; gap: 3px; background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 6px; padding: 3px 8px; font-size: 10px; cursor: pointer; font-weight: 700;">
-            Next 50 ${ICONS.chevronRight}
-          </button>
+          <div id="zfp-batch-badge" style="font-size: 11px; font-weight: 700; color: #2563eb;">
+            Batch ${Math.floor(state.currentIndex / batchSize) + 1} / ${Math.ceil(jobQueue.length / batchSize)}
+          </div>
+
+          <div style="display: flex; gap: 3px;">
+            <button id="zfp-prev-batch-btn" title="Previous Batch" style="display: flex; align-items: center; background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 5px; padding: 3px 6px; font-size: 10px; cursor: pointer;">${ICONS.chevronLeft}</button>
+            <button id="zfp-next-batch-btn" title="Next Batch" style="display: flex; align-items: center; background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 5px; padding: 3px 6px; font-size: 10px; cursor: pointer; font-weight: 700;">${ICONS.chevronRight}</button>
+          </div>
         </div>
 
         <!-- Pacing Options -->
@@ -522,7 +549,7 @@
             transition: all 0.2s;
           ">
             <span id="zfp-btn-icon">${ICONS.play}</span>
-            <span id="zfp-btn-label">Start Batch ${Math.floor(state.currentIndex / BATCH_SIZE) + 1}</span>
+            <span id="zfp-btn-label">Start Batch ${Math.floor(state.currentIndex / batchSize) + 1} (${batchSize} Jobs)</span>
           </button>
 
           <button id="zfp-skip-btn" title="Skip to next job" style="
@@ -592,7 +619,7 @@
           line-height: 1.45;
           border: 1px solid #e2e8f0;
           margin-bottom: 8px;
-        ">Ready. Loaded ${jobQueue.length} jobs across ${Math.ceil(jobQueue.length / BATCH_SIZE)} batches. Click Start or Next 50 to begin.</div>
+        ">Ready. Loaded ${jobQueue.length} jobs across ${Math.ceil(jobQueue.length / batchSize)} batches. Click Start to begin.</div>
 
         <!-- Step-by-Step Instructions Card -->
         <div style="
@@ -605,11 +632,11 @@
           line-height: 1.5;
         ">
           <div style="display: flex; align-items: center; gap: 4px; font-weight: 700; color: #1e293b; margin-bottom: 2px;">
-            ${ICONS.info} Batch Navigation Guide:
+            ${ICONS.info} Batch & Deep-Clean Guide:
           </div>
-          <div>• <b>Next 50 ▶:</b> Jump directly to Batch 2 (51–100), Batch 3 (101–150)...</div>
-          <div>• <b>Auto-Closer:</b> Opens tab, clicks Apply, and closes both tabs.</div>
-          <div>• <b>Storage Wipe:</b> Click button above to clear all tracking cookies anytime!</div>
+          <div>• <b>Batch Sizes:</b> Toggle between 25, 50, or 100 applications per batch.</div>
+          <div>• <b>Per-Job Deep Purge:</b> Wipes cookies, sessionStorage & localStorage after EACH job.</div>
+          <div>• <b>Auto-Closer:</b> Opens tab, clicks Apply, and closes all tabs cleanly.</div>
         </div>
       </div>
     </div>
@@ -630,8 +657,8 @@
   function updateUI() {
     const totalJobs = jobQueue.length;
     const curIndex = state.currentIndex;
-    const curBatch = Math.floor(curIndex / BATCH_SIZE) + 1;
-    const totalBatches = Math.ceil(totalJobs / BATCH_SIZE);
+    const curBatch = Math.floor(curIndex / batchSize) + 1;
+    const totalBatches = Math.ceil(totalJobs / batchSize);
     const percent = Math.min(100, Math.round((curIndex / totalJobs) * 100));
 
     if (progressBar) progressBar.style.width = percent + "%";
@@ -642,7 +669,7 @@
       targetText.innerText = jobQueue[curIndex] ? ("[" + (curIndex + 1) + "/" + totalJobs + "] " + formatSlug(jobQueue[curIndex])) : "Queue Finished!";
     }
     if (!isRunning && btnLabel) {
-      btnLabel.innerText = "Start Batch " + curBatch;
+      btnLabel.innerText = "Start Batch " + curBatch + " (" + batchSize + " Jobs)";
     }
   }
   updateUI();
@@ -661,14 +688,14 @@
   async function processNextJob() {
     if (!isRunning || isPaused) return;
 
-    // Check if reached milestone (end of a 50-job batch)
-    if (state.currentIndex > 0 && state.currentIndex % BATCH_SIZE === 0 && !state._milestonePassed) {
+    // Check if reached milestone (end of selected batch size)
+    if (state.currentIndex > 0 && state.currentIndex % batchSize === 0 && !state._milestonePassed) {
       state._milestonePassed = true;
       saveState(state);
 
-      const curBatch = Math.floor(state.currentIndex / BATCH_SIZE);
+      const curBatch = Math.floor(state.currentIndex / batchSize);
       const nextBatch = curBatch + 1;
-      const totalBatches = Math.ceil(jobQueue.length / BATCH_SIZE);
+      const totalBatches = Math.ceil(jobQueue.length / batchSize);
 
       console.log(
         "%c🎉 [BATCH " + curBatch + " COMPLETED] Finished " + state.currentIndex + " jobs! Purging cookies & storage...",
@@ -678,7 +705,7 @@
       wipeAllStorageAndCookies(true);
 
       isRunning = false;
-      if (btnLabel) btnLabel.innerText = "Start Batch " + nextBatch + " (" + (state.currentIndex + 1) + "–" + Math.min(jobQueue.length, state.currentIndex + BATCH_SIZE) + ")";
+      if (btnLabel) btnLabel.innerText = "Start Batch " + nextBatch + " (" + (state.currentIndex + 1) + "–" + Math.min(jobQueue.length, state.currentIndex + batchSize) + ")";
       if (btnIcon) btnIcon.innerHTML = ICONS.play;
       if (mainActionBtn) {
         mainActionBtn.style.background = "#059669";
@@ -687,7 +714,7 @@
       if (statusDot) statusDot.style.background = "#10b981";
       log("🎉 Batch " + curBatch + " completed! Storage purged. Click button to begin Batch " + nextBatch + " / " + totalBatches, "#059669");
       return;
-    } else if (state.currentIndex % BATCH_SIZE !== 0) {
+    } else if (state.currentIndex % batchSize !== 0) {
       state._milestonePassed = false;
     }
 
@@ -765,7 +792,7 @@
       let match = null;
       try {
         await sleep(1500);
-        match = await waitForApplyButton(tab1.document, 9000);
+        match = await waitForApplyButton(tab1, 9000);
       } catch (pollErr) {
         log("Page redirected automatically. Capturing response...", "#64748b");
       }
@@ -788,18 +815,18 @@
         state.skippedCount++;
       }
 
-      // 4. Wait for redirect (Tab 2 & Tab 3) and network telemetry to finalize
-      log("Waiting for tracking beacon & redirect on Tab 2 & Tab 3...", "#64748b");
-      await sleep(randomDelay(2500, 3500));
+      // 4. Wait for redirect (Tab 2 & Tab 3) and network telemetry to finalize (10s load wait)
+      log("Waiting 10s for destination page hydration & affiliate telemetry...", "#64748b");
+      await sleep(randomDelay(10000, 11500));
 
-      // 5. Triple Tab Close: Cleanly close Tab 3 (Employer ATS), Tab 2 (Redirect Gateway), and Tab 1 (Job Details)
-      log("Closing 3 tabs (Tab 1, Tab 2 & Tab 3)...", "#7c3aed");
+      // 5. Triple Tab Close: Cleanly wipe storage and close Tab 3, Tab 2, and Tab 1
+      log("Purging storage & closing windows...", "#7c3aed");
       try {
         if (tab3 && !tab3.closed) {
           try { tab3.localStorage.clear(); } catch (e) {}
           try { tab3.sessionStorage.clear(); } catch (e) {}
           tab3.close();
-          console.log("%c🚪 Tab 3 (Final Employer/ATS Destination Tab) closed cleanly.", "color: #059669; font-size: 11px; font-weight: bold;");
+          console.log("%c🚪 Tab 3 (Final Employer/ATS Destination Tab) storage wiped & closed cleanly.", "color: #059669; font-size: 11px; font-weight: bold;");
         }
       } catch (e) {}
 
@@ -808,7 +835,7 @@
           try { tab2.localStorage.clear(); } catch (e) {}
           try { tab2.sessionStorage.clear(); } catch (e) {}
           tab2.close();
-          console.log("%c🚪 Tab 2 (Redirect Gateway Tab) closed cleanly.", "color: #059669; font-size: 11px; font-weight: bold;");
+          console.log("%c🚪 Tab 2 (Redirect Gateway Tab) storage wiped & closed cleanly.", "color: #059669; font-size: 11px; font-weight: bold;");
         }
       } catch (e) {}
 
@@ -817,7 +844,7 @@
           try { tab1.localStorage.clear(); } catch (e) {}
           try { tab1.sessionStorage.clear(); } catch (e) {}
           tab1.close();
-          console.log("%c🚪 Tab 1 (Job Details Tab) closed cleanly.", "color: #059669; font-size: 11px; font-weight: bold;");
+          console.log("%c🚪 Tab 1 (Job Details Tab) storage wiped & closed cleanly.", "color: #059669; font-size: 11px; font-weight: bold;");
         }
       } catch (e) {}
 
@@ -828,8 +855,9 @@
       try { if (tab1 && !tab1.closed) tab1.close(); } catch(e) {}
     }
 
-    // 🧹 Purge storage and cookies immediately after job step completes
-    wipeAllStorageAndCookies(true);
+    // 🧼 Zero-Footprint Per-Job Deep Purge: Clear cookies, sessionStorage & localStorage after EACH job applied
+    wipeAllStorageAndCookies(false);
+    console.log("%c🧼 [ZERO-FOOTPRINT PURGE] Cleared cookies, sessionStorage & localStorage for Job " + (state.currentIndex + 1), "color: #059669; font-weight: bold; font-size: 11px;");
 
     // Advance queue index & save persistent state
     state.currentIndex++;
@@ -858,7 +886,7 @@
     if (isRunning && !isPaused) return;
     isRunning = true;
     isPaused = false;
-    const curBatch = Math.floor(state.currentIndex / BATCH_SIZE) + 1;
+    const curBatch = Math.floor(state.currentIndex / batchSize) + 1;
     if (btnLabel) btnLabel.innerText = "Pause Batch " + curBatch;
     if (btnIcon) btnIcon.innerHTML = ICONS.pause;
     if (mainActionBtn) {
@@ -872,7 +900,7 @@
 
   function pauseQueue() {
     isPaused = true;
-    const curBatch = Math.floor(state.currentIndex / BATCH_SIZE) + 1;
+    const curBatch = Math.floor(state.currentIndex / batchSize) + 1;
     if (btnLabel) btnLabel.innerText = "Resume Batch " + curBatch;
     if (btnIcon) btnIcon.innerHTML = ICONS.play;
     if (mainActionBtn) {
@@ -908,7 +936,7 @@
       state = { currentIndex: 0, completedCount: 0, skippedCount: 0, history: [] };
       saveState(state);
       updateUI();
-      if (btnLabel) btnLabel.innerText = "Start Batch 1";
+      if (btnLabel) btnLabel.innerText = "Start Batch 1 (" + batchSize + " Jobs)";
       if (btnIcon) btnIcon.innerHTML = ICONS.play;
       if (mainActionBtn) {
         mainActionBtn.style.background = "#2563eb";
@@ -919,8 +947,8 @@
   }
 
   function moveToNextBatch() {
-    const currentBatch = Math.floor(state.currentIndex / BATCH_SIZE);
-    const nextIndex = (currentBatch + 1) * BATCH_SIZE;
+    const currentBatch = Math.floor(state.currentIndex / batchSize);
+    const nextIndex = (currentBatch + 1) * batchSize;
     if (nextIndex < jobQueue.length) {
       isRunning = false;
       isPaused = false;
@@ -928,22 +956,22 @@
       saveState(state);
       wipeAllStorageAndCookies(true);
       updateUI();
-      log("⏩ Moved to Batch " + (Math.floor(nextIndex / BATCH_SIZE) + 1) + " (Starting from Job " + (nextIndex + 1) + "). Storage purged.", "#2563eb");
+      log("⏩ Moved to Batch " + (Math.floor(nextIndex / batchSize) + 1) + " (Starting from Job " + (nextIndex + 1) + "). Storage purged.", "#2563eb");
     } else {
       alert("Already at the final batch!");
     }
   }
 
   function moveToPrevBatch() {
-    const currentBatch = Math.floor(state.currentIndex / BATCH_SIZE);
-    const prevIndex = Math.max(0, (currentBatch - 1) * BATCH_SIZE);
+    const currentBatch = Math.floor(state.currentIndex / batchSize);
+    const prevIndex = Math.max(0, (currentBatch - 1) * batchSize);
     isRunning = false;
     isPaused = false;
     state.currentIndex = prevIndex;
     saveState(state);
     wipeAllStorageAndCookies(true);
     updateUI();
-    log("⏪ Moved to Batch " + (Math.floor(prevIndex / BATCH_SIZE) + 1) + " (Starting from Job " + (prevIndex + 1) + "). Storage purged.", "#2563eb");
+    log("⏪ Moved to Batch " + (Math.floor(prevIndex / batchSize) + 1) + " (Starting from Job " + (prevIndex + 1) + "). Storage purged.", "#2563eb");
   }
 
   mainActionBtn.addEventListener("click", toggleMainAction);
@@ -952,6 +980,32 @@
   document.getElementById("zfp-next-batch-btn").addEventListener("click", moveToNextBatch);
   document.getElementById("zfp-prev-batch-btn").addEventListener("click", moveToPrevBatch);
   document.getElementById("zfp-full-purge-btn").addEventListener("click", () => wipeAllStorageAndCookies(false));
+
+  // Batch Size Switchers (25, 50, 100)
+  document.querySelectorAll(".zfp-size-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const selectedSize = parseInt(btn.getAttribute("data-size"), 10);
+      if (!selectedSize || isNaN(selectedSize)) return;
+      batchSize = selectedSize;
+
+      document.querySelectorAll(".zfp-size-btn").forEach((b) => {
+        b.style.background = "#ffffff";
+        b.style.color = "#475569";
+        b.style.borderColor = "#cbd5e1";
+        b.style.fontWeight = "500";
+        b.style.boxShadow = "none";
+      });
+
+      btn.style.background = "#2563eb";
+      btn.style.color = "#ffffff";
+      btn.style.borderColor = "#2563eb";
+      btn.style.fontWeight = "700";
+      btn.style.boxShadow = "0 1px 3px rgba(37,99,235,0.2)";
+
+      updateUI();
+      log("Batch size set to " + batchSize + " jobs per batch.", "#2563eb");
+    });
+  });
 
   // Speed Mode Buttons
   document.querySelectorAll(".zfp-speed-btn").forEach((btn) => {
@@ -1003,6 +1057,14 @@
     reset: resetProgress,
     nextBatch: moveToNextBatch,
     prevBatch: moveToPrevBatch,
+    setBatchSize: (size) => {
+      const s = parseInt(size, 10);
+      if (s > 0) {
+        batchSize = s;
+        updateUI();
+        log("Batch size updated to " + s + " jobs via API.", "#2563eb");
+      }
+    },
     wipeStorage: () => wipeAllStorageAndCookies(false),
     cleanup: cleanupInstance,
     getState: () => ({ ...state }),
@@ -1024,11 +1086,11 @@
     "background: #2563eb; color: #ffffff; font-size: 13px; font-weight: 800; padding: 6px 10px; border-radius: 0 6px 6px 0; border: 1px solid #2563eb;"
   );
   console.log(
-    "%c📋 Total Queued: %c" + jobQueue.length + " openings across " + Math.ceil(jobQueue.length / BATCH_SIZE) + " batches\n" +
-    "%c💾 Saved Progress: %cJob " + (state.currentIndex + 1) + " (Batch " + (Math.floor(state.currentIndex / BATCH_SIZE) + 1) + ") | Applied: " + state.completedCount + "\n" +
-    "%c⏩ Batch Controls: %cClick 'Next 50 ▶' or 'Prev 50 ◀' on HUD to jump batches\n" +
-    "%c🧹 Storage Purge: %cClick 'Wipe Storage' button to purge cookies & storage instantly\n" +
-    "%c💡 Instructions: Click 'Start Batch " + (Math.floor(state.currentIndex / BATCH_SIZE) + 1) + "' on HUD or call window.__AUTO_APPLIER__.start()",
+    "%c📋 Total Queued: %c" + jobQueue.length + " openings across " + Math.ceil(jobQueue.length / batchSize) + " batches\n" +
+    "%c💾 Saved Progress: %cJob " + (state.currentIndex + 1) + " (Batch " + (Math.floor(state.currentIndex / batchSize) + 1) + ") | Applied: " + state.completedCount + "\n" +
+    "%c🎯 Batch Selector: %cChoose 25, 50, or 100 on the HUD toolbar\n" +
+    "%c🧼 Deep Purge: %cCookies, localStorage & sessionStorage wiped after EACH application\n" +
+    "%c💡 Instructions: Click 'Start Batch " + (Math.floor(state.currentIndex / batchSize) + 1) + "' on HUD or call window.__AUTO_APPLIER__.start()",
     "color: #64748b; font-weight: bold;", "color: #2563eb; font-weight: bold;",
     "color: #64748b; font-weight: bold;", "color: #059669; font-weight: bold;",
     "color: #64748b; font-weight: bold;", "color: #2563eb; font-weight: bold;",
