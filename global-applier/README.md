@@ -27,9 +27,9 @@ node playwright_applier.js --queue jobs_all_high_cpc_queue.json --batch 50 --bro
 node playwright_applier.js --start 500 --end 900 --batch 50 --browser rotate --headed
 ```
 
-### 3. ⚡ Continuous Execution with Auto-Next
+### 3. ⚡ Continuous Execution with 1-Minute Cooldown
 ```powershell
-node playwright_applier.js --queue jobs_all_high_cpc_queue.json --batch 50 --browser rotate --auto-next --headed
+node playwright_applier.js --queue jobs_all_high_cpc_queue.json --batch 50 --browser rotate --headed
 ```
 
 ---

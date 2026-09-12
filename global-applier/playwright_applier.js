@@ -217,7 +217,6 @@ BATCH & LOCATION OPTIONS:
   --batch-num <number>    Jump directly to specific batch number (e.g. 2, 3)
   --start <number>        Starting job index (e.g. 500)
   --end <number>          Ending job index limit (e.g. 900)
-  --auto-next             Automatically progress to next batch after 30s cooldown
   --resume                Resume execution from saved state in progress_state.json
 
 TIMING & DISPLAY:
@@ -753,14 +752,13 @@ process.on('SIGTERM', handleGracefulExit);
     console.log(`======================================================`);
 
     if (currentIndex < maxEndIndex && !isTerminating) {
-      if (isAutoNext) {
-        console.log(`\n☕ [AUTO-NEXT COOLDOWN] Taking 30s organic human rest before Batch ${currentBatchNum + 1}...`);
-        await sleep(30000);
-      } else {
-        console.log(`\n💡 To start the next batch, run:`);
-        console.log(`   node playwright_applier.js --location ${requestedCountry} --batch ${batchSize} --batch-num ${currentBatchNum + 1} --browser ${browserArg} --headed\n`);
-        break;
+      console.log(`\n☕ [BATCH ${currentBatchNum} COMPLETED] Storage purged. Taking 60s (1 min) organic cooldown before autostarting Batch ${currentBatchNum + 1} / ${totalBatches}...`);
+      for (let s = 60; s > 0; s--) {
+        if (isTerminating) break;
+        process.stdout.write(`\r⏳ Autostarting Batch ${currentBatchNum + 1} in ${s}s... (Press Ctrl+C to stop) `);
+        await sleep(1000);
       }
+      process.stdout.write(`\r🚀 Starting Batch ${currentBatchNum + 1} now!                                    \n\n`);
     }
   }
 

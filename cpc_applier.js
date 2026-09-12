@@ -10496,6 +10496,17 @@
     }
   }
 
+  let cooldownTimerId = null;
+  let cooldownSecondsRemaining = 0;
+
+  function stopCooldownTimer() {
+    if (cooldownTimerId) {
+      clearInterval(cooldownTimerId);
+      cooldownTimerId = null;
+    }
+    cooldownSecondsRemaining = 0;
+  }
+
   // =========================================================================
   // ⚡ SEQUENTIAL 1-BY-1 TAB ORCHESTRATION & TRIPLE TAB CLOSER
   // =========================================================================
@@ -10519,14 +10530,30 @@
       wipeAllStorageAndCookies(true);
 
       isRunning = false;
-      if (btnLabel) btnLabel.innerText = "Start Batch " + nextBatch + " (" + (state.currentIndex + 1) + "–" + Math.min(jobQueue.length, state.currentIndex + batchSize) + ")";
+      stopCooldownTimer();
+      cooldownSecondsRemaining = 60;
+
+      if (btnLabel) btnLabel.innerText = "Start Batch " + nextBatch + " now (" + cooldownSecondsRemaining + "s autostart)";
       if (btnIcon) btnIcon.innerHTML = ICONS.play;
       if (mainActionBtn) {
-        mainActionBtn.style.background = "#059669";
-        mainActionBtn.style.boxShadow = "0 4px 12px rgba(5, 150, 105, 0.3)";
+        mainActionBtn.style.background = "#d97706";
+        mainActionBtn.style.boxShadow = "0 4px 12px rgba(217, 119, 6, 0.3)";
       }
-      if (statusDot) statusDot.style.background = "#10b981";
-      log("🎉 Batch " + curBatch + " completed! Storage purged. Click button to begin Batch " + nextBatch + " / " + totalBatches, "#059669");
+      if (statusDot) statusDot.style.background = "#f59e0b";
+      log("🎉 Batch " + curBatch + " completed! Storage purged. ⏳ Autostarting Batch " + nextBatch + " / " + totalBatches + " in 60s (or click button to start now)...", "#d97706");
+
+      cooldownTimerId = setInterval(() => {
+        cooldownSecondsRemaining--;
+        if (cooldownSecondsRemaining > 0) {
+          if (btnLabel) btnLabel.innerText = "Start Batch " + nextBatch + " now (" + cooldownSecondsRemaining + "s autostart)";
+          if (statusDot) statusDot.style.background = (cooldownSecondsRemaining % 2 === 0) ? "#f59e0b" : "#10b981";
+        } else {
+          stopCooldownTimer();
+          log("🚀 [AUTOSTART] 1-minute cooldown complete! Starting Batch " + nextBatch + "...", "#059669");
+          startQueue();
+        }
+      }, 1000);
+
       return;
     } else if (state.currentIndex % batchSize !== 0) {
       state._milestonePassed = false;
@@ -10697,6 +10724,7 @@
   // 🎛️ CONTROLS & EVENT LISTENERS
   // =========================================================================
   function startQueue() {
+    stopCooldownTimer();
     if (isRunning && !isPaused) return;
     isRunning = true;
     isPaused = false;
@@ -10713,6 +10741,7 @@
   }
 
   function pauseQueue() {
+    stopCooldownTimer();
     isPaused = true;
     const curBatch = Math.floor(state.currentIndex / batchSize) + 1;
     if (btnLabel) btnLabel.innerText = "Resume Batch " + curBatch;
@@ -10726,7 +10755,7 @@
   }
 
   function toggleMainAction() {
-    if (!isRunning || isPaused) {
+    if (!isRunning || isPaused || cooldownTimerId) {
       startQueue();
     } else {
       pauseQueue();
@@ -10734,6 +10763,7 @@
   }
 
   function skipJob() {
+    stopCooldownTimer();
     if (state.currentIndex < jobQueue.length) {
       state.currentIndex++;
       state.skippedCount++;
@@ -10744,6 +10774,7 @@
   }
 
   function resetProgress() {
+    stopCooldownTimer();
     if (confirm("Reset application progress back to Job #1?")) {
       isRunning = false;
       isPaused = false;
@@ -10761,6 +10792,7 @@
   }
 
   function moveToNextBatch() {
+    stopCooldownTimer();
     const currentBatch = Math.floor(state.currentIndex / batchSize);
     const nextIndex = (currentBatch + 1) * batchSize;
     if (nextIndex < jobQueue.length) {
@@ -10777,6 +10809,7 @@
   }
 
   function moveToPrevBatch() {
+    stopCooldownTimer();
     const currentBatch = Math.floor(state.currentIndex / batchSize);
     const prevIndex = Math.max(0, (currentBatch - 1) * batchSize);
     isRunning = false;
@@ -10851,6 +10884,7 @@
 
   // Cleanup Session
   function cleanupInstance() {
+    stopCooldownTimer();
     isRunning = false;
     isPaused = true;
     hud.remove();
@@ -10871,6 +10905,9 @@
     reset: resetProgress,
     nextBatch: moveToNextBatch,
     prevBatch: moveToPrevBatch,
+    skipCooldown: () => {
+      if (cooldownTimerId) startQueue();
+    },
     setBatchSize: (size) => {
       const s = parseInt(size, 10);
       if (s > 0) {

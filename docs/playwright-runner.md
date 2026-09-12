@@ -37,12 +37,12 @@ To run specifically the section between **Job 500 and Job 900**:
 node global-applier/playwright_applier.js --queue jobs_all_high_cpc_queue.json --start 500 --end 900 --batch 50 --browser rotate --headed
 ```
 
-### 3. ⚡ Continuous Execution with Auto-Next
+### 3. ⚡ Continuous Execution with 1-Minute Cooldown
 
-To let the runner automatically progress through batches with a 30-second cooldown:
+By default, the runner takes a 60-second (1 minute) organic rest after each batch, shows a live terminal countdown, and autostarts the next batch without requiring any manual clicks or intervention:
 
 ```powershell
-node global-applier/playwright_applier.js --queue jobs_all_high_cpc_queue.json --batch 50 --auto-next --headed
+node global-applier/playwright_applier.js --queue jobs_all_high_cpc_queue.json --batch 50 --browser rotate --headed
 ```
 
 ### 4. 📌 Pinned Single Browser Execution

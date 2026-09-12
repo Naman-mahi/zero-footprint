@@ -4,7 +4,7 @@ This guide details our flagship in-browser automation engines:
 1. **`cpc_applier.js`**: Dedicated engine for the **10,000 High-CPC queue** (`cpc_value: 0.048` & `sort_by: "high_cpc"`).
 2. **`auto_applier.js`**: Engine for the **8,987 Recommendation queue**.
 
-Both scripts feature a **pure white light-theme floating HUD**, **dynamic user-selectable batch sizes (25 / 50 / 100)**, **per-job zero-footprint cookie & storage purge**, **10-second mandatory destination hydration**, and **3-tab auto-closing**.
+Both scripts feature a **pure white light-theme floating HUD**, **dynamic user-selectable batch sizes (25 / 50 / 100)**, **automatic 1-minute batch autostart (zero manual click required)**, **per-job zero-footprint cookie & storage purge**, **10-second mandatory destination hydration**, and **3-tab auto-closing**.
 
 ---
 
@@ -21,33 +21,40 @@ flowchart TD
     G --> H[🧹 Zero-Footprint Deep Purge: Cookies, Local/Session Storage, IndexedDB]
     H --> I[Save Progress in localStorage]
     I --> J{Is Job at Batch Milestone?}
-    J -->|Yes| K{Milestone Mode}
-    K -->|Auto-Continue| L[Pause 30s for Human Rest -> Start Next Batch]
-    K -->|Pause & Wait| M[Pause Queue -> Wait for User Click]
+    J -->|Yes| K[🧹 Deep Storage & Cookie Purge]
+    K --> L[⏳ Start 1-Minute Cooldown Countdown: 60s -> 0s]
+    L -->|Timer Expires / User Clicks Start| M[🚀 Automatically Launch Next Batch]
+    M --> B
     J -->|No| N[Human Pacing Delay 3s-7s]
     N --> B
-    L --> B
 ```
 
 ---
 
 ## ✨ Key Capabilities
 
-### 1. 🎯 User-Selectable Batch Sizes (25 / 50 / 100)
+### 1. ⏳ Automatic 1-Minute Batch Autostart (No Manual Click Required)
+When any batch (e.g. 25, 50, or 100 jobs) completes:
+- The bot **purges all cookies and storage**.
+- Initiates an **organic 60-second (1 minute) cooldown timer** with a real-time countdown displayed on the HUD button and log bar (`"Start Batch 2 now (48s autostart)"`).
+- Upon reaching `0s`, it **automatically begins the next batch immediately** without requiring any manual interaction.
+- If you wish to skip the cooldown and proceed immediately, simply click the main action button at any time.
+
+### 2. 🎯 User-Selectable Batch Sizes (25 / 50 / 100)
 Directly on the floating HUD, you can select your preferred batch size:
 - **`[25]`**: Ideal for quick validation sessions and light testing.
 - **`[50]`**: Standard recommended batch size with optimal rest intervals.
 - **`[100]`**: High-volume unattended execution.
 
-The engine recalibrates batch progress (e.g. `Batch 3 of 400`) and milestone checks in real time upon selection.
+The engine recalibrates batch progress (e.g. `Batch 3 of 200`) and milestone checks in real time upon selection.
 
-### 2. 🧼 Per-Job Deep Zero-Footprint Storage & Cookie Purge
+### 3. 🧼 Per-Job Deep Zero-Footprint Storage & Cookie Purge
 Unlike basic bots that only clear storage at batch boundaries, Zero-Footprint executes a **full storage & cookie purge on EVERY SINGLE job application**:
 - **Domain & Subdomain Cookies**: Scans `document.cookie` and deletes every cookie across root domain and all parent/subdomain scopes (`domain=.artha.link`, `domain=my.artha.link`, `path=/`).
 - **Web Storage**: Executes `localStorage.clear()` (safely retaining the bot's own isolated progress key) and `sessionStorage.clear()`.
 - **IndexedDB**: Iterates `window.indexedDB.databases()` and drops tracking/session databases.
 
-### 3. ⏳ 10-Second Mandatory Destination Hydration
+### 4. ⏳ 10-Second Mandatory Destination Hydration
 When the apply button is clicked and redirects to the employer portal or affiliate landing page:
 - Tab 3 is monitored and held open for **10 full seconds**.
 - Guarantees that affiliate tracking pixels, UTM analytics beacons, and conversion scripts complete their network requests.
@@ -69,15 +76,15 @@ When the apply button is clicked and redirects to the employer portal or affilia
 ├────────────────────────────────────────────────────────┤
 │ Batch Size:     [ 25 ]  [[ 50 ]]  [ 100 ]              │
 │ Pacing:         [Fast (3s)]  [[ Normal (5s) ]] [Stealth]│
-│ At Batch End:   [[ Auto-Continue ]]   [Pause & Wait]   │
 ├────────────────────────────┬─────────────┬─────────────┤
-│ [▶ Start 1-by-1 Queue]     │ [⏭ Skip]   │ [↺ Reset]   │
+│ [⏳ Start Batch 2 now (45s)]│ [⏭ Skip]   │ [↺ Reset]   │
 ├────────────────────────────┴─────────────┴─────────────┤
 │ [🧹 Wipe All Cookies, Session & Local Storage]         │
 ├────────────────────────────────────────────────────────┤
 │ 💡 Operational Guarantees:                             │
 │ • Runs strictly 1-by-1 (0% machine RAM/CPU lag).       │
 │ • Clears cookies & session storage after EACH job.     │
+│ • 1-minute autostart cooldown between batches.         │
 │ • Holds destination pages for 10s tracking hydration.  │
 │ • Auto-closes all 3 tabs cleanly.                      │
 └────────────────────────────────────────────────────────┘
@@ -124,22 +131,25 @@ javascript:(function(){const s=document.createElement('script');s.src='https://c
 Control the engine directly from the browser console:
 
 ```javascript
-// Start or resume execution
-window.__CPC_APP_INSTANCE__.start(); // For CPC applier
-window.__AUTO_APPLIER__.start();     // For standard applier
+// Start or resume execution (or skip cooldown)
+window.__CPC_APPLIER__.start();
+window.__AUTO_APPLIER__.start();
+
+// Skip 1-minute cooldown immediately
+window.__CPC_APPLIER__.skipCooldown();
 
 // Pause queue
-window.__CPC_APP_INSTANCE__.pause();
+window.__CPC_APPLIER__.pause();
 
 // Skip current job
-window.__CPC_APP_INSTANCE__.skip();
+window.__CPC_APPLIER__.skip();
 
 // Reset queue progress back to 1
-window.__CPC_APP_INSTANCE__.reset();
+window.__CPC_APPLIER__.reset();
 
 // Manually trigger deep cookie/storage purge
-window.__CPC_APP_INSTANCE__.wipeStorage();
+window.__CPC_APPLIER__.wipeStorage();
 
 // Inspect live progress state
-console.log(window.__CPC_APP_INSTANCE__.getState());
+console.log(window.__CPC_APPLIER__.getState());
 ```

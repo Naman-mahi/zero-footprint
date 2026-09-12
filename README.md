@@ -31,6 +31,7 @@ A high-performance, **zero-footprint**, 100% undetectable automation suite for h
 - **🛡️ 100% Undetectable Execution**: Zero automation flags (`navigator.webdriver === false`), native human execution context, 9-stage pointer event cascade.
 - **💎 10,000 High-CPC Dedicated Queue**: Paged and extracted all 100 pages (`cpc_value: 0.048`, `sort_by: "high_cpc"`) into dedicated data files and appliers.
 - **🎯 Dynamic User-Selectable Batch Sizes**: Toggle between **25**, **50**, or **100 jobs per batch** on the fly from the floating HUD or CLI.
+- **⏳ Automatic 1-Minute Batch Autostart**: Never wait for a manual click—automatically purges storage, takes a 60-second organic cooldown with live countdown, and autostarts the next batch.
 - **🧼 Per-Job Deep Zero-Footprint Purge**: Completely purges `document.cookie` (root domain + subdomains), `sessionStorage`, `localStorage`, and `IndexedDB` **after every single job application**.
 - **⏳ 10-Second Mandatory Destination Hydration**: Holds employer landing pages open for 10 seconds to ensure tracking beacons, affiliate pixels, and analytics scripts fully register.
 - **🪟 3-Tab Auto-Closing System**: Seamlessly manages the Main Controller Tab, Job Detail Page (Tab 1), Affiliate Redirect (Tab 2), and Final Destination (Tab 3), closing target tabs cleanly.
@@ -109,10 +110,10 @@ node global-applier/playwright_applier.js --queue jobs_all_high_cpc_queue.json -
 node global-applier/playwright_applier.js --queue jobs_all_high_cpc_queue.json --start 500 --end 900 --batch 50 --browser rotate --headed
 ```
 
-### 3. Continuous Execution with Auto-Next
+### 3. Continuous Execution with 1-Minute Cooldown
 ```powershell
-# Automatically proceeds to next batch after 30s rest
-node global-applier/playwright_applier.js --queue jobs_all_high_cpc_queue.json --batch 50 --auto-next --headed
+# Automatically proceeds to next batch after 1-minute (60s) cooldown countdown
+node global-applier/playwright_applier.js --queue jobs_all_high_cpc_queue.json --batch 50 --browser rotate --headed
 ```
 
 ### 4. Resume from Saved State
