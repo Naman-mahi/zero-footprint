@@ -39,22 +39,256 @@
   // 📋 TARGET JOB QUEUE (16 Verified Openings)
   // ==========================================
   const JOB_QUEUE = [
-    { id: 1, title: "Data Engineer @ micro1", url: "https://artha.link/@ritu_singh_647119359/jobs/data-engineer-micro1-467d5920" },
-    { id: 2, title: "Senior Database Reliability Engineer @ micro1", url: "https://artha.link/@ritu_singh_647119359/jobs/senior-database-reliability-engineer-micro1-8ef9e2c8" },
-    { id: 3, title: "QA Engineer @ micro1", url: "https://artha.link/@ritu_singh_647119359/jobs/qa-engineer-micro1-d29d2b9c" },
-    { id: 4, title: "Senior Software Engineer @ micro1", url: "https://artha.link/@ritu_singh_647119359/jobs/senior-software-engineer-micro1-215ec6b5" },
-    { id: 5, title: "Autodesk Fusion 360 Specialist @ micro1", url: "https://artha.link/@ritu_singh_647119359/jobs/autodesk-fusion-360-specialist-micro1-22acdfe4" },
-    { id: 6, title: "Senior Backend Engineer @ micro1", url: "https://artha.link/@ritu_singh_647119359/jobs/senior-backend-engineer-micro1-56b8b236" },
-    { id: 7, title: "Senior Webflow Developer @ micro1", url: "https://artha.link/@ritu_singh_647119359/jobs/senior-webflow-developer-micro1-fbad260a" },
-    { id: 8, title: "Mechanical Engineer @ micro1", url: "https://artha.link/@ritu_singh_647119359/jobs/mechanical-engineer-micro1-2a66b15d" },
-    { id: 9, title: "Chemistry Specialist @ micro1", url: "https://artha.link/@ritu_singh_647119359/jobs/chemistry-specialist-micro1-34f365c0" },
-    { id: 10, title: "Materials Scientist / Engineer @ micro1", url: "https://artha.link/@ritu_singh_647119359/jobs/materials-scientist-engineer-micro1-8864dfaa" },
-    { id: 11, title: "Lead Engineer – Plant Layout Cabling @ GE Vernova", url: "https://artha.link/@ritu_singh_647119359/jobs/lead-engineer-plant-layout-cabling-ge-vernova-vadodara-e848bc78" },
-    { id: 12, title: "Lead Engineer – Electrical Component @ GE Vernova", url: "https://artha.link/@ritu_singh_647119359/jobs/lead-engineer-electrical-component-ge-vernova-noida-ab79ca02" },
-    { id: 13, title: "Project Plant Lead Engineer @ GE Vernova", url: "https://artha.link/@ritu_singh_647119359/jobs/project-plant-lead-engineer-ge-vernova-noida-dcf6df6e" },
-    { id: 14, title: "Procurement Specialist @ Tech Data", url: "https://artha.link/@ritu_singh_647119359/jobs/procurement-specialist-tech-data-chennai-41783bc1" },
-    { id: 15, title: "Senior Data Engineer @ Procter & Gamble", url: "https://artha.link/@ritu_singh_647119359/jobs/senior-data-engineer-procter-gamble-hyderabad-6c1b68af" },
-    { id: 16, title: "Data Scientist @ Procter & Gamble", url: "https://artha.link/@ritu_singh_647119359/jobs/data-scientist-procter-gamble-mumbai-b1369edd" },
+      {
+          "id": 1,
+          "title": "Customer Support Executive @ Risebird",
+          "url": "https://artha.link/@eanxt/jobs/customer-support-executive-risebird-noida-4ac1e100"
+      },
+      {
+          "id": 2,
+          "title": "Associate Cardiac Surgeon @ Freelance",
+          "url": "https://artha.link/@eanxt/jobs/associate-cardiac-surgeon-freelance-nashik-725169b8"
+      },
+      {
+          "id": 3,
+          "title": "Product Designer @ Cradlewise",
+          "url": "https://artha.link/@eanxt/jobs/product-designer-cradlewise-bangalore-e6f2072d"
+      },
+      {
+          "id": 4,
+          "title": "Tax Senior @ SENTIENT - An Ascend Company",
+          "url": "https://artha.link/@eanxt/jobs/tax-senior-sentient-an-ascend-ahmedabad-92a1d0c7"
+      },
+      {
+          "id": 5,
+          "title": "Solutions & Delivery Lead - Enterprise Learning Solutions @ Global Enterprise Technology & Learning Solutions Company",
+          "url": "https://artha.link/@eanxt/jobs/solutions-delivery-lead-enterprise-global-enterprise-bangalore-95e7696e"
+      },
+      {
+          "id": 6,
+          "title": "Senior Reporting Analyst @ Korn Ferry",
+          "url": "https://artha.link/@eanxt/jobs/senior-reporting-analyst-korn-ferry-bangalore-33ef9773"
+      },
+      {
+          "id": 7,
+          "title": "Visionplus Support Engineer @ Stackave Solutions",
+          "url": "https://artha.link/@eanxt/jobs/visionplus-support-engineer-stackave-solutions-hyderabad-18b7aee8"
+      },
+      {
+          "id": 8,
+          "title": "Technical Lead Python @ EvoluteIQ",
+          "url": "https://artha.link/@eanxt/jobs/technical-lead-python-evoluteiq-bangalore-f5290319"
+      },
+      {
+          "id": 9,
+          "title": "Vice President - India Sales @ Charles Alan Consulting Ltd",
+          "url": "https://artha.link/@eanxt/jobs/vice-president-india-sales-charles-alan-mumbai-f315cd16"
+      },
+      {
+          "id": 10,
+          "title": "Sales Technical Lead @ Symco Techno Products and Services",
+          "url": "https://artha.link/@eanxt/jobs/sales-technical-lead-symco-techno-hyderabad-0f186eca"
+      },
+      {
+          "id": 11,
+          "title": "Associate Manager- Audit- Technical Resources @ Withum",
+          "url": "https://artha.link/@eanxt/jobs/associate-manager-audit-technical-withum-bangalore-187f4f2c"
+      },
+      {
+          "id": 12,
+          "title": "Inside Sales Executive - B2c @ Hoola Health (Prev. BabyMD)",
+          "url": "https://artha.link/@eanxt/jobs/inside-sales-executive-b2c-hoola-health-prev-bangalore-3e43f26a"
+      },
+      {
+          "id": 13,
+          "title": "Senior Implementation Project Manager - Bfsi @ Convin",
+          "url": "https://artha.link/@eanxt/jobs/senior-implementation-project-manager-convin-bangalore-cdc3baa2"
+      },
+      {
+          "id": 14,
+          "title": "Senior Data Engineer @ Info Services",
+          "url": "https://artha.link/@eanxt/jobs/senior-data-engineer-info-services-india-6c6f4d0b"
+      },
+      {
+          "id": 15,
+          "title": "Admin / Executive Assistant - Real Estate | Ghatkopar, Mumbai | Up to ₹30k Pm @ QUICK PLACEMENTS",
+          "url": "https://artha.link/@eanxt/jobs/admin-executive-assistant-real-estate-quick-placements-mumbai-a4657608"
+      },
+      {
+          "id": 16,
+          "title": "Analog Circuit Design @ UST",
+          "url": "https://artha.link/@eanxt/jobs/analog-circuit-design-ust-hyderabad-2dce1b2e"
+      },
+      {
+          "id": 17,
+          "title": "Accordion India - Senior Data Engineer @ Accordion India",
+          "url": "https://artha.link/@eanxt/jobs/accordion-india-senior-data-engineer-accordion-india-hyderabad-c5bf98bf"
+      },
+      {
+          "id": 18,
+          "title": "Data Governance Consultant @ Bristlecone",
+          "url": "https://artha.link/@eanxt/jobs/data-governance-consultant-bristlecone-pune-division-771c1889"
+      },
+      {
+          "id": 19,
+          "title": "Senior Interior Designer @ Dar",
+          "url": "https://artha.link/@eanxt/jobs/senior-interior-designer-dar-pune-district-04ecd4bd"
+      },
+      {
+          "id": 20,
+          "title": "Senior Backend Engineer @ Blossom Social",
+          "url": "https://artha.link/@eanxt/jobs/senior-backend-engineer-blossom-social-india-ac38a724"
+      },
+      {
+          "id": 21,
+          "title": "Head Of Production @ UNISON INTERNATIONAL CONSULTING (The Recruitment Company)",
+          "url": "https://artha.link/@eanxt/jobs/head-of-production-unison-bangalore-8ba9751f"
+      },
+      {
+          "id": 22,
+          "title": "Secretarial & Compliance @ Mangalam Placement Pvt Ltd.",
+          "url": "https://artha.link/@eanxt/jobs/secretarial-compliance-mangalam-placement-navi-mumbai-1dafe14b"
+      },
+      {
+          "id": 23,
+          "title": "Lead Security Solution Architect for Banking @ Live Connections",
+          "url": "https://artha.link/@eanxt/jobs/lead-security-solution-architect-for-live-connections-chennai-2fe4317a"
+      },
+      {
+          "id": 24,
+          "title": "Associate Director Business Finance - Group Functions @ upGrad",
+          "url": "https://artha.link/@eanxt/jobs/associate-director-business-finance-upgrad-mumbai-8a2e8c20"
+      },
+      {
+          "id": 25,
+          "title": "Cybersecurity Governance Analyst @ Mizuho",
+          "url": "https://artha.link/@eanxt/jobs/cybersecurity-governance-analyst-mizuho-pune-city-313f2676"
+      },
+      {
+          "id": 26,
+          "title": "Architect @ Visarg Studio",
+          "url": "https://artha.link/@eanxt/jobs/architect-visarg-studio-new-delhi-60187f98"
+      },
+      {
+          "id": 27,
+          "title": "Mdm Developer @ Webologix Ltd/ INC",
+          "url": "https://artha.link/@eanxt/jobs/mdm-developer-webologix-ltd-inc-west-bengal-f3ff509a"
+      },
+      {
+          "id": 28,
+          "title": "Account Manager @ Swiggy",
+          "url": "https://artha.link/@eanxt/jobs/account-manager-swiggy-mumbai-87595193"
+      },
+      {
+          "id": 29,
+          "title": "Lead Interior Designer @ Meld",
+          "url": "https://artha.link/@eanxt/jobs/lead-interior-designer-meld-mumbai-f5579756"
+      },
+      {
+          "id": 30,
+          "title": "Chartered Accountant @ King Rose Construction",
+          "url": "https://artha.link/@eanxt/jobs/chartered-accountant-king-rose-bangalore-abb2e764"
+      },
+      {
+          "id": 31,
+          "title": "Assistant Professor-quantitative Technique - Asmsoc-mumbai @ SVKM's Narsee Monjee Institute of Management Studies (NMIMS)",
+          "url": "https://artha.link/@eanxt/jobs/assistant-professor-quantitative-svkm-s-narsee-mumbai-5976fda9"
+      },
+      {
+          "id": 32,
+          "title": "Sales Executive (medical Devices) @ Cureous",
+          "url": "https://artha.link/@eanxt/jobs/sales-executive-medical-devices-cureous-new-delhi-7b7c1343"
+      },
+      {
+          "id": 33,
+          "title": "Deputy Manager @ Hardcastle Restaurants Pvt. Ltd.",
+          "url": "https://artha.link/@eanxt/jobs/deputy-manager-hardcastle-mumbai-c281f42e"
+      },
+      {
+          "id": 34,
+          "title": "Front Office Executive @ BDO India",
+          "url": "https://artha.link/@eanxt/jobs/front-office-executive-bdo-india-gandhinagar-2b9847d9"
+      },
+      {
+          "id": 35,
+          "title": "Graphic Designer @ MIT Academy of Engineering",
+          "url": "https://artha.link/@eanxt/jobs/graphic-designer-mit-academy-of-pimpri-solapur-9204b610"
+      },
+      {
+          "id": 36,
+          "title": "Back End Developer @ Asymmetric Labs",
+          "url": "https://artha.link/@eanxt/jobs/back-end-developer-asymmetric-labs-bangalore-2c2edc67"
+      },
+      {
+          "id": 37,
+          "title": "Embedded Hardware Engineer @ Exicom",
+          "url": "https://artha.link/@eanxt/jobs/embedded-hardware-engineer-exicom-gurgaon-f0436c94"
+      },
+      {
+          "id": 38,
+          "title": "Infusion Nurse @ ALIV - Regenerative Wellness",
+          "url": "https://artha.link/@eanxt/jobs/infusion-nurse-aliv-regenerative-mumbai-4d2cca68"
+      },
+      {
+          "id": 39,
+          "title": "Sales Executive @ BADRIVAS BIOTECH PRIVATE LIMITED",
+          "url": "https://artha.link/@eanxt/jobs/sales-executive-badrivas-biotech-new-delhi-8b1124ad"
+      },
+      {
+          "id": 40,
+          "title": "Guest Relations Executive (gre) @ Leading Construction Company",
+          "url": "https://artha.link/@eanxt/jobs/guest-relations-executive-gre-leading-bangalore-d96ea4a8"
+      },
+      {
+          "id": 41,
+          "title": "Pastry Chef @ DLF Hospitality",
+          "url": "https://artha.link/@eanxt/jobs/pastry-chef-dlf-hospitality-gurgaon-0d6c17cb"
+      },
+      {
+          "id": 42,
+          "title": "Public Relations Senior Account Manager @ PR Pundit Havas Red",
+          "url": "https://artha.link/@eanxt/jobs/public-relations-senior-account-manager-pr-pundit-havas-red-mumbai-1d6c518b"
+      },
+      {
+          "id": 43,
+          "title": "Ipqa Manager @ Amara Raja Advanced Cell Technologies",
+          "url": "https://artha.link/@eanxt/jobs/ipqa-manager-amara-raja-advanced-telangana-37d9d90a"
+      },
+      {
+          "id": 44,
+          "title": "Assistant Manager Packaging Development @ Inventia Healthcare Limited",
+          "url": "https://artha.link/@eanxt/jobs/assistant-manager-packaging-development-inventia-healthcare-mumbai-0ef92094"
+      },
+      {
+          "id": 45,
+          "title": "Assistant Event Manager @ SmartQ",
+          "url": "https://artha.link/@eanxt/jobs/assistant-event-manager-smartq-bangalore-5c392766"
+      },
+      {
+          "id": 46,
+          "title": "Sales Development Representative @ OpenGov",
+          "url": "https://artha.link/@eanxt/jobs/sales-development-representative-opengov-inc-pune-city-24bebeba"
+      },
+      {
+          "id": 47,
+          "title": "Lead Data Engineer @ Ascendion",
+          "url": "https://artha.link/@eanxt/jobs/lead-data-engineer-ascendion-pune-district-8f6c0d59"
+      },
+      {
+          "id": 48,
+          "title": "Territory Sales Manager @ Kapoor Glass India Pvt. Ltd.",
+          "url": "https://artha.link/@eanxt/jobs/territory-sales-manager-kapoor-glass-india-mumbai-d47847ab"
+      },
+      {
+          "id": 49,
+          "title": "Telesales Executive - Healthcare/insurance @ Care.fi",
+          "url": "https://artha.link/@eanxt/jobs/telesales-executive-healthcare-insurance-care-fi-bangalore-eff1fd1c"
+      },
+      {
+          "id": 50,
+          "title": "Creative Designer @ Gratitude Bharat",
+          "url": "https://artha.link/@eanxt/jobs/creative-designer-gratitude-bharat-mumbai-3c2f4717"
+      }
   ];
 
   // ==========================================
