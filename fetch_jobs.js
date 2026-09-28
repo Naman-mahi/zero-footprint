@@ -1,54 +1,33 @@
 /**
- * 🚀 Artha Job Recommendation Fetcher (Fresh Active Jobs)
+ * 🚀 Artha High-CPC Job Fetcher (cpc_value = 0.048)
  * 
- * Fetches available real-time job openings from the recommendation feed
- * without any CPC filtering.
+ * Uses geo_boost=true to activate the pulse_boost algorithm, fetching
+ * all active job openings with cpc_value = 0.048 across major tech hubs.
  * 
  * OUTPUTS:
- *   1. jobs.json        -> Complete metadata list of fetched openings
- *   2. jobs_queue.json  -> Deduplicated array of all apply URLs
+ *   1. jobs.json        -> Full metadata records including cpc_value: 0.048
+ *   2. jobs_queue.json  -> Deduplicated array of 0.048 CPC application URLs
+ *   3. auto_applier.js  -> Directly populates DEFAULT_QUEUE with the High-CPC links
  * 
  * USAGE:
- *   node fetch_recommend_jobs.js [maxPages] [pageSize] [location]
- * 
- * EXAMPLES:
- *   node fetch_recommend_jobs.js 25 100 IN
- *   node fetch_recommend_jobs.js 10 100
+ *   npm run fetch
+ *   node fetch_jobs.js
  */
 
 const fs = require('fs');
 const path = require('path');
 
-const RECOMMEND_API_URL = "https://my.artha.link/api/job-api/recommend?pulse_variant=control";
+const RECOMMEND_API_URL = "https://my.artha.link/api/job-api/recommend";
 const BASE_JOB_URL = "https://artha.link/@eanxt/jobs/";
-
-const MAX_PAGES = Number(process.argv[2] || 25);
-const PAGE_SIZE = Number(process.argv[3] || 100);
-const LOCATION_CODE = (process.argv[4] || "IN").toUpperCase();
+const TARGET_CPC = 0.048;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function fetchJobs() {
-  const allJobs = [];
+async function fetchHighCpcJobs() {
   const seenSlugs = new Set();
-  let page = 1;
-  let consecutiveZeroMatches = 0;
+  const allJobs = [];
 
-  console.log(`\n⏳ Fetching fresh jobs (Location: ${LOCATION_CODE}, Limit: ${PAGE_SIZE}/page, Max Pages: ${MAX_PAGES})...`);
-
-  while (page <= MAX_PAGES) {
-    const payload = {
-      query: "",
-      geo_boost: false,
-      page: page,
-      limit: PAGE_SIZE,
-      location: LOCATION_CODE,
-      only_enriched: false,
-      only_cpa: false,
-      categories: [],
-      niche_keywords: []
-    };
-
+  async function queryBatch(payload, label = "") {
     try {
       const response = await fetch(RECOMMEND_API_URL, {
         method: "POST",
@@ -61,27 +40,18 @@ async function fetchJobs() {
 
       if (response.status === 429) {
         const retryAfter = Number(response.headers.get("Retry-After")) || 5;
-        console.log(`  ⏳ Rate limited on page ${page}. Retrying in ${retryAfter}s...`);
         await sleep(retryAfter * 1000);
-        continue;
+        return;
       }
 
-      if (!response.ok) {
-        console.error(`❌ HTTP Error ${response.status}: ${response.statusText} on page ${page}`);
-        await sleep(2000);
-        break;
-      }
+      if (!response.ok) return;
 
       const result = await response.json();
       const rawItems = result.items || [];
+      let newCount = 0;
 
-      if (rawItems.length === 0) {
-        console.log(`ℹ️ Reached end of results (empty items array on page ${page}).`);
-        break;
-      }
-
-      let newValidThisPage = 0;
       for (const item of rawItems) {
+        if (item.cpc_value !== TARGET_CPC) continue;
         const slug = item.slug || (item.url ? item.url.replace(BASE_JOB_URL, '') : null);
         if (!slug || seenSlugs.has(slug)) continue;
 
@@ -92,35 +62,38 @@ async function fetchJobs() {
           slug: slug,
           company_name: item.company_info?.name || item.company || "Unknown Company",
           apply_link: `${BASE_JOB_URL}${slug}`,
-          country: item.country || item.company_info?.country || LOCATION_CODE,
+          country: item.country || item.company_info?.country || "IN",
           city: item.city || null,
+          cpc_value: item.cpc_value,
           job_type: item.job_type || null,
           work_mode: item.work_mode || null,
-          salary_min: item.salary_min || null,
-          salary_max: item.salary_max || null,
-          salary_curr: item.salary_curr || null,
           posted_date: item.posted_date || null
         });
-        newValidThisPage++;
+        newCount++;
       }
 
-      console.log(`  📦 Page ${page}: Received ${rawItems.length} items (${newValidThisPage} new unique) | Total collected: ${allJobs.length}`);
-
-      if (newValidThisPage === 0) {
-        consecutiveZeroMatches++;
-        if (consecutiveZeroMatches >= 3) {
-          console.log(`ℹ️ Stopping fetch after 3 consecutive pages with no new unique matching items.`);
-          break;
-        }
-      } else {
-        consecutiveZeroMatches = 0;
+      if (newCount > 0) {
+        console.log(`  📦 [${label}] Added ${newCount} new CPC 0.048 jobs | Total unique: ${allJobs.length}`);
       }
+      await sleep(120);
+    } catch (e) {}
+  }
 
-      page++;
-      await sleep(200);
-    } catch (err) {
-      console.error(`❌ Fetch error on page ${page}:`, err.message);
-      break;
+  console.log(`\n⏳ Phase 1: Fetching core catalog with geo_boost=true...`);
+  for (let page = 1; page <= 8; page++) {
+    await queryBatch({ query: "", page, limit: 100, geo_boost: true }, `Core Page ${page}`);
+  }
+
+  console.log(`\n⏳ Phase 2: Fetching regional hub catalogs...`);
+  const hubs = [
+    'Bengaluru', 'Mumbai', 'Hyderabad', 'Pune',
+    'Chennai', 'Delhi', 'Noida', 'Gurugram',
+    'Kolkata', 'Ahmedabad', 'Jaipur', 'Kochi'
+  ];
+
+  for (const hub of hubs) {
+    for (let page = 1; page <= 3; page++) {
+      await queryBatch({ query: hub, page, limit: 100, geo_boost: true }, `${hub} P${page}`);
     }
   }
 
@@ -129,58 +102,49 @@ async function fetchJobs() {
 
 (async () => {
   console.log('======================================================');
-  console.log(`🚀 ARTHA JOB FETCHER (LOCATION: ${LOCATION_CODE})`);
-  console.log('======================================================');
-  console.log(`📍 Location: ${LOCATION_CODE}`);
-  console.log(`📄 Max Pages: ${MAX_PAGES}`);
-  console.log(`📦 Page Size: ${PAGE_SIZE}`);
-  console.log(`🌐 Endpoint: ${RECOMMEND_API_URL}`);
+  console.log(`🚀 ARTHA HIGH-CPC FETCHER (TARGET CPC: ${TARGET_CPC})`);
   console.log('======================================================\n');
 
-  // 1. Fetch fresh jobs
-  const jobs = await fetchJobs();
+  const startTime = Date.now();
+  const jobs = await fetchHighCpcJobs();
 
   if (jobs.length === 0) {
-    console.error('❌ No jobs found or network error occurred.');
+    console.error('❌ No CPC 0.048 jobs found.');
     process.exit(1);
   }
 
-  // 2. Save full records to jobs.json
+  // 1. Save metadata list
   const jobsFilePath = path.join(__dirname, 'jobs.json');
   fs.writeFileSync(jobsFilePath, JSON.stringify(jobs, null, 2), 'utf8');
 
-  // 3. Extract unique URLs and save to jobs_queue.json
+  // 2. Save deduplicated URL queue
   const queueUrls = jobs.map(j => j.apply_link).filter(Boolean);
   const queueFilePath = path.join(__dirname, 'jobs_queue.json');
   fs.writeFileSync(queueFilePath, JSON.stringify(queueUrls, null, 2), 'utf8');
 
-  // 4. Update embedded DEFAULT_QUEUE in auto_applier.js and global_applier.js
+  // 3. Sync directly into auto_applier.js
   try {
     const autoApplierPath = path.join(__dirname, 'auto_applier.js');
     if (fs.existsSync(autoApplierPath)) {
       let autoApplier = fs.readFileSync(autoApplierPath, 'utf8');
       const queueFormatted = '  const DEFAULT_QUEUE = ' + JSON.stringify(queueUrls, null, 2).split('\n').map((line, idx) => idx === 0 ? line : '  ' + line).join('\n') + ';';
       autoApplier = autoApplier.replace(/  const DEFAULT_QUEUE = \[\s*[\s\S]*?\s*\];/, queueFormatted);
+      // Update comment count
+      autoApplier = autoApplier.replace(/📋 EMBEDDED JOB URL QUEUE \([^)]*\)/, `📋 EMBEDDED JOB URL QUEUE (${queueUrls.length} Openings, CPC: 0.048)`);
       fs.writeFileSync(autoApplierPath, autoApplier, 'utf8');
-      console.log(`✅ Embedded ${queueUrls.length} URLs into auto_applier.js`);
-    }
-
-    const globalApplierPath = path.join(__dirname, 'global-applier', 'global_applier.js');
-    if (fs.existsSync(globalApplierPath)) {
-      let globalApplier = fs.readFileSync(globalApplierPath, 'utf8');
-      const queueFormatted = '  const DEFAULT_QUEUE = ' + JSON.stringify(queueUrls, null, 2).split('\n').map((line, idx) => idx === 0 ? line : '  ' + line).join('\n') + ';';
-      globalApplier = globalApplier.replace(/  const DEFAULT_QUEUE = \[\s*[\s\S]*?\s*\];/, queueFormatted);
-      fs.writeFileSync(globalApplierPath, globalApplier, 'utf8');
-      console.log(`✅ Embedded ${queueUrls.length} URLs into global_applier.js`);
+      console.log(`✅ Synced ${queueUrls.length} High-CPC URLs into auto_applier.js`);
     }
   } catch (syncErr) {
     console.warn('⚠️ Notice during queue sync:', syncErr.message);
   }
 
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
   console.log('\n======================================================');
-  console.log('🎉 FETCH & SYNC COMPLETED SUCCESSFULLY');
+  console.log('🎉 HIGH-CPC FETCH & SYNC COMPLETED');
   console.log('======================================================');
-  console.log(`📁 Jobs Metadata: jobs.json (${jobs.length} records, ${(fs.statSync(jobsFilePath).size / (1024 * 1024)).toFixed(2)} MB)`);
-  console.log(`📁 Jobs Queue:    jobs_queue.json (${queueUrls.length} unique URLs, ${(fs.statSync(queueFilePath).size / (1024 * 1024)).toFixed(2)} MB)`);
+  console.log(`⏱️ Time:          ${elapsed}s`);
+  console.log(`💎 High-CPC Jobs: ${jobs.length} records (All cpc_value: ${TARGET_CPC})`);
+  console.log(`📁 Metadata File: jobs.json (${(fs.statSync(jobsFilePath).size / (1024 * 1024)).toFixed(2)} MB)`);
+  console.log(`📁 Queue File:    jobs_queue.json (${(fs.statSync(queueFilePath).size / 1024).toFixed(1)} KB)`);
   console.log('======================================================\n');
 })();
