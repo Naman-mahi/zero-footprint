@@ -1549,7 +1549,7 @@
   ];
 
   let jobQueue = DEFAULT_QUEUE;
-  let batchSize = 50; // default 50 (configurable: 25, 50, 100)
+  let batchSize = 50; // default 50 (configurable: 25, 50, 100, 200)
 
   // =========================================================================
   // 💾 STATE MANAGEMENT & LOCAL STORAGE PERSISTENCE
@@ -1573,7 +1573,7 @@
   let state = loadSavedState();
   let isRunning = false;
   let isPaused = false;
-  let speedMode = "normal"; // fast (3-4.5s), normal (5-7.5s), stealth (8-12s)
+  let speedMode = "5s"; // 1s, 2s, 3s, 5s, 8s, 10s, 15s
 
   // =========================================================================
   // 🛡️ ADVANCED HUMAN EVENT & ANTI-DETECTION ENGINE
@@ -1582,9 +1582,35 @@
   const randomDelay = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
   function getPacingDelay() {
-    if (speedMode === "fast") return randomDelay(3000, 4500);
-    if (speedMode === "stealth") return randomDelay(8000, 12000);
-    return randomDelay(5000, 7500); // normal
+    switch (speedMode) {
+      case "1s": return randomDelay(1000, 1500);
+      case "2s": return randomDelay(1800, 2400);
+      case "3s": return randomDelay(2800, 3800);
+      case "5s": return randomDelay(4500, 6000);
+      case "8s": return randomDelay(7500, 9000);
+      case "10s": return randomDelay(9500, 11500);
+      case "15s": return randomDelay(14000, 16500);
+      case "fast": return randomDelay(2800, 3800);
+      case "normal": return randomDelay(4500, 6000);
+      case "stealth": return randomDelay(9500, 11500);
+      default:
+        const num = parseFloat(speedMode);
+        if (!isNaN(num) && num > 0) return Math.round(num * 1000);
+        return randomDelay(4500, 6000);
+    }
+  }
+
+  function getDestinationHoldMs() {
+    switch (speedMode) {
+      case "1s": return randomDelay(2500, 3500);
+      case "2s": return randomDelay(3500, 5000);
+      case "3s": return randomDelay(5000, 6500);
+      case "5s": return randomDelay(7500, 9500);
+      case "8s": return randomDelay(9000, 11500);
+      case "10s": return randomDelay(10000, 12500);
+      case "15s": return randomDelay(14000, 16500);
+      default: return randomDelay(8000, 10000);
+    }
   }
 
   async function humanClick(element, win = window) {
@@ -1838,9 +1864,10 @@
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 6px 10px;">
           <div style="display: flex; align-items: center; gap: 3px;">
             <span style="font-size: 10px; color: #64748b; font-weight: 600; margin-right: 1px;">Batch:</span>
-            <button id="zfp-size-25-btn" class="zfp-size-btn" data-size="25" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 5px; padding: 2px 6px; font-size: 10px; cursor: pointer; font-weight: 500;">25</button>
-            <button id="zfp-size-50-btn" class="zfp-size-btn" data-size="50" style="background: #2563eb; color: #ffffff; border: 1px solid #2563eb; border-radius: 5px; padding: 2px 6px; font-size: 10px; cursor: pointer; font-weight: 700; box-shadow: 0 1px 3px rgba(37,99,235,0.2);">50</button>
-            <button id="zfp-size-100-btn" class="zfp-size-btn" data-size="100" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 5px; padding: 2px 6px; font-size: 10px; cursor: pointer; font-weight: 500;">100</button>
+            <button id="zfp-size-25-btn" class="zfp-size-btn" data-size="25" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 5px; padding: 2px 5px; font-size: 10px; cursor: pointer; font-weight: 500;">25</button>
+            <button id="zfp-size-50-btn" class="zfp-size-btn" data-size="50" style="background: #2563eb; color: #ffffff; border: 1px solid #2563eb; border-radius: 5px; padding: 2px 5px; font-size: 10px; cursor: pointer; font-weight: 700; box-shadow: 0 1px 3px rgba(37,99,235,0.2);">50</button>
+            <button id="zfp-size-100-btn" class="zfp-size-btn" data-size="100" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 5px; padding: 2px 5px; font-size: 10px; cursor: pointer; font-weight: 500;">100</button>
+            <button id="zfp-size-200-btn" class="zfp-size-btn" data-size="200" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 5px; padding: 2px 5px; font-size: 10px; cursor: pointer; font-weight: 500;">200</button>
           </div>
 
           <div id="zfp-batch-badge" style="font-size: 11px; font-weight: 700; color: #2563eb;">
@@ -1853,13 +1880,17 @@
           </div>
         </div>
 
-        <!-- Pacing Options -->
+        <!-- Pacing Options (Seconds Selector) -->
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 11px;">
-          <span style="color: #64748b; font-size: 10.5px; font-weight: 500;">Pacing:</span>
-          <div style="display: flex; gap: 4px;">
-            <button class="zfp-speed-btn" data-speed="fast" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 7px; padding: 3px 8px; font-size: 10px; cursor: pointer; font-weight: 500;">Fast (3s)</button>
-            <button class="zfp-speed-btn" data-speed="normal" style="background: #2563eb; color: #ffffff; border: 1px solid #2563eb; border-radius: 7px; padding: 3px 8px; font-size: 10px; cursor: pointer; font-weight: 700; box-shadow: 0 2px 4px rgba(37,99,235,0.2);">Normal (5s)</button>
-            <button class="zfp-speed-btn" data-speed="stealth" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 7px; padding: 3px 8px; font-size: 10px; cursor: pointer; font-weight: 500;">Stealth (10s)</button>
+          <span style="color: #64748b; font-size: 10.5px; font-weight: 600;">Delay:</span>
+          <div style="display: flex; gap: 3px;">
+            <button class="zfp-speed-btn" data-speed="1s" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; padding: 2px 5px; font-size: 10px; cursor: pointer; font-weight: 500;">1s</button>
+            <button class="zfp-speed-btn" data-speed="2s" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; padding: 2px 5px; font-size: 10px; cursor: pointer; font-weight: 500;">2s</button>
+            <button class="zfp-speed-btn" data-speed="3s" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; padding: 2px 5px; font-size: 10px; cursor: pointer; font-weight: 500;">3s</button>
+            <button class="zfp-speed-btn" data-speed="5s" style="background: #2563eb; color: #ffffff; border: 1px solid #2563eb; border-radius: 6px; padding: 2px 5px; font-size: 10px; cursor: pointer; font-weight: 700; box-shadow: 0 1px 3px rgba(37,99,235,0.2);">5s</button>
+            <button class="zfp-speed-btn" data-speed="8s" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; padding: 2px 5px; font-size: 10px; cursor: pointer; font-weight: 500;">8s</button>
+            <button class="zfp-speed-btn" data-speed="10s" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; padding: 2px 5px; font-size: 10px; cursor: pointer; font-weight: 500;">10s</button>
+            <button class="zfp-speed-btn" data-speed="15s" style="background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 6px; padding: 2px 5px; font-size: 10px; cursor: pointer; font-weight: 500;">15s</button>
           </div>
         </div>
 
@@ -1968,7 +1999,7 @@
           <div style="display: flex; align-items: center; gap: 4px; font-weight: 700; color: #1e293b; margin-bottom: 2px;">
             ${ICONS.info} Batch & Deep-Clean Guide:
           </div>
-          <div>• <b>Batch Sizes:</b> Toggle between 25, 50, or 100 applications per batch.</div>
+          <div>• <b>Batch Sizes:</b> Toggle between 25, 50, 100, or 200 applications per batch.</div>
           <div>• <b>Per-Job Deep Purge:</b> Wipes cookies, sessionStorage & localStorage after EACH job.</div>
           <div>• <b>Auto-Closer:</b> Opens tab, clicks Apply, and closes all tabs cleanly.</div>
         </div>
@@ -2176,9 +2207,10 @@
         state.skippedCount++;
       }
 
-      // 4. Wait for redirect (Tab 2 & Tab 3) and network telemetry to finalize (10s load wait)
-      log("Waiting 10s for destination page hydration & affiliate telemetry...", "#64748b");
-      await sleep(randomDelay(10000, 11500));
+      // 4. Wait for redirect (Tab 2 & Tab 3) and network telemetry to finalize
+      const holdMs = getDestinationHoldMs();
+      log("Waiting " + (holdMs / 1000).toFixed(1) + "s for destination page hydration & affiliate telemetry...", "#64748b");
+      await sleep(holdMs);
 
       // 5. Triple Tab Close: Cleanly wipe storage and close Tab 3, Tab 2, and Tab 1
       log("Purging storage & closing windows...", "#7c3aed");
@@ -2348,7 +2380,7 @@
   document.getElementById("zfp-prev-batch-btn").addEventListener("click", moveToPrevBatch);
   document.getElementById("zfp-full-purge-btn").addEventListener("click", () => wipeAllStorageAndCookies(false));
 
-  // Batch Size Switchers (25, 50, 100)
+  // Batch Size Switchers (25, 50, 100, 200)
   document.querySelectorAll(".zfp-size-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       const selectedSize = parseInt(btn.getAttribute("data-size"), 10);
@@ -2459,7 +2491,7 @@
   console.log(
     "%c📋 Total Queued: %c" + jobQueue.length + " openings across " + Math.ceil(jobQueue.length / batchSize) + " batches\n" +
     "%c💾 Saved Progress: %cJob " + (state.currentIndex + 1) + " (Batch " + (Math.floor(state.currentIndex / batchSize) + 1) + ") | Applied: " + state.completedCount + "\n" +
-    "%c🎯 Batch Selector: %cChoose 25, 50, or 100 on the HUD toolbar\n" +
+    "%c🎯 Batch Selector: %cChoose 25, 50, 100, or 200 on the HUD toolbar\n" +
     "%c🧼 Deep Purge: %cCookies, localStorage & sessionStorage wiped after EACH application\n" +
     "%c💡 Instructions: Click 'Start Batch " + (Math.floor(state.currentIndex / batchSize) + 1) + "' on HUD or call window.__AUTO_APPLIER__.start()",
     "color: #64748b; font-weight: bold;", "color: #2563eb; font-weight: bold;",

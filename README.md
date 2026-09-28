@@ -27,11 +27,12 @@ zero-footprint/
 ## ✨ Key Features
 
 - **🛡️ 100% Undetectable Execution**: Zero automation flags (`navigator.webdriver === false`), native human execution context, 9-stage pointer event cascade.
-- **⚡ 2,000 Active Jobs Queue**: Pre-populated with real-time active openings from Artha.
-- **🎯 Dynamic Batch Sizing**: Switch between **25**, **50**, or **100 jobs per batch** directly on the floating HUD.
+- **⚡ High-Volume Queue**: Pre-populated with real-time active openings from Artha.
+- **🎯 Dynamic Batch Sizing**: Switch between **25**, **50**, **100**, or **200 jobs per batch** directly on the floating HUD.
+- **⏱️ Granular Pacing Delay**: Select from multiple human delay profiles (**1s**, **2s**, **3s**, **5s**, **8s**, **10s**, **15s**) with scaled destination telemetry hold.
 - **⏳ 1-Minute Cooldown & Autostart**: Wipes storage and automatically begins the next batch after a 60-second cooldown (or click to start immediately).
 - **🧼 Deep Zero-Footprint Purge**: Cleans `document.cookie`, `sessionStorage`, and `localStorage` **after each application**.
-- **⏳ 10-Second Destination Hydration**: Ensures affiliate tracking beacons, analytics, and conversion pixels fire completely.
+- **⏳ Destination Page Hydration**: Holds destination pages dynamically to ensure affiliate tracking beacons, analytics, and conversion pixels fire completely.
 - **🪟 3-Tab Auto-Closer**: Cleanly opens job details, handles gateway redirects, destination pages, and closes tabs sequentially.
 - **💾 Persistent State**: Standalone progress tracking in `localStorage` with pause, resume, skip, and reset.
 
@@ -83,8 +84,8 @@ node fetch_jobs.js 20 100 IN
 │ Active:   [26/2000] Senior Data Engineer               │
 │ Batch:    Batch 2 of 40 (Jobs 51–100)                  │
 ├────────────────────────────────────────────────────────┤
-│ Batch Size:     [ 25 ]  [[ 50 ]]  [ 100 ]              │
-│ Pacing:         [Fast (3s)]  [[ Normal (5s) ]] [Stealth]│
+│ Batch Size:  [ 25 ]  [[ 50 ]]  [ 100 ]  [ 200 ]            │
+│ Delay:       [1s] [2s] [3s] [[ 5s ]] [8s] [10s] [15s]     │
 ├────────────────────────────┬─────────────┬─────────────┤
 │ [⏳ Start Batch 2 now (45s)]│ [⏭ Skip]   │ [↺ Reset]   │
 ├────────────────────────────┴─────────────┴─────────────┤
