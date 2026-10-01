@@ -10,16 +10,22 @@ A high-performance, **zero-footprint**, 100% undetectable in-browser automation 
 
 ---
 
-## 📁 Minimal Repository Structure
+## 📁 Repository Structure
 
 ```text
 zero-footprint/
-├── auto_applier.js          # In-browser 1-by-1 auto-applier with modern HUD
-├── fetch_jobs.js            # Artha recommendation feed fetcher (syncs queue)
-├── jobs.json                # Complete metadata for 2,000 active openings (1.00 MB)
-├── jobs_queue.json          # Clean deduplicated apply URLs (0.18 MB)
-├── package.json             # Minimal configuration & fetch script
-└── README.md                # Quick-start documentation
+├── us/                          # 🇺🇸 Dedicated US High-CPC Module (Up to $1.75/click)
+│   ├── auto_applier.js          # In-browser 1-by-1 US applier (1,973 High-CPC URLs embedded)
+│   ├── fetch_jobs.js            # US recommendations fetcher (sort_by: high_cpc)
+│   ├── jobs.json                # Complete US metadata records (1.42 MB)
+│   ├── jobs_queue.json          # Deduplicated US apply URLs (0.20 MB)
+│   └── README.md                # Standalone US module documentation
+├── auto_applier.js              # Global/IN in-browser 1-by-1 auto-applier
+├── fetch_jobs.js                # Global/IN recommendation feed fetcher
+├── jobs.json                    # Global metadata records (0.73 MB)
+├── jobs_queue.json              # Global deduplicated apply URLs (0.14 MB)
+├── package.json                 # Project configuration & npm scripts (`fetch`, `fetch:us`)
+└── README.md                    # Main documentation
 ```
 
 ---
@@ -69,6 +75,59 @@ npm run fetch
 # Or with custom pages/location:
 node fetch_jobs.js 20 100 IN
 ```
+
+---
+
+## 🇺🇸 US High-CPC Auto-Applier Suite (Up to $1.75/click)
+
+The [`us/`](us/) directory provides an isolated, ultra-high-yield automation package configured specifically for **United States job openings** paying premium CPC rates (ranging from **$0.78 to $1.75 per click**).
+
+### 📊 Comparison: Standard Catalog vs. 🇺🇸 US High-CPC Suite
+
+| Feature | Standard Feed | 🇺🇸 US High-CPC Suite |
+| :--- | :--- | :--- |
+| **Target Region** | Global / India | **United States Only (`location: "US"`)** |
+| **Max CPC Rate** | ~$0.048 / click | **Up to $1.750 / click** (36× higher yield) |
+| **Median CPC** | $0.048 | **$0.780 / click** |
+| **Queue Size** | 1,517 Openings | **1,973 Active Openings** |
+| **Queue Ordering** | Standard Catalog Order | **Strictly Highest CPC First** |
+| **Storage State** | `__ZERO_FOOTPRINT_APPLIER_STATE__` | **`__ZERO_FOOTPRINT_APPLIER_STATE_US__`** (Zero Collision) |
+| **HUD Identifier** | `⚡ ZERO-FOOTPRINT PRO` | **`🇺🇸 US HIGH-CPC PRO`** |
+| **Dedicated Doc** | [README.md](README.md) | **[us/README.md](us/README.md)** |
+
+---
+
+### ⚡ Running the US High-CPC Applier
+
+#### Method 1: Browser DevTools Console (Zero Install)
+1. Open [artha.link](https://artha.link) and sign in.
+2. Press `F12` and switch to the **Console** tab.
+3. Paste the contents of [`us/auto_applier.js`](us/auto_applier.js) into the console and hit `Enter`.
+4. Click **"Start Batch 1 (50 Jobs)"** on the top-right floating HUD.
+
+#### Method 2: 1-Click Bookmarklet
+Create a browser bookmark named `🇺🇸 US High-CPC Applier` with URL:
+```javascript
+javascript:(function(){const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/us/auto_applier.js?t='+Date.now();document.head.appendChild(s);})();
+```
+
+---
+
+### 🔄 Fetching & Updating Fresh US Jobs
+
+To query Artha's recommendation API for fresh US listings sorted highest-CPC first:
+
+```powershell
+# From project root:
+npm run fetch:us
+
+# Or directly:
+node us/fetch_jobs.js
+```
+
+This hits `https://my.artha.link/api/job-api/recommend?pulse_variant=control` with `location: "US"` and `sort_by: "high_cpc"`, along with specialized technology/software niche keywords (DevSecOps, SRE, Cloud Security, Kubernetes, AWS, etc.) and metro hubs, automatically synchronizing [`us/jobs.json`](us/jobs.json), [`us/jobs_queue.json`](us/jobs_queue.json), and [`us/auto_applier.js`](us/auto_applier.js).
+
+> 💡 **For full documentation and advanced operational details, see the standalone [us/README.md](us/README.md) documentation.**
 
 ---
 
