@@ -1,9 +1,10 @@
 /**
- * 🕶️ Zero-Footprint PRO: Advanced 1-by-1 Sequential In-Browser Auto-Applier (Live Dynamic Fetcher Edition)
+ * 🕶️ Zero-Footprint PRO: Advanced 1-by-1 Sequential In-Browser Auto-Applier (India High-CPC Edition)
  * 
  * GitHub: https://github.com/Naman-mahi/zero-footprint
  * 
  * FEATURES:
+ * - 🇮🇳 Pure Indian Jobs: Exclusively targets Indian openings (location: "IN" / country: "IN").
  * - 🌐 100% Zero Hardcoded Links: Fetches fresh, active high-CPC jobs live from Artha directly in your browser.
  * - 🚫 Anti-Spam: Completely filters out all trucking, CDL, driver, and duplicate spam listings.
  * - ⚡ 1-by-1 Sequential Processing: Never overloads CPU/RAM with hundreds of open tabs.
@@ -102,8 +103,8 @@
   async function fetchFreshJobs(isSilent = false) {
     if (isFetchingLive) return false;
     isFetchingLive = true;
-    if (!isSilent) log("⏳ Fetching fresh High-CPC jobs live from Artha...", "#2563eb");
-    if (btnLabel && !isRunning) btnLabel.innerText = "Fetching fresh jobs...";
+    if (!isSilent) log("⏳ Fetching fresh Indian High-CPC jobs live from Artha...", "#2563eb");
+    if (btnLabel && !isRunning) btnLabel.innerText = "Fetching Indian jobs...";
 
     const freshUrls = [];
     const seen = new Set();
@@ -121,8 +122,8 @@
             query: "",
             page: page,
             limit: 100,
-            geo_boost: false,
-            location: "US",
+            geo_boost: true,
+            location: "IN",
             only_enriched: false,
             only_cpa: false,
             sort_by: "high_cpc"
@@ -136,10 +137,15 @@
 
         for (const it of items) {
           if (typeof it.cpc_value !== "number" || it.cpc_value <= 0) continue;
+
+          // Confirm Indian location
+          const isIN = it.country === "IN" || it.company_info?.country === "India";
+          if (!isIN) continue;
+
           const titleLower = (it.title || "").toLowerCase();
           const compLower = (it.company || it.company_info?.name || "").toLowerCase();
 
-          // Exclude trucking, CDL, driver, freight, Mesilla Valley spam
+          // Exclude trucking, CDL, driver, freight spam
           if (
             titleLower.includes("truck") ||
             titleLower.includes("driver") ||
@@ -163,7 +169,7 @@
       if (freshUrls.length > 0) {
         jobQueue = freshUrls;
         updateUI();
-        log(`✨ Loaded ${freshUrls.length} fresh pure High-CPC jobs! Ready to start.`, "#059669");
+        log(`✨ Loaded ${freshUrls.length} fresh Indian High-CPC jobs! Ready to start.`, "#059669");
         isFetchingLive = false;
         return true;
       }
@@ -395,10 +401,10 @@
           </span>
           <div>
             <div style="display: flex; align-items: center; gap: 4px;">
-              <span style="font-weight: 800; font-size: 13.5px; color: #0f172a; letter-spacing: -0.2px;">⚡ ZERO-FOOTPRINT PRO</span>
-              <span style="background: #eff6ff; color: #2563eb; font-size: 9.5px; font-weight: 700; padding: 1px 5px; border-radius: 5px; border: 1px solid #dbeafe;">PRO</span>
+              <span style="font-weight: 800; font-size: 13.5px; color: #0f172a; letter-spacing: -0.2px;">🇮🇳 INDIA HIGH-CPC APPLIER</span>
+              <span style="background: #ecfdf5; color: #059669; font-size: 9.5px; font-weight: 700; padding: 1px 5px; border-radius: 5px; border: 1px solid #a7f3d0;">🇮🇳 INDIA EDITION</span>
             </div>
-            <div style="font-size: 10.5px; color: #64748b; font-weight: 500;">Live Pure-CPC Sequential Applier</div>
+            <div style="font-size: 10.5px; color: #64748b; font-weight: 500;">Live Pure-CPC Indian Jobs Applier</div>
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 4px;">

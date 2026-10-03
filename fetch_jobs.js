@@ -64,10 +64,14 @@ async function fetchPureCpcJobs() {
         // STRICT FILTER 1: Must have confirmed positive CPC value
         if (typeof item.cpc_value !== "number" || item.cpc_value <= 0) continue;
 
+        // STRICT FILTER 2: Confirm Indian location
+        const isIN = item.country === "IN" || item.company_info?.country === "India";
+        if (!isIN) continue;
+
         const titleLower = (item.title || "").toLowerCase();
         const compLower = (item.company || item.company_info?.name || "").toLowerCase();
 
-        // Anti-Spam: Exclude all trucking, CDL, driver, freight, and Mesilla Valley listings
+        // Anti-Spam: Exclude all trucking, CDL, driver, freight listings
         if (
           titleLower.includes("truck") ||
           titleLower.includes("driver") ||
@@ -91,14 +95,14 @@ async function fetchPureCpcJobs() {
           slug: slug,
           company_name: item.company_info?.name || item.company || "Unknown Company",
           apply_link: `${BASE_JOB_URL}${slug}`,
-          country: item.country || item.company_info?.country || "US",
+          country: item.country || item.company_info?.country || "IN",
           city: item.city || null,
           state: item.state || null,
           cpc_value: item.cpc_value,
           cpa_value: item.cpa_value || null,
           salary_min: item.salary_min || null,
           salary_max: item.salary_max || null,
-          salary_curr: item.salary_curr || "USD",
+          salary_curr: item.salary_curr || "INR",
           salary_unit: item.salary_unit || null,
           job_type: item.job_type || null,
           work_mode: item.work_mode || null,
@@ -109,7 +113,7 @@ async function fetchPureCpcJobs() {
       }
 
       if (newCount > 0) {
-        console.log(`  📦 [${label}] Added ${newCount} pure-CPC jobs | Total unique: ${allJobs.length}`);
+        console.log(`  📦 [${label}] Added ${newCount} pure-CPC Indian jobs | Total unique: ${allJobs.length}`);
       }
       await sleep(120);
     } catch (e) {
@@ -117,27 +121,29 @@ async function fetchPureCpcJobs() {
     }
   }
 
-  // Phase 1: Top-Tier High CPC Catalog (Pages 1 to 25, Strictly CPC > 0)
-  console.log(`\n⏳ Phase 1: Fetching Top-Tier High CPC Catalog (Pages 1–25, Strictly CPC > 0)...`);
+  // Phase 1: Indian High CPC Catalog (Pages 1 to 25, Strictly CPC > 0)
+  console.log(`\n⏳ Phase 1: Fetching Indian High CPC Catalog (location: 'IN', Pages 1–25, Strictly CPC > 0)...`);
   for (let page = 1; page <= 25; page++) {
     await queryBatch({
       query: "",
-      geo_boost: false,
+      geo_boost: true,
+      location: "IN",
       page: page,
       limit: 100,
       only_enriched: false,
       only_cpa: false,
       only_cpc: true,
       sort_by: "high_cpc"
-    }, `Top Pure-CPC Page ${page}`);
+    }, `India Pure-CPC Page ${page}`);
   }
 
-  // Phase 2: Tech & Software High CPC
-  console.log(`\n⏳ Phase 2: Fetching Software & Technology High CPC Listings...`);
-  for (let page = 1; page <= 3; page++) {
+  // Phase 2: Tech & Software High CPC in India
+  console.log(`\n⏳ Phase 2: Fetching Software & Technology High CPC Listings in India...`);
+  for (let page = 1; page <= 5; page++) {
     await queryBatch({
       query: "",
-      geo_boost: false,
+      geo_boost: true,
+      location: "IN",
       page: page,
       limit: 100,
       only_enriched: false,
@@ -145,29 +151,30 @@ async function fetchPureCpcJobs() {
       only_cpc: true,
       categories: ["technology-software"],
       sort_by: "high_cpc"
-    }, `Tech Pure-CPC Page ${page}`);
+    }, `India Tech Pure-CPC Page ${page}`);
   }
 
-  // Phase 3: Major Hubs with sort_by: high_cpc & only_cpc: true
-  console.log(`\n⏳ Phase 3: Fetching Major Tech & Metro Hubs...`);
+  // Phase 3: Major Indian Tech Hubs
+  console.log(`\n⏳ Phase 3: Fetching Major Indian Tech & Metro Hubs...`);
   const hubs = [
-    'New York', 'San Francisco', 'Seattle', 'Austin',
-    'Los Angeles', 'Chicago', 'Boston', 'Denver',
-    'Bengaluru', 'Mumbai', 'Hyderabad', 'Pune'
+    'Bengaluru', 'Bangalore', 'Mumbai', 'Hyderabad',
+    'Pune', 'Delhi', 'Noida', 'Gurgaon', 'Gurugram',
+    'Chennai', 'Kolkata', 'Ahmedabad'
   ];
 
   for (const hub of hubs) {
     for (let page = 1; page <= 2; page++) {
       await queryBatch({
         query: hub,
-        geo_boost: false,
+        geo_boost: true,
+        location: "IN",
         page: page,
         limit: 100,
         only_enriched: false,
         only_cpa: false,
         only_cpc: true,
         sort_by: "high_cpc"
-      }, `${hub} P${page}`);
+      }, `India ${hub} P${page}`);
     }
   }
 
