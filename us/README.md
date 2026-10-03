@@ -13,10 +13,10 @@ A dedicated, high-yield automation module specialized exclusively for **United S
 ```text
 all-bots/
 ├── us/
-│   ├── auto_applier.js     # US in-browser 1-by-1 applier (with 1,973 High-CPC URLs pre-embedded)
+│   ├── auto_applier.js     # US in-browser 1-by-1 applier (with 2,761 Pure-CPC URLs pre-embedded)
 │   ├── fetch_jobs.js       # Real-time Artha recommendation fetcher (pulse_variant=control)
-│   ├── jobs.json           # Detailed metadata for 1,973 US openings (1.42 MB)
-│   ├── jobs_queue.json     # Clean deduplicated apply URLs sorted highest-CPC first (0.20 MB)
+│   ├── jobs.json           # Detailed metadata for 2,761 US openings (1.99 MB)
+│   ├── jobs_queue.json     # Clean deduplicated apply URLs sorted highest-CPC first (0.28 MB)
 │   └── README.md           # Documentation & instructions
 ├── auto_applier.js         # Base IN catalog applier
 ├── fetch_jobs.js           # Base IN fetcher

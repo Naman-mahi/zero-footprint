@@ -15,15 +15,15 @@ A high-performance, **zero-footprint**, 100% undetectable in-browser automation 
 ```text
 zero-footprint/
 ├── us/                          # 🇺🇸 Dedicated US High-CPC Module (Up to $1.75/click)
-│   ├── auto_applier.js          # In-browser 1-by-1 US applier (1,973 High-CPC URLs embedded)
+│   ├── auto_applier.js          # In-browser 1-by-1 US applier (2,761 Pure-CPC URLs embedded)
 │   ├── fetch_jobs.js            # US recommendations fetcher (sort_by: high_cpc)
-│   ├── jobs.json                # Complete US metadata records (1.42 MB)
-│   ├── jobs_queue.json          # Deduplicated US apply URLs (0.20 MB)
+│   ├── jobs.json                # Complete US metadata records (1.99 MB)
+│   ├── jobs_queue.json          # Deduplicated US apply URLs (0.28 MB)
 │   └── README.md                # Standalone US module documentation
-├── auto_applier.js              # Global/IN in-browser 1-by-1 auto-applier
-├── fetch_jobs.js                # Global/IN recommendation feed fetcher
-├── jobs.json                    # Global metadata records (0.73 MB)
-├── jobs_queue.json              # Global deduplicated apply URLs (0.14 MB)
+├── auto_applier.js              # Global in-browser 1-by-1 auto-applier (3,049 Pure-CPC URLs embedded)
+├── fetch_jobs.js                # Global recommendation feed fetcher (sort_by: high_cpc)
+├── jobs.json                    # Global metadata records (2.20 MB)
+├── jobs_queue.json              # Global deduplicated apply URLs (0.31 MB)
 ├── package.json                 # Project configuration & npm scripts (`fetch`, `fetch:us`)
 └── README.md                    # Main documentation
 ```
@@ -89,8 +89,8 @@ The [`us/`](us/) directory provides an isolated, ultra-high-yield automation pac
 | **Target Region** | Global / India | **United States Only (`location: "US"`)** |
 | **Max CPC Rate** | ~$0.048 / click | **Up to $1.750 / click** (36× higher yield) |
 | **Median CPC** | $0.048 | **$0.780 / click** |
-| **Queue Size** | 1,517 Openings | **1,973 Active Openings** |
-| **Queue Ordering** | Standard Catalog Order | **Strictly Highest CPC First** |
+| **Queue Size** | 1,517 Openings | **2,761 Pure-CPC Openings (100% CPC > 0)** |
+| **Queue Ordering** | Standard Catalog Order | **Strictly Highest CPC First ($1.75 down to top tier)** |
 | **Storage State** | `__ZERO_FOOTPRINT_APPLIER_STATE__` | **`__ZERO_FOOTPRINT_APPLIER_STATE_US__`** (Zero Collision) |
 | **HUD Identifier** | `⚡ ZERO-FOOTPRINT PRO` | **`🇺🇸 US HIGH-CPC PRO`** |
 | **Dedicated Doc** | [README.md](README.md) | **[us/README.md](us/README.md)** |
