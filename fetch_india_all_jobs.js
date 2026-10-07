@@ -2,19 +2,21 @@
  * 🇮🇳 Artha India Comprehensive Multi-Category & Multi-Niche Job Fetcher
  * 
  * Standalone runner to fetch Indian jobs across ALL official industry categories,
- * specialized job niches, and major tech/business hubs.
+ * specialized job niches, and major tech/business hubs — exhaustively querying
+ * ALL pages until every listing is discovered.
  * 
  * FEATURES:
+ *   - 📄 Exhaustive Pagination: Automatically queries ALL available pages (until has_more === false).
  *   - 🇮🇳 Strictly India: location: "IN", geo_boost: true, country: "IN".
  *   - 🌐 18 Official Categories: Tech, Healthcare, Finance, Sales, Engineering, HR, Legal, etc.
  *   - 🎯 30+ Specialized Niches: Fullstack, DevOps, Cloud, AI/ML, Pharma, Audit, B2B, UI/UX, etc.
- *   - 🏙️ 11 Indian Metro Hubs: Bengaluru, Hyderabad, Pune, Mumbai, Delhi/NCR, Chennai, etc.
+ *   - 🏙️ 12 Indian Metro Hubs: Bengaluru, Hyderabad, Pune, Mumbai, Delhi/NCR, Chennai, etc.
  *   - 💎 Pure Positive CPC prioritized, with fallback to all verified Indian opportunities.
  *   - 🚫 Anti-Spam: Discards trucking, driver, and CDL spam.
- *   - 📁 Isolated Outputs: jobs_india_all.json & jobs_india_all_queue.json (no conflict with deployed files).
+ *   - 📁 Isolated Outputs: jobs_india_all.json & jobs_india_all_queue.json.
  * 
  * USAGE:
- *   node fetch_india_all_jobs.js            (Fetch all Indian jobs across all categories & niches)
+ *   node fetch_india_all_jobs.js            (Fetch all Indian jobs across all categories, niches & pages)
  *   node fetch_india_all_jobs.js --cpc-only (Strictly positive CPC only: cpc_value > 0)
  */
 
@@ -83,31 +85,50 @@ async function fetchIndiaAllJobs() {
     metros: 0
   };
 
-  async function queryBatch(payload, label, statKey) {
-    try {
-      const response = await fetch(RECOMMEND_API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-          "Referrer-Policy": "strict-origin-when-cross-origin"
-        },
-        body: JSON.stringify(payload)
-      });
+  /**
+   * Exhaustively queries ALL pages for a given payload until has_more === false
+   * or items return empty.
+   */
+  async function queryAllPages(basePayload, labelPrefix, statKey) {
+    let page = 1;
+    while (true) {
+      const payload = {
+        ...basePayload,
+        page: page,
+        limit: 100
+      };
 
-      if (response.status === 429) {
-        const retryAfter = Number(response.headers.get("Retry-After")) || 5;
-        console.warn(`    ⚠️ Rate limited on [${label}]. Waiting ${retryAfter}s...`);
-        await sleep(retryAfter * 1000);
-        return;
+      let result;
+      try {
+        const response = await fetch(RECOMMEND_API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Referrer-Policy": "strict-origin-when-cross-origin"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.status === 429) {
+          const retryAfter = Number(response.headers.get("Retry-After")) || 5;
+          console.warn(`    ⚠️ Rate limited on [${labelPrefix} P${page}]. Waiting ${retryAfter}s...`);
+          await sleep(retryAfter * 1000);
+          continue; // retry the same page
+        }
+
+        if (!response.ok) break;
+
+        result = await response.json();
+      } catch (e) {
+        console.warn(`    ⚠️ Network notice for [${labelPrefix} P${page}]:`, e.message);
+        break;
       }
 
-      if (!response.ok) return;
-
-      const result = await response.json();
       const rawItems = result.items || [];
-      let addedCount = 0;
+      if (rawItems.length === 0) break;
 
+      let addedCount = 0;
       for (const item of rawItems) {
         // Location verification
         const isIndia = item.country === "IN" || item.company_info?.country === "India";
@@ -155,7 +176,7 @@ async function fetchIndiaAllJobs() {
           job_type: item.job_type || null,
           work_mode: item.work_mode || null,
           category: item.category || [],
-          source_query: label,
+          source_query: `${labelPrefix} P${page}`,
           posted_date: item.posted_date || null
         });
 
@@ -164,12 +185,18 @@ async function fetchIndiaAllJobs() {
 
       if (addedCount > 0) {
         stats[statKey] = (stats[statKey] || 0) + addedCount;
-        console.log(`    📦 [${label}] +${addedCount} jobs | Total unique: ${allJobs.length}`);
+        console.log(`    📦 [${labelPrefix} P${page}] +${addedCount} jobs (Batch: ${rawItems.length}) | Total unique: ${allJobs.length}`);
       }
 
+      // If API signals no more pages, break out cleanly
+      if (result.has_more === false || rawItems.length < 100) {
+        break;
+      }
+
+      page++;
+      // Safety limit: up to 100 pages per individual facet
+      if (page > 100) break;
       await sleep(100);
-    } catch (e) {
-      console.warn(`    ⚠️ Query notice for [${label}]:`, e.message);
     }
   }
 
@@ -177,65 +204,58 @@ async function fetchIndiaAllJobs() {
   console.log(`🇮🇳 ARTHA INDIA MULTI-CATEGORY JOB FETCHER [${CPC_ONLY_MODE ? "STRICT CPC ONLY" : "ALL OPENINGS"}]`);
   console.log("==================================================================\n");
 
-  // Phase 1: High-Volume General Indian Feed (Pages 1 to 20)
-  console.log("⏳ Phase 1: Fetching General Indian Feed (Pages 1–20)...");
-  for (let page = 1; page <= 20; page++) {
-    await queryBatch({
-      query: "",
+  // Phase 1: High-Volume General Indian Feed (All pages until exhaustion)
+  console.log("⏳ Phase 1: Fetching General Indian Feed (ALL pages until has_more: false)...");
+  await queryAllPages({
+    query: "",
+    geo_boost: true,
+    location: "IN",
+    only_enriched: false,
+    only_cpa: false,
+    only_cpc: CPC_ONLY_MODE,
+    sort_by: "high_cpc"
+  }, "General Feed (high_cpc)", "generalFeed");
+
+  await queryAllPages({
+    query: "",
+    geo_boost: true,
+    location: "IN",
+    only_enriched: false,
+    only_cpa: false,
+    only_cpc: CPC_ONLY_MODE
+  }, "General Feed (default)", "generalFeed");
+
+  // Phase 2: Official Categories (All pages per category until exhaustion)
+  console.log("\n⏳ Phase 2: Fetching All 18 Official Industry Categories (ALL pages)...");
+  for (const cat of OFFICIAL_CATEGORIES) {
+    await queryAllPages({
+      categories: [cat],
       geo_boost: true,
       location: "IN",
-      page: page,
-      limit: 100,
-      only_enriched: false,
-      only_cpa: false,
-      only_cpc: CPC_ONLY_MODE,
-      sort_by: "high_cpc"
-    }, `India Feed P${page}`, "generalFeed");
+      only_cpc: CPC_ONLY_MODE
+    }, `Cat: ${cat}`, "categories");
   }
 
-  // Phase 2: Official Categories (18 Categories, Pages 1-3)
-  console.log("\n⏳ Phase 2: Fetching All 18 Official Industry Categories...");
-  for (const cat of OFFICIAL_CATEGORIES) {
-    for (let page = 1; page <= 3; page++) {
-      await queryBatch({
-        categories: [cat],
-        geo_boost: true,
-        location: "IN",
-        page: page,
-        limit: 100,
-        only_cpc: CPC_ONLY_MODE
-      }, `Cat: ${cat} P${page}`, "categories");
-    }
-  }
-
-  // Phase 3: Specialized Niches
-  console.log("\n⏳ Phase 3: Fetching Specialized Role Niches...");
+  // Phase 3: Specialized Niches (All pages per niche query)
+  console.log("\n⏳ Phase 3: Fetching Specialized Role Niches (ALL pages)...");
   for (const query of NICHE_QUERIES) {
-    for (let page = 1; page <= 2; page++) {
-      await queryBatch({
-        query: query,
-        geo_boost: true,
-        location: "IN",
-        page: page,
-        limit: 100,
-        only_cpc: CPC_ONLY_MODE
-      }, `Niche: ${query} P${page}`, "niches");
-    }
+    await queryAllPages({
+      query: query,
+      geo_boost: true,
+      location: "IN",
+      only_cpc: CPC_ONLY_MODE
+    }, `Niche: ${query}`, "niches");
   }
 
-  // Phase 4: Metro Hubs
-  console.log("\n⏳ Phase 4: Fetching Major Indian Metro Hubs...");
+  // Phase 4: Metro Hubs (All pages per metro hub query)
+  console.log("\n⏳ Phase 4: Fetching Major Indian Metro Hubs (ALL pages)...");
   for (const hub of METRO_HUBS) {
-    for (let page = 1; page <= 2; page++) {
-      await queryBatch({
-        query: hub,
-        geo_boost: true,
-        location: "IN",
-        page: page,
-        limit: 100,
-        only_cpc: CPC_ONLY_MODE
-      }, `Metro: ${hub} P${page}`, "metros");
-    }
+    await queryAllPages({
+      query: hub,
+      geo_boost: true,
+      location: "IN",
+      only_cpc: CPC_ONLY_MODE
+    }, `Metro: ${hub}`, "metros");
   }
 
   // Sort descending by CPC value so highest CPC jobs are at the top
@@ -273,7 +293,7 @@ async function fetchIndiaAllJobs() {
   console.log(`💎 Total Unique Jobs:   ${allJobs.length} Indian listings`);
   console.log(`💰 Positive CPC Jobs:   ${positiveCpcJobs.length} listings (up to ${maxCpc})`);
   console.log('\n📊 Breakdown by Pipeline:');
-  console.log(`   • General Feed:      ${stats.generalFeed} jobs`);
+  console.log(`   • General Feeds:     ${stats.generalFeed} jobs`);
   console.log(`   • Official Sectors:  ${stats.categories} jobs`);
   console.log(`   • Specialized Niches:${stats.niches} jobs`);
   console.log(`   • Metro Hubs:        ${stats.metros} jobs`);
