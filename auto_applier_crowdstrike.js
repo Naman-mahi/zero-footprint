@@ -3,22 +3,8 @@
  * 
  * GitHub: https://github.com/Naman-mahi/zero-footprint
  * 
- * TARGET ROLES (15 Openings):
- * 1. Infrastructure Engineer, Techops Cicd (hybrid, Ind) - Bengaluru
- * 2. Sr. Backend Engineer - Bengaluru
- * 3. Manager, Sales Engineering - Mumbai
- * 4. Network Reliability Engineer Iii (hybrid, Ind) - Bengaluru
- * 5. Engineer Iii - Cloud - Pune
- * 6. Engineer Iii, Techops Cicd Sda - Bengaluru
- * 7. Sr. Software Developer - Observability Tracing (hybrid) - Bengaluru
- * 8. Sr. Engineer - Cloud - Pune
- * 9. Engineer Iii - Techops Cicd Platform - Bengaluru
- * 10. Engineer Ii - Site Reliability (hybrid, Ind) - Bengaluru
- * 11. Sr. Engineer - Data & Ml Platform (hybrid, Ind) - Bengaluru
- * 12. Engineer Ii - Virtualization (shift 8am -5pm Ist) - Bengaluru
- * 13. Engineer Iii - Cicd Devops - Pune
- * 14. Full Stack Engineer Iii - Bengaluru
- * 15. Engineer Ii - Vulnerability Detection - Pune
+ * TARGET ROLES (31 Openings):
+ * - Bengaluru, Pune, Mumbai (CrowdStrike India Engineering & Leadership)
  * 
  * HOW TO RUN:
  * 1. Open https://artha.link or https://my.artha.link in Google Chrome.
@@ -37,25 +23,41 @@
   }
 
   // =========================================================================
-  // 📋 CROWDSTRIKE TARGET JOB QUEUE (15 Verified Openings)
+  // 📋 CROWDSTRIKE TARGET JOB QUEUE (31 Verified Openings)
   // =========================================================================
   const DEFAULT_QUEUE = [
-    "https://artha.link/@eanxt/jobs/infrastructure-engineer-techops-cicd-crowdstrike-bengaluru-dbc5db80",
-    "https://artha.link/@eanxt/jobs/sr-backend-engineer-crowdstrike-bengaluru-f4b3618d",
-    "https://artha.link/@eanxt/jobs/manager-sales-engineering-crowdstrike-mumbai-c9fb55c9",
-    "https://artha.link/@eanxt/jobs/network-reliability-engineer-iii-hybrid-crowdstrike-bengaluru-b6d27db6",
-    "https://artha.link/@eanxt/jobs/engineer-iii-cloud-crowdstrike-pune-e7f67ea7",
-    "https://artha.link/@eanxt/jobs/engineer-iii-techops-cicd-sda-crowdstrike-bengaluru-663bd9b9",
-    "https://artha.link/@eanxt/jobs/sr-software-developer-observability-crowdstrike-bengaluru-becea209",
-    "https://artha.link/@eanxt/jobs/sr-engineer-cloud-crowdstrike-pune-f2cf64c9",
-    "https://artha.link/@eanxt/jobs/engineer-iii-techops-cicd-platform-crowdstrike-bengaluru-fc557ef3",
-    "https://artha.link/@eanxt/jobs/engineer-ii-site-reliability-hybrid-ind-crowdstrike-bengaluru-5fb0f3f0",
-    "https://artha.link/@eanxt/jobs/sr-engineer-data-ml-platform-hybrid-ind-crowdstrike-bengaluru-e9ca5f1e",
-    "https://artha.link/@eanxt/jobs/engineer-ii-virtualization-shift-8am-crowdstrike-bengaluru-a6695671",
-    "https://artha.link/@eanxt/jobs/engineer-iii-cicd-devops-crowdstrike-pune-ea04cfa7",
-    "https://artha.link/@eanxt/jobs/full-stack-engineer-iii-crowdstrike-bengaluru-1e5b8f84",
-    "https://artha.link/@eanxt/jobs/engineer-ii-vulnerability-detection-crowdstrike-pune-d9e53537"
-  ];
+  "https://artha.link/@eanxt/jobs/infrastructure-engineer-techops-cicd-crowdstrike-bengaluru-dbc5db80",
+  "https://artha.link/@eanxt/jobs/sr-backend-engineer-crowdstrike-bengaluru-f4b3618d",
+  "https://artha.link/@eanxt/jobs/manager-sales-engineering-crowdstrike-mumbai-c9fb55c9",
+  "https://artha.link/@eanxt/jobs/network-reliability-engineer-iii-hybrid-crowdstrike-bengaluru-b6d27db6",
+  "https://artha.link/@eanxt/jobs/engineer-iii-cloud-crowdstrike-pune-e7f67ea7",
+  "https://artha.link/@eanxt/jobs/engineer-iii-techops-cicd-sda-crowdstrike-bengaluru-663bd9b9",
+  "https://artha.link/@eanxt/jobs/sr-software-developer-observability-crowdstrike-bengaluru-becea209",
+  "https://artha.link/@eanxt/jobs/sr-engineer-cloud-crowdstrike-pune-f2cf64c9",
+  "https://artha.link/@eanxt/jobs/engineer-iii-techops-cicd-platform-crowdstrike-bengaluru-fc557ef3",
+  "https://artha.link/@eanxt/jobs/engineer-ii-site-reliability-hybrid-ind-crowdstrike-bengaluru-5fb0f3f0",
+  "https://artha.link/@eanxt/jobs/sr-engineer-data-ml-platform-hybrid-ind-crowdstrike-bengaluru-e9ca5f1e",
+  "https://artha.link/@eanxt/jobs/engineer-ii-virtualization-shift-8am-crowdstrike-bengaluru-a6695671",
+  "https://artha.link/@eanxt/jobs/engineer-iii-cicd-devops-crowdstrike-pune-ea04cfa7",
+  "https://artha.link/@eanxt/jobs/full-stack-engineer-iii-crowdstrike-bengaluru-1e5b8f84",
+  "https://artha.link/@eanxt/jobs/engineer-ii-vulnerability-detection-crowdstrike-pune-d9e53537",
+  "https://artha.link/@eanxt/jobs/engineer-ii-vulnerability-detection-crowdstrike-pune-fe78d560",
+  "https://artha.link/@eanxt/jobs/full-stack-engineer-iii-crowdstrike-bengaluru-74ab9a7a",
+  "https://artha.link/@eanxt/jobs/engineer-iii-cicd-devops-crowdstrike-pune-bdc115d1",
+  "https://artha.link/@eanxt/jobs/sr-engineer-data-ml-platform-hybrid-ind-crowdstrike-bengaluru-6d556cf9",
+  "https://artha.link/@eanxt/jobs/engineer-ii-virtualization-shift-8am-crowdstrike-bengaluru-decf1beb",
+  "https://artha.link/@eanxt/jobs/engineer-ii-site-reliability-hybrid-ind-crowdstrike-bengaluru-4a25e082",
+  "https://artha.link/@eanxt/jobs/infrastructure-engineer-techops-cicd-crowdstrike-bengaluru-a384d623",
+  "https://artha.link/@eanxt/jobs/sr-backend-engineer-crowdstrike-bengaluru-4a0768ce",
+  "https://artha.link/@eanxt/jobs/sr-backend-engineer-crowdstrike-bengaluru-8d882f4d",
+  "https://artha.link/@eanxt/jobs/manager-sales-engineering-crowdstrike-mumbai-eca9c8db",
+  "https://artha.link/@eanxt/jobs/network-reliability-engineer-iii-hybrid-crowdstrike-bengaluru-990bdeb6",
+  "https://artha.link/@eanxt/jobs/engineer-iii-cloud-crowdstrike-pune-13ab66bf",
+  "https://artha.link/@eanxt/jobs/engineer-iii-techops-cicd-sda-crowdstrike-bengaluru-4dd3da5c",
+  "https://artha.link/@eanxt/jobs/sr-engineer-cloud-crowdstrike-pune-33d94f56",
+  "https://artha.link/@eanxt/jobs/sr-software-developer-observability-crowdstrike-bengaluru-64284c15",
+  "https://artha.link/@eanxt/jobs/engineer-iii-techops-cicd-platform-crowdstrike-bengaluru-83efd1c7"
+];
 
   let jobQueue = DEFAULT_QUEUE.slice();
   let batchSize = 15;
@@ -287,7 +289,7 @@
     play: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>',
     pause: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>',
     skip: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>',
-    reset: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10 predators"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>',
+    reset: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>',
     broom: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 22 5-5-3.5-3.5-5 5M2 22l6.5-6.5M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>',
     minimize: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>',
     close: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
@@ -321,7 +323,7 @@
           <div>
             <div style="display: flex; align-items: center; gap: 5px;">
               <span style="font-weight: 800; font-size: 13.5px; color: #0f172a; letter-spacing: -0.2px;">🦅 CROWDSTRIKE APPLIER</span>
-              <span style="background: #fef2f2; color: #dc2626; font-size: 9.5px; font-weight: 800; padding: 1px 6px; border-radius: 5px; border: 1px solid #fecaca;">15 ROLES</span>
+              <span style="background: #fef2f2; color: #dc2626; font-size: 9.5px; font-weight: 800; padding: 1px 6px; border-radius: 5px; border: 1px solid #fecaca;">31 ROLES</span>
             </div>
             <div style="font-size: 10.5px; color: #64748b; font-weight: 500;">Dedicated Targeted Application Suite</div>
           </div>
@@ -382,7 +384,7 @@
             transition: all 0.2s;
           ">
             <span id="cs-btn-icon">${ICONS.play}</span>
-            <span id="cs-btn-label">Start Applying (15 Jobs)</span>
+            <span id="cs-btn-label">Start Applying (31 Jobs)</span>
           </button>
 
           <button id="cs-skip-btn" title="Skip to next role" style="
@@ -452,7 +454,7 @@
           line-height: 1.45;
           border: 1px solid #e2e8f0;
           margin-bottom: 8px;
-        ">Ready. Loaded 15 CrowdStrike jobs (Bengaluru, Pune, Mumbai). Click 'Start' to begin.</div>
+        ">Ready. Loaded 31 CrowdStrike jobs (Bengaluru, Pune, Mumbai). Click 'Start' to begin.</div>
 
         <!-- Role Summary List -->
         <div style="
@@ -467,7 +469,7 @@
           <div style="display: flex; align-items: center; gap: 4px; font-weight: 700; color: #b91c1c; margin-bottom: 3px;">
             ${ICONS.info} CrowdStrike Target Profile:
           </div>
-          <div>• <b>Locations:</b> Bengaluru (10), Pune (4), Mumbai (1).</div>
+          <div>• <b>Locations:</b> Bengaluru, Pune, Mumbai (31 verified openings).</div>
           <div>• <b>Functions:</b> CI/CD, TechOps, Cloud, Backend, SRE, Observability, ML Platform, Sales Eng.</div>
           <div>• <b>Safety:</b> Dual-tab auto-closer + per-job deep cache purge active.</div>
         </div>
@@ -509,7 +511,7 @@
     }
 
     if (!isRunning && btnLabel) {
-      btnLabel.innerText = state.currentIndex >= total ? "All 15 Jobs Applied!" : "Start Applying (" + (total - state.currentIndex) + " left)";
+      btnLabel.innerText = state.currentIndex >= total ? "All 31 Jobs Applied!" : "Start Applying (" + (total - state.currentIndex) + " left)";
     }
   }
 
@@ -518,7 +520,7 @@
 
     if (state.currentIndex >= jobQueue.length) {
       isRunning = false;
-      if (btnLabel) btnLabel.innerText = "All 15 Roles Completed!";
+      if (btnLabel) btnLabel.innerText = "All 31 Roles Completed!";
       if (btnIcon) btnIcon.innerHTML = ICONS.play;
       if (mainActionBtn) mainActionBtn.style.background = "#059669";
       if (statusDot) statusDot.style.background = "#10b981";
@@ -762,8 +764,8 @@
     "background: #dc2626; color: #ffffff; font-size: 13px; font-weight: 800; padding: 6px 10px; border-radius: 0 6px 6px 0; border: 1px solid #dc2626;"
   );
   console.log(
-    "%c🎯 Target: %c15 CrowdStrike Openings (Bengaluru, Pune, Mumbai)\\n" +
-    "%c💾 Saved Progress: %cJob " + (state.currentIndex + 1) + " | Applied: " + state.completedCount + "\\n" +
+    "%c🎯 Target: %c31 CrowdStrike Openings (Bengaluru, Pune, Mumbai)\n" +
+    "%c💾 Saved Progress: %cJob " + (state.currentIndex + 1) + " | Applied: " + state.completedCount + "\n" +
     "%c⚡ Controls: %cClick 'Start Applying' on the floating HUD in the top right",
     "color: #64748b; font-weight: bold;", "color: #dc2626; font-weight: bold;",
     "color: #64748b; font-weight: bold;", "color: #059669; font-weight: bold;",
