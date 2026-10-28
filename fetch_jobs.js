@@ -224,8 +224,21 @@ async function fetchPureCpcJobs() {
   const queueUrls = jobs.map(j => j.apply_link).filter(Boolean);
   fs.writeFileSync(queueFilePath, JSON.stringify(queueUrls, null, 2), 'utf8');
 
-  // 4. auto_applier.js operates in Live Dynamic Fetcher mode (zero hardcoded links)
-  console.log('💡 Note: auto_applier.js operates in Live Dynamic Fetcher mode (zero hardcoded links in code).');
+  // 4. Sync DEFAULT_QUEUE into applier scripts
+  const updateApplierQueue = (filePath) => {
+    if (!fs.existsSync(filePath)) return;
+    let content = fs.readFileSync(filePath, 'utf8');
+    const startIdx = content.indexOf('const DEFAULT_QUEUE = [');
+    if (startIdx !== -1) {
+      const endIdx = content.indexOf('];', startIdx) + 2;
+      const queueStr = 'const DEFAULT_QUEUE = ' + JSON.stringify(queueUrls, null, 2) + ';';
+      content = content.slice(0, startIdx) + queueStr + content.slice(endIdx);
+      fs.writeFileSync(filePath, content, 'utf8');
+      console.log(`🔄 Synced ${queueUrls.length} jobs into ${path.basename(filePath)}.`);
+    }
+  };
+  updateApplierQueue(path.join(__dirname, 'auto_applier.js'));
+  updateApplierQueue(path.join(__dirname, 'auto_applier_crowdstrike.js'));
 
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
   const maxCpc = jobs[0]?.cpc_value ? `$${jobs[0].cpc_value.toFixed(3)}` : 'N/A';
