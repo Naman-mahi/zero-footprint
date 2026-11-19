@@ -48,33 +48,34 @@ Because the applier opens and closes job tabs automatically, Chrome needs permis
 3. Click **Site settings** → Set **Pop-ups and redirects** to **Allow**.
 
 #### 🤖 Step 2: Launch the Applier
-1. Go to **[https://artha.link](https://artha.link)** (or `https://my.artha.link`) and log in.
-2. Press **`F12`** (or right-click → *Inspect*) to open DevTools, then switch to the **Console** tab.
-3. Open [`auto_applier.js`](auto_applier.js), select all code (`Ctrl + A`), copy it (`Ctrl + C`), paste it into the Console, and press **Enter**.
-4. The **Pure White Floating HUD** will appear at the top-right of your screen.
-5. Click **Start Applying**!
+
+**Option A (1-Line Console Script):**
+Paste this into the DevTools Console and press Enter:
+```javascript
+fetch(`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js?_t=${Date.now()}`).then(r => r.text()).then(eval);
+```
+
+**Option B (Manual Paste):**
+1. Open [`auto_applier.js`](auto_applier.js), select all code (`Ctrl + A`), copy it (`Ctrl + C`).
+2. Paste it into the Console and press **Enter**.
+
+The **Pure White Floating HUD** will appear at the top-right of your screen. Click **Start Applying**!
 
 ---
 
 ### 3. 🔄 Fetch Fresh Jobs (`fetch_jobs.js`)
 
-Whenever you want to wipe the old cache and pull all the latest live listings from Artha:
+Whenever you want to wipe the old cache and pull all the latest high-yield listings from Artha:
 
 ```bash
 npm run fetch
 ```
 *(Or run `node fetch_jobs.js` directly)*
 
-**What this automatically does:**
-1. Wipes old cached files (`jobs.json`, `jobs_queue.json`, `jobs_data.js`).
-2. Queries the live Artha API across 5 pipelines:
-   - High-CPC Indian Catalog (strictly positive CPC).
-   - General Indian Feed across all pages.
-   - All 18 Official Industry Categories.
-   - Major Indian Metros & Tech States.
-   - High-demand role keywords (Engineering, Data, Cloud, AI, Management, etc.).
-3. Deduplicates all listings and sorts them with the **highest CPC first**.
-4. Automatically updates `jobs.json`, `jobs_queue.json`, `jobs_data.js`, and syncs the new queue into `auto_applier.js`.
+#### 🎯 Strict High-Yield CPC Rules (Future Guarantee):
+- **Minimum Threshold (`>= $0.010`):** Automatically discards all sub-$0.01 / `0.00x` listings (such as `$0.007`, `$0.008`, and `$0.000`). Only jobs paying at least `$0.010` (up to `$0.160+`) are kept.
+- **Configurable:** If you ever want to adjust this threshold in the future, change `MIN_CPC_THRESHOLD = 0.01;` on line 29 of [`fetch_jobs.js`](fetch_jobs.js).
+- **Auto-Sync:** Wipes old files, writes fresh metadata to `jobs.json` and `jobs_data.js`, and syncs the new queue into `auto_applier.js`.
 
 ---
 
