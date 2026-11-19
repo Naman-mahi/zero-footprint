@@ -22,18 +22,15 @@ all-bots/
 
 ## 🚀 Quick Start Guide
 
-### 1. 🌐 View & Apply via Web Portal (`index.html`)
+### 1. 🌐 iOS Web App Portal (`index.html`)
 
-You can visually browse every job, see payout amounts, filter by role/city, track applications, and apply manually with 1-click:
+A native iPhone-styled web portal with an iOS bottom tab bar, live earnings tracker, and application ledger:
 
-1. Double-click **`index.html`** in Windows Explorer (or right-click → **Open with Chrome / Edge / Brave**).
-2. Features available on the portal:
-   - **Payout Badges:** View exact amounts (e.g., `💰 $0.160 CPC`, `💎 $3.00 CPA`).
-   - **LocalStorage Application Tracking:** When you click **Apply Now**, the job is automatically marked as applied and moved out of the *Available* grid into the **Applied Jobs** tab.
-   - **Applied Jobs Tab:** Dedicated tab to review all your submitted applications with timestamps and quick re-visit/restore buttons.
-   - **Reset Applied History Button:** Top header button to wipe local storage history and restore all jobs back to available.
-   - **Search & Filters:** Real-time search by Job Role or Company, filter by City, or sort by highest amount.
-   - **Export Option:** Export your applied jobs history as a JSON file anytime.
+1. Double-click **`index.html`** in Windows Explorer (or open with Chrome / Safari / Edge).
+2. **Native iOS Bottom Tabs:**
+   - 💼 **Jobs Tab:** Browse all available high-yield jobs (sorted by highest CPC). Tapping **Apply** opens the application, moves it out of the feed, and logs your earnings.
+   - ✅ **Applied Tab:** Review your submitted applications with exact timestamps, total earnings calculated, and options to re-visit or restore jobs.
+   - 👤 **Profile & Earnings Tab:** View your cumulative earnings dashboard (**Total Earned**, **Applied Count**, **Average Payout/Job**, **Remaining Pipeline Value**), track your daily application goal progress, or clear/export your LocalStorage history.
 
 *(Zero web server required: works straight out of the box via double-click).*
 
