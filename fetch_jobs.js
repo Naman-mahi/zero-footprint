@@ -248,11 +248,9 @@ async function fetchAllIndiaJobs() {
 
   const jobsFilePath = path.join(__dirname, 'jobs.json');
   const queueFilePath = path.join(__dirname, 'jobs_queue.json');
-  const indiaAllJobsPath = path.join(__dirname, 'jobs_india_all.json');
-  const indiaAllQueuePath = path.join(__dirname, 'jobs_india_all_queue.json');
 
   // 1. Remove old cached files
-  [jobsFilePath, queueFilePath, indiaAllJobsPath, indiaAllQueuePath].forEach(fp => {
+  [jobsFilePath, queueFilePath].forEach(fp => {
     if (fs.existsSync(fp)) {
       fs.unlinkSync(fp);
       console.log(`🧹 Removed old ${path.basename(fp)} cache.`);
@@ -269,28 +267,25 @@ async function fetchAllIndiaJobs() {
 
   // 2. Save metadata list
   fs.writeFileSync(jobsFilePath, JSON.stringify(jobs, null, 2), 'utf8');
-  fs.writeFileSync(indiaAllJobsPath, JSON.stringify(jobs, null, 2), 'utf8');
+  fs.writeFileSync(path.join(__dirname, 'jobs_data.js'), 'window.__JOBS_DATA__ = ' + JSON.stringify(jobs, null, 2) + ';', 'utf8');
 
   // 3. Save deduplicated URL queue
   const queueUrls = jobs.map(j => j.apply_link).filter(Boolean);
   fs.writeFileSync(queueFilePath, JSON.stringify(queueUrls, null, 2), 'utf8');
-  fs.writeFileSync(indiaAllQueuePath, JSON.stringify(queueUrls, null, 2), 'utf8');
 
-  // 4. Sync DEFAULT_QUEUE into applier scripts
-  const updateApplierQueue = (filePath) => {
-    if (!fs.existsSync(filePath)) return;
-    let content = fs.readFileSync(filePath, 'utf8');
+  // 4. Sync DEFAULT_QUEUE into auto_applier.js
+  const applierPath = path.join(__dirname, 'auto_applier.js');
+  if (fs.existsSync(applierPath)) {
+    let content = fs.readFileSync(applierPath, 'utf8');
     const startIdx = content.indexOf('const DEFAULT_QUEUE = [');
     if (startIdx !== -1) {
       const endIdx = content.indexOf('];', startIdx) + 2;
       const queueStr = 'const DEFAULT_QUEUE = ' + JSON.stringify(queueUrls, null, 2) + ';';
       content = content.slice(0, startIdx) + queueStr + content.slice(endIdx);
-      fs.writeFileSync(filePath, content, 'utf8');
-      console.log(`🔄 Synced ${queueUrls.length} jobs into ${path.basename(filePath)}.`);
+      fs.writeFileSync(applierPath, content, 'utf8');
+      console.log(`🔄 Synced ${queueUrls.length} jobs into auto_applier.js.`);
     }
-  };
-  updateApplierQueue(path.join(__dirname, 'auto_applier.js'));
-  updateApplierQueue(path.join(__dirname, 'auto_applier_crowdstrike.js'));
+  }
 
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
   const positiveCpc = jobs.filter(j => j.cpc_value > 0);

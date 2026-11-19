@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ Live Job Portal | High-CPC Openings</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-xl shadow-md shadow-blue-500/20">
+          ⚡
+        </div>
+        <div>
+          <h1 class="text-lg font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+            Job Opportunity Portal
+            <span class="text-xs bg-emerald-50 text-emerald-700 font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">
+              Live & Verified
+            </span>
+          </h1>
+          <p class="text-xs text-slate-500 font-medium">Pan-India openings with verified payout amounts</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2.5">
+        <a href="auto_applier.js" download class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition border border-slate-200">
+          <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          auto_applier.js
+        </a>
+        <a href="jobs.json" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition border border-blue-200">
+          <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+          jobs.json
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+    <!-- KPI Statistics Banner -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-6">
+      <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs">
+        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Active Jobs</div>
+        <div class="text-2xl font-black text-slate-900 mt-1" id="stat-total-jobs">0</div>
+        <div class="text-[11px] text-slate-400 mt-0.5">Deduplicated Indian listings</div>
+      </div>
+      <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs">
+        <div class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Highest CPC Amount</div>
+        <div class="text-2xl font-black text-emerald-600 mt-1" id="stat-highest-cpc">$0.000</div>
+        <div class="text-[11px] text-emerald-600/70 mt-0.5">Top-tier payout rate</div>
+      </div>
+      <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs">
+        <div class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Positive CPC Jobs</div>
+        <div class="text-2xl font-black text-blue-600 mt-1" id="stat-cpc-count">0</div>
+        <div class="text-[11px] text-blue-600/70 mt-0.5">Verified cpc_value > 0</div>
+      </div>
+      <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs">
+        <div class="text-xs font-semibold text-purple-600 uppercase tracking-wider">Unique Companies</div>
+        <div class="text-2xl font-black text-purple-600 mt-1" id="stat-companies">0</div>
+        <div class="text-[11px] text-purple-600/70 mt-0.5">Top Indian & Global firms</div>
+      </div>
+    </div>
+
+    <!-- Search & Filter Controls -->
+    <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-xs mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-center">
+        <!-- Search Input -->
+        <div class="md:col-span-5 relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </div>
+          <input type="text" id="search-input" placeholder="Search by Job Role, Title, or Company..." class="w-full pl-9 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white transition text-slate-900 placeholder-slate-400">
+        </div>
+
+        <!-- City / Location Filter -->
+        <div class="md:col-span-3">
+          <select id="city-filter" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-800">
+            <option value="">All Locations (Pan-India)</option>
+          </select>
+        </div>
+
+        <!-- Sort Filter -->
+        <div class="md:col-span-2">
+          <select id="sort-filter" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-800">
+            <option value="cpc-desc">Amount: High to Low</option>
+            <option value="cpc-asc">Amount: Low to High</option>
+            <option value="title-asc">Role: A to Z</option>
+            <option value="company-asc">Company: A to Z</option>
+          </select>
+        </div>
+
+        <!-- Quick Filter Mode -->
+        <div class="md:col-span-2 flex items-center gap-1.5">
+          <button id="filter-all-btn" class="flex-1 py-2 text-xs font-bold rounded-lg border border-blue-600 bg-blue-600 text-white transition shadow-xs">
+            All
+          </button>
+          <button id="filter-cpc-btn" class="flex-1 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition">
+            CPC Only
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Stats Tagline -->
+      <div class="flex items-center justify-between text-xs text-slate-500 mt-3 pt-3 border-t border-slate-100">
+        <span id="results-count">Showing 0 jobs</span>
+        <button id="reset-filters" class="text-blue-600 hover:text-blue-800 font-semibold cursor-pointer">Reset Filters</button>
+      </div>
+    </div>
+
+    <!-- Jobs Grid Container -->
+    <div id="jobs-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+      <!-- Skeleton Loading State -->
+      <div class="bg-white rounded-xl p-5 border border-slate-200 animate-pulse h-48"></div>
+      <div class="bg-white rounded-xl p-5 border border-slate-200 animate-pulse h-48"></div>
+      <div class="bg-white rounded-xl p-5 border border-slate-200 animate-pulse h-48"></div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div id="pagination-container" class="flex items-center justify-between bg-white px-4 py-3 rounded-xl border border-slate-200 shadow-xs mb-8">
+      <div class="text-xs text-slate-500 font-medium">
+        Page <span id="current-page" class="font-bold text-slate-900">1</span> of <span id="total-pages" class="font-bold text-slate-900">1</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <button id="prev-page-btn" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition">
+          ← Previous
+        </button>
+        <button id="next-page-btn" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition">
+          Next →
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500">
+      ⚡ Zero-Footprint Automated Suite • Synced directly with <code class="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded font-mono">jobs.json</code>
+    </div>
+  </footer>
+
+  <!-- Toast notification -->
+  <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-lg opacity-0 transition-opacity duration-200 pointer-events-none z-50 flex items-center gap-2">
+    <span>Link copied to clipboard!</span>
+  </div>
+
+  <!-- Embedded fallback script (for double-click file:// opening) -->
+  <script src="jobs_data.js"></script>
+
+  <!-- Main Application Logic -->
+  <script>
+    let allJobs = [];
+    let filteredJobs = [];
+    let currentPage = 1;
+    const pageSize = 24;
+    let onlyPositiveCpc = false;
+
+    // Toast helper
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.querySelector("span").innerText = message;
+      toast.classList.remove("opacity-0");
+      setTimeout(() => toast.classList.add("opacity-0"), 2000);
+    }
+
+    // Load data
+    async function loadJobsData() {
+      // 1. Try window.__JOBS_DATA__ from jobs_data.js (works with file:// directly)
+      if (window.__JOBS_DATA__ && Array.isArray(window.__JOBS_DATA__) && window.__JOBS_DATA__.length > 0) {
+        allJobs = window.__JOBS_DATA__;
+      } else {
+        // 2. Fallback to fetch('jobs.json')
+        try {
+          const res = await fetch('jobs.json');
+          if (res.ok) {
+            allJobs = await res.json();
+          }
+        } catch (e) {
+          console.warn("Could not load jobs.json via fetch:", e);
+        }
+      }
+
+      initPortal();
+    }
+
+    function initPortal() {
+      // Populate city filter dropdown
+      const citySet = new Set();
+      let maxCpc = 0;
+      let positiveCpcCount = 0;
+      const companySet = new Set();
+
+      allJobs.forEach(job => {
+        if (job.city) citySet.add(job.city.trim());
+        if (job.company_name) companySet.add(job.company_name.trim());
+        const cpc = typeof job.cpc_value === 'number' ? job.cpc_value : 0;
+        if (cpc > maxCpc) maxCpc = cpc;
+        if (cpc > 0) positiveCpcCount++;
+      });
+
+      // Update KPIs
+      document.getElementById("stat-total-jobs").innerText = allJobs.length.toLocaleString();
+      document.getElementById("stat-highest-cpc").innerText = `$${maxCpc.toFixed(3)}`;
+      document.getElementById("stat-cpc-count").innerText = positiveCpcCount.toLocaleString();
+      document.getElementById("stat-companies").innerText = companySet.size.toLocaleString();
+
+      const citySelect = document.getElementById("city-filter");
+      const sortedCities = Array.from(citySet).sort();
+      sortedCities.forEach(city => {
+        const opt = document.createElement("option");
+        opt.value = city;
+        opt.innerText = city;
+        citySelect.appendChild(opt);
+      });
+
+      // Setup event listeners
+      document.getElementById("search-input").addEventListener("input", applyFilters);
+      document.getElementById("city-filter").addEventListener("change", applyFilters);
+      document.getElementById("sort-filter").addEventListener("change", applyFilters);
+
+      document.getElementById("filter-all-btn").addEventListener("click", () => {
+        onlyPositiveCpc = false;
+        document.getElementById("filter-all-btn").className = "flex-1 py-2 text-xs font-bold rounded-lg border border-blue-600 bg-blue-600 text-white transition shadow-xs";
+        document.getElementById("filter-cpc-btn").className = "flex-1 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition";
+        applyFilters();
+      });
+
+      document.getElementById("filter-cpc-btn").addEventListener("click", () => {
+        onlyPositiveCpc = true;
+        document.getElementById("filter-cpc-btn").className = "flex-1 py-2 text-xs font-bold rounded-lg border border-blue-600 bg-blue-600 text-white transition shadow-xs";
+        document.getElementById("filter-all-btn").className = "flex-1 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition";
+        applyFilters();
+      });
+
+      document.getElementById("reset-filters").addEventListener("click", () => {
+        document.getElementById("search-input").value = "";
+        document.getElementById("city-filter").value = "";
+        document.getElementById("sort-filter").value = "cpc-desc";
+        onlyPositiveCpc = false;
+        document.getElementById("filter-all-btn").className = "flex-1 py-2 text-xs font-bold rounded-lg border border-blue-600 bg-blue-600 text-white transition shadow-xs";
+        document.getElementById("filter-cpc-btn").className = "flex-1 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition";
+        applyFilters();
+      });
+
+      document.getElementById("prev-page-btn").addEventListener("click", () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderJobs();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      });
+
+      document.getElementById("next-page-btn").addEventListener("click", () => {
+        const totalPages = Math.ceil(filteredJobs.length / pageSize) || 1;
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderJobs();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      });
+
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const query = document.getElementById("search-input").value.trim().toLowerCase();
+      const city = document.getElementById("city-filter").value.trim().toLowerCase();
+      const sortMode = document.getElementById("sort-filter").value;
+
+      filteredJobs = allJobs.filter(job => {
+        if (onlyPositiveCpc && (!job.cpc_value || job.cpc_value <= 0)) {
+          return false;
+        }
+
+        if (city && (!job.city || job.city.toLowerCase() !== city)) {
+          return false;
+        }
+
+        if (query) {
+          const title = (job.title || "").toLowerCase();
+          const company = (job.company_name || "").toLowerCase();
+          const location = ((job.city || "") + " " + (job.state || "")).toLowerCase();
+          if (!title.includes(query) && !company.includes(query) && !location.includes(query)) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      // Sorting
+      filteredJobs.sort((a, b) => {
+        const cpcA = typeof a.cpc_value === 'number' ? a.cpc_value : 0;
+        const cpcB = typeof b.cpc_value === 'number' ? b.cpc_value : 0;
+
+        switch (sortMode) {
+          case 'cpc-desc':
+            return cpcB - cpcA;
+          case 'cpc-asc':
+            return cpcA - cpcB;
+          case 'title-asc':
+            return (a.title || "").localeCompare(b.title || "");
+          case 'company-asc':
+            return (a.company_name || "").localeCompare(b.company_name || "");
+          default:
+            return cpcB - cpcA;
+        }
+      });
+
+      currentPage = 1;
+      renderJobs();
+    }
+
+    function renderJobs() {
+      const container = document.getElementById("jobs-container");
+      const resultsCountEl = document.getElementById("results-count");
+      const currentPageEl = document.getElementById("current-page");
+      const totalPagesEl = document.getElementById("total-pages");
+      const prevBtn = document.getElementById("prev-page-btn");
+      const nextBtn = document.getElementById("next-page-btn");
+
+      resultsCountEl.innerText = `Showing ${filteredJobs.length.toLocaleString()} matching jobs`;
+
+      if (filteredJobs.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-16 text-center bg-white rounded-xl border border-slate-200">
+            <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center text-xl mb-3">🔍</div>
+            <h3 class="text-sm font-bold text-slate-800">No matching jobs found</h3>
+            <p class="text-xs text-slate-500 mt-1">Try clearing your search term or selecting a different location.</p>
+          </div>
+        `;
+        currentPageEl.innerText = "1";
+        totalPagesEl.innerText = "1";
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        return;
+      }
+
+      const totalPages = Math.ceil(filteredJobs.length / pageSize) || 1;
+      currentPageEl.innerText = currentPage;
+      totalPagesEl.innerText = totalPages;
+      prevBtn.disabled = currentPage <= 1;
+      nextBtn.disabled = currentPage >= totalPages;
+
+      const startIndex = (currentPage - 1) * pageSize;
+      const paginatedJobs = filteredJobs.slice(startIndex, startIndex + pageSize);
+
+      let html = "";
+      paginatedJobs.forEach(job => {
+        const cpc = typeof job.cpc_value === 'number' && job.cpc_value > 0 ? job.cpc_value : 0;
+        const cpa = typeof job.cpa_value === 'number' && job.cpa_value > 0 ? job.cpa_value : 0;
+
+        let amountBadge = "";
+        if (cpc > 0) {
+          amountBadge = `
+            <span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 font-extrabold text-xs px-2.5 py-1 rounded-md border border-emerald-200 shadow-2xs">
+              💰 $${cpc.toFixed(3)} CPC
+            </span>
+          `;
+        } else if (cpa > 0) {
+          amountBadge = `
+            <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-700 font-extrabold text-xs px-2.5 py-1 rounded-md border border-blue-200 shadow-2xs">
+              💎 $${cpa.toFixed(2)} CPA
+            </span>
+          `;
+        } else {
+          amountBadge = `
+            <span class="inline-flex items-center gap-1 bg-slate-100 text-slate-600 font-semibold text-xs px-2.5 py-1 rounded-md border border-slate-200">
+              Verified Role
+            </span>
+          `;
+        }
+
+        const locationStr = [job.city, job.state, "India"].filter(Boolean).join(", ");
+        const companyName = job.company_name || "Company Confidential";
+
+        html += `
+          <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-xs hover:shadow-md hover:border-blue-300 transition-all flex flex-col justify-between group">
+            <div>
+              <!-- Top Row: Amount & Category -->
+              <div class="flex items-center justify-between gap-2 mb-3">
+                ${amountBadge}
+                <span class="text-[11px] font-semibold text-slate-400 truncate max-w-[140px]">
+                  ${job.job_type ? job.job_type.toUpperCase() : 'FULL-TIME'}
+                </span>
+              </div>
+
+              <!-- Job Role / Title -->
+              <h3 class="font-bold text-slate-900 text-base leading-snug group-hover:text-blue-600 transition-colors line-clamp-2 mb-1.5" title="${escapeHtml(job.title)}">
+                ${escapeHtml(job.title)}
+              </h3>
+
+              <!-- Company & Location -->
+              <div class="space-y-1 mb-4">
+                <div class="text-xs font-semibold text-slate-700 flex items-center gap-1.5 truncate">
+                  <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                  <span class="truncate">${escapeHtml(companyName)}</span>
+                </div>
+                <div class="text-xs text-slate-500 flex items-center gap-1.5 truncate">
+                  <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  <span class="truncate">${escapeHtml(locationStr)}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons: Apply & Copy -->
+            <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
+              <a href="${job.apply_link}" target="_blank" rel="noopener noreferrer" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2 px-3.5 rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow-xs">
+                <span>Apply Now</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+              </a>
+              <button onclick="copyJobLink('${job.apply_link}')" title="Copy Apply Link" class="bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 p-2 rounded-lg transition shrink-0 cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function copyJobLink(url) {
+      navigator.clipboard.writeText(url).then(() => {
+        showToast("Link copied to clipboard!");
+      }).catch(() => {
+        showToast("Could not copy link");
+      });
+    }
+
+    function escapeHtml(text) {
+      if (!text) return "";
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // Initialize on page load
+    window.addEventListener("DOMContentLoaded", loadJobsData);
+  </script>
+</body>
+</html>
+

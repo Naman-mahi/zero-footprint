@@ -1,4 +1,4 @@
-[
+window.__JOBS_DATA__ = [
   {
     "id": "01a1c7af-654a-70c0-8398-3d4ceb21dcd9",
     "title": "Innovation Cup 2027 - Team Synthetic Biology (all Genders)",
@@ -9247,4 +9247,4 @@
     ],
     "posted_date": "2026-11-18T13:25:13.163949"
   }
-]
+];

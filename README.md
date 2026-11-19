@@ -1,31 +1,21 @@
 # 🕶️ Zero-Footprint: 100% Undetectable In-Browser Auto-Applier
 
-[![GitHub Repo](https://img.shields.io/badge/GitHub-Naman--mahi%2Fzero--footprint-blue?logo=github)](https://github.com/Naman-mahi/zero-footprint)
-[![jsDelivr CDN](https://data.jsdelivr.com/v1/package/gh/Naman-mahi/zero-footprint/badge)](https://www.jsdelivr.com/package/gh/Naman-mahi/zero-footprint)
-[![Anti-Detection](https://img.shields.io/badge/Anti--Detection-100%25%20Undetectable-brightgreen.svg)](#-why-it-is-100-undetectable)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Chrome%20%7C%20Edge%20%7C%20Brave%20%7C%20Firefox-orange.svg)](#)
-
-A high-performance, **zero-footprint**, 100% undetectable in-browser automation suite for high-volume job applications. Operates directly inside your active authenticated browser session with zero webdriver flags.
+A high-performance, **zero-footprint**, 100% undetectable in-browser automation suite for high-volume job applications on Artha. Operates directly inside your active authenticated browser session with zero webdriver flags.
 
 ---
 
-## 📁 Repository Structure
+## 📁 Clean Repository Structure
 
 ```text
-zero-footprint/
-├── us/                          # 🇺🇸 Dedicated US High-CPC Module (Up to $1.75/click)
-│   ├── auto_applier.js          # In-browser 1-by-1 US applier (2,761 Pure-CPC URLs embedded)
-│   ├── fetch_jobs.js            # US recommendations fetcher (sort_by: high_cpc)
-│   ├── jobs.json                # Complete US metadata records (1.99 MB)
-│   ├── jobs_queue.json          # Deduplicated US apply URLs (0.28 MB)
-│   └── README.md                # Standalone US module documentation
-├── auto_applier.js              # Global in-browser 1-by-1 auto-applier (3,049 Pure-CPC URLs embedded)
-├── fetch_jobs.js                # Global recommendation feed fetcher (sort_by: high_cpc)
-├── jobs.json                    # Global metadata records (2.20 MB)
-├── jobs_queue.json              # Global deduplicated apply URLs (0.31 MB)
-├── package.json                 # Project configuration & npm scripts (`fetch`, `fetch:us`)
-└── README.md                    # Main documentation
+all-bots/
+├── index.html          # 🌐 Live Web Portal (Browse roles, amounts & apply directly)
+├── auto_applier.js     # ⚡ Core In-Browser Sequential Auto-Applier (Floating HUD)
+├── fetch_jobs.js       # 🚀 Comprehensive Multi-Pipeline Fresh Jobs Fetcher
+├── jobs.json           # 📋 Full Metadata Catalog for all fetched active jobs
+├── jobs_queue.json     # 🔗 Deduplicated Direct Application URLs
+├── jobs_data.js        # 📦 Instant zero-setup data loader for index.html
+├── package.json        # ⚙️ Clean Project Configuration & Scripts
+└── README.md           # 📖 Documentation
 ```
 
 ---
@@ -33,144 +23,40 @@ zero-footprint/
 ## ✨ Key Features
 
 - **🛡️ 100% Undetectable Execution**: Zero automation flags (`navigator.webdriver === false`), native human execution context, 9-stage pointer event cascade.
-- **⚡ High-Volume Queue**: Pre-populated with real-time active openings from Artha.
-- **🎯 Dynamic Batch Sizing**: Switch between **25**, **50**, **100**, or **200 jobs per batch** directly on the floating HUD.
+- **⚡ High-Volume Queue**: Pre-populated with real-time active openings, prioritized by highest CPC first.
+- **🎯 Configurable Batch Size**: Toggle between **25**, **50**, **100**, or **200** jobs per batch directly on the floating HUD.
 - **⏱️ Granular Pacing Delay**: Select from multiple human delay profiles (**1s**, **2s**, **3s**, **5s**, **8s**, **10s**, **15s**) with scaled destination telemetry hold.
-- **⏳ 1-Minute Cooldown & Autostart**: Wipes storage and automatically begins the next batch after a 60-second cooldown (or click to start immediately).
-- **🧼 Deep Zero-Footprint Purge**: Cleans `document.cookie`, `sessionStorage`, and `localStorage` **after each application**.
-- **⏳ Destination Page Hydration**: Holds destination pages dynamically to ensure affiliate tracking beacons, analytics, and conversion pixels fire completely.
-- **🪟 3-Tab Auto-Closer**: Cleanly opens job details, handles gateway redirects, destination pages, and closes tabs sequentially.
-- **💾 Persistent State**: Standalone progress tracking in `localStorage` with pause, resume, skip, and reset.
+- **🧼 Deep Zero-Footprint Purge**: Cleans `document.cookie`, `sessionStorage`, and `localStorage` after each job.
+- **🪟 Smart Multi-Tab Auto-Closer**: Handles gateway redirects, destination pages, and closes tabs sequentially.
+- **💾 Session Resume & Controls**: Persistent state in `localStorage` with pause, resume, skip, and reset.
 
 ---
 
-## ⚡ Quick Start: In-Browser Applier (`auto_applier.js`)
+## 🚀 How to Run
 
-### Option A: DevTools Console (Zero Install)
-1. Open [artha.link](https://artha.link) in Chrome / Edge / Brave / Firefox and log in.
-2. Press `F12` to open DevTools, switch to **Console**.
-3. Run the remote CDN loader or paste [`auto_applier.js`](file:///d:/DEVELOPMENT/all-bots/auto_applier.js):
-```javascript
-fetch(`https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js?_t=${Date.now()}`)
-  .then(r => r.text())
-  .then(eval);
-```
+### 1. Fetch Fresh Jobs
+Wipes old cache files, pulls all live active listings (CPC prioritized), and updates the bot queue:
 
-### Option B: 1-Click Bookmarklet
-Create a bookmark named `⚡ 1-by-1 Auto Applier` with URL:
-```javascript
-javascript:(function(){const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/auto_applier.js?t='+Date.now();document.head.appendChild(s);})();
-```
-
----
-
-## 🔄 Fetching Fresh Jobs (`fetch_jobs.js`)
-
-To fetch fresh job openings and automatically sync them into `jobs.json`, `jobs_queue.json`, and `auto_applier.js`:
-
-```powershell
-# Default fetch (2,000 jobs, Location: IN)
+```bash
 npm run fetch
-
-# Or with custom pages/location:
-node fetch_jobs.js 20 100 IN
 ```
+*(Or `node fetch_jobs.js`)*
+
+### 2. Run the Auto-Applier in Browser
+1. Open [artha.link](https://artha.link) in Google Chrome (or Edge/Brave) and log in.
+2. Press `F12` to open DevTools, then click the **Console** tab.
+3. Open [`auto_applier.js`](auto_applier.js), copy the entire file, paste it into the Console, and press **Enter**.
+4. The floating HUD will appear at the top-right. Click **Start Applying** to begin!
 
 ---
 
-## 🇺🇸 US High-CPC Auto-Applier Suite (Up to $1.75/click)
-
-The [`us/`](us/) directory provides an isolated, ultra-high-yield automation package configured specifically for **United States job openings** paying premium CPC rates (ranging from **$0.78 to $1.75 per click**).
-
-### 📊 Comparison: Standard Catalog vs. 🇺🇸 US High-CPC Suite
-
-| Feature | Standard Feed | 🇺🇸 US High-CPC Suite |
-| :--- | :--- | :--- |
-| **Target Region** | Global / India | **United States Only (`location: "US"`)** |
-| **Max CPC Rate** | ~$0.048 / click | **Up to $1.750 / click** (36× higher yield) |
-| **Median CPC** | $0.048 | **$0.780 / click** |
-| **Queue Size** | 1,517 Openings | **2,761 Pure-CPC Openings (100% CPC > 0)** |
-| **Queue Ordering** | Standard Catalog Order | **Strictly Highest CPC First ($1.75 down to top tier)** |
-| **Storage State** | `__ZERO_FOOTPRINT_APPLIER_STATE__` | **`__ZERO_FOOTPRINT_APPLIER_STATE_US__`** (Zero Collision) |
-| **HUD Identifier** | `⚡ ZERO-FOOTPRINT PRO` | **`🇺🇸 US HIGH-CPC PRO`** |
-| **Dedicated Doc** | [README.md](README.md) | **[us/README.md](us/README.md)** |
-
----
-
-### ⚡ Running the US High-CPC Applier
-
-#### Method 1: Browser DevTools Console (Zero Install)
-1. Open [artha.link](https://artha.link) and sign in.
-2. Press `F12` and switch to the **Console** tab.
-3. Paste the contents of [`us/auto_applier.js`](us/auto_applier.js) into the console and hit `Enter`.
-4. Click **"Start Batch 1 (50 Jobs)"** on the top-right floating HUD.
-
-#### Method 2: 1-Click Bookmarklet
-Create a browser bookmark named `🇺🇸 US High-CPC Applier` with URL:
+## 🛠️ Global Console API
+While the applier is running in the browser, you can control it anytime from the DevTools console:
 ```javascript
-javascript:(function(){const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/Naman-mahi/zero-footprint@master/us/auto_applier.js?t='+Date.now();document.head.appendChild(s);})();
+window.__AUTO_APPLIER__.start();         // Start / Resume application queue
+window.__AUTO_APPLIER__.pause();         // Pause queue
+window.__AUTO_APPLIER__.skip();          // Skip to next job
+window.__AUTO_APPLIER__.reset();         // Reset queue progress
+window.__AUTO_APPLIER__.setBatchSize(50);// Change batch size
+window.__AUTO_APPLIER__.cleanup();       // Remove HUD and stop session
 ```
-
----
-
-### 🔄 Fetching & Updating Fresh US Jobs
-
-To query Artha's recommendation API for fresh US listings sorted highest-CPC first:
-
-```powershell
-# From project root:
-npm run fetch:us
-
-# Or directly:
-node us/fetch_jobs.js
-```
-
-This hits `https://my.artha.link/api/job-api/recommend?pulse_variant=control` with `location: "US"` and `sort_by: "high_cpc"`, along with specialized technology/software niche keywords (DevSecOps, SRE, Cloud Security, Kubernetes, AWS, etc.) and metro hubs, automatically synchronizing [`us/jobs.json`](us/jobs.json), [`us/jobs_queue.json`](us/jobs_queue.json), and [`us/auto_applier.js`](us/auto_applier.js).
-
-> 💡 **For full documentation and advanced operational details, see the standalone [us/README.md](us/README.md) documentation.**
-
----
-
-## 🎛️ HUD Controller Layout
-
-```text
-┌────────────────────────────────────────────────────────┐
-│ ⚡ ZERO-FOOTPRINT AUTO APPLIER                  _  ✕  │
-│   Autonomous 1-by-1 Job Applier       🟢 (Active Dot)  │
-├────────────────────────────────────────────────────────┤
-│ [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░] 25%                   │
-│ Progress: 25 / 2000 (1.25%)     Applied: 25            │
-│ Active:   [26/2000] Senior Data Engineer               │
-│ Batch:    Batch 2 of 40 (Jobs 51–100)                  │
-├────────────────────────────────────────────────────────┤
-│ Batch Size:  [ 25 ]  [[ 50 ]]  [ 100 ]  [ 200 ]            │
-│ Delay:       [1s] [2s] [3s] [[ 5s ]] [8s] [10s] [15s]     │
-├────────────────────────────┬─────────────┬─────────────┤
-│ [⏳ Start Batch 2 now (45s)]│ [⏭ Skip]   │ [↺ Reset]   │
-├────────────────────────────┴─────────────┴─────────────┤
-│ [🧹 Wipe All Cookies, Session & Local Storage]         │
-├────────────────────────────────────────────────────────┤
-│ 💡 Operational Guarantees:                             │
-│ • Runs strictly 1-by-1 (0% machine RAM/CPU lag).       │
-│ • Clears cookies & session storage after EACH job.     │
-│ • 1-minute autostart cooldown between batches.         │
-│ • Holds destination pages for 10s tracking hydration.  │
-│ • Auto-closes all 3 tabs cleanly.                      │
-└────────────────────────────────────────────────────────┘
-```
-
----
-
-## ⚠️ Troubleshooting & Tips
-
-### Q: Why do popups get blocked after the first job?
-**A:** Modern browsers restrict asynchronous `window.open` calls after user interaction expires. Click the popup blocker icon in your browser's address bar and select **"Always allow popups and redirects from this site"**.
-
-### Q: How do I pause or resume?
-**A:** Click the main action button in the HUD to pause at any time. Progress is saved in `localStorage`, so you can resume even after closing or refreshing the tab.
-
----
-
-## 📄 License
-
-MIT License — see `LICENSE` for details.

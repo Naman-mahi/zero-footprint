@@ -5,9 +5,7 @@
   "main": "auto_applier.js",
   "scripts": {
     "fetch": "node fetch_jobs.js",
-    "fetch:jobs": "node fetch_jobs.js",
-    "fetch:india:all": "node fetch_india_all_jobs.js",
-    "fetch:us": "node us/fetch_jobs.js"
+    "start": "node fetch_jobs.js"
   },
   "repository": {
     "type": "git",
