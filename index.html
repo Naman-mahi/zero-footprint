@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>⚡ Live Job Portal | High-CPC Openings</title>
+  <title>⚡ Live Job Portal | High-CPC Openings & Application Tracker</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,7 +29,7 @@
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
   <!-- Header -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs backdrop-blur-md bg-white/95">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-xl shadow-md shadow-blue-500/20">
@@ -38,22 +38,24 @@
         <div>
           <h1 class="text-lg font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
             Job Opportunity Portal
-            <span class="text-xs bg-emerald-50 text-emerald-700 font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">
+            <span class="text-xs bg-emerald-50 text-emerald-700 font-bold px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               Live & Verified
             </span>
           </h1>
-          <p class="text-xs text-slate-500 font-medium">Pan-India openings with verified payout amounts</p>
+          <p class="text-xs text-slate-500 font-medium">Pan-India openings with verified payout amounts & local tracker</p>
         </div>
       </div>
 
+      <!-- Header Action Controls -->
       <div class="flex items-center gap-2.5">
-        <a href="auto_applier.js" download class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition border border-slate-200">
-          <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        <button id="clear-storage-btn" title="Clear applied jobs saved in local storage" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 transition border border-rose-200 cursor-pointer">
+          <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          Reset Applied History
+        </button>
+        <a href="auto_applier.js" download class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition border border-slate-200">
+          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
           auto_applier.js
-        </a>
-        <a href="jobs.json" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition border border-blue-200">
-          <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-          jobs.json
         </a>
       </div>
     </div>
@@ -65,24 +67,61 @@
     <!-- KPI Statistics Banner -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-6">
       <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs">
-        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Active Jobs</div>
-        <div class="text-2xl font-black text-slate-900 mt-1" id="stat-total-jobs">0</div>
-        <div class="text-[11px] text-slate-400 mt-0.5">Deduplicated Indian listings</div>
+        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+          <span>Available Jobs</span>
+          <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+        </div>
+        <div class="text-2xl font-black text-slate-900 mt-1" id="stat-available-jobs">0</div>
+        <div class="text-[11px] text-slate-400 mt-0.5">Ready to apply</div>
       </div>
       <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs">
-        <div class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Highest CPC Amount</div>
-        <div class="text-2xl font-black text-emerald-600 mt-1" id="stat-highest-cpc">$0.000</div>
-        <div class="text-[11px] text-emerald-600/70 mt-0.5">Top-tier payout rate</div>
+        <div class="text-xs font-semibold text-emerald-600 uppercase tracking-wider flex items-center justify-between">
+          <span>Applied Jobs</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        </div>
+        <div class="text-2xl font-black text-emerald-600 mt-1" id="stat-applied-jobs">0</div>
+        <div class="text-[11px] text-emerald-600/70 mt-0.5">Saved in LocalStorage</div>
       </div>
       <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs">
-        <div class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Positive CPC Jobs</div>
-        <div class="text-2xl font-black text-blue-600 mt-1" id="stat-cpc-count">0</div>
-        <div class="text-[11px] text-blue-600/70 mt-0.5">Verified cpc_value > 0</div>
+        <div class="text-xs font-semibold text-purple-600 uppercase tracking-wider flex items-center justify-between">
+          <span>Highest CPC</span>
+          <span class="text-xs font-mono font-bold text-purple-600">CPC</span>
+        </div>
+        <div class="text-2xl font-black text-purple-600 mt-1" id="stat-highest-cpc">$0.000</div>
+        <div class="text-[11px] text-purple-600/70 mt-0.5">Top verified payout</div>
       </div>
       <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs">
-        <div class="text-xs font-semibold text-purple-600 uppercase tracking-wider">Unique Companies</div>
-        <div class="text-2xl font-black text-purple-600 mt-1" id="stat-companies">0</div>
-        <div class="text-[11px] text-purple-600/70 mt-0.5">Top Indian & Global firms</div>
+        <div class="text-xs font-semibold text-amber-600 uppercase tracking-wider flex items-center justify-between">
+          <span>Median Payout</span>
+          <span class="text-xs font-mono font-bold text-amber-600">AVG</span>
+        </div>
+        <div class="text-2xl font-black text-amber-600 mt-1" id="stat-median-cpc">$0.000</div>
+        <div class="text-[11px] text-amber-600/70 mt-0.5">Per-click benchmark</div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex items-center justify-between border-b border-slate-200 mb-6 pb-px">
+      <div class="flex items-center gap-2">
+        <button id="tab-available-btn" class="flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 border-blue-600 text-blue-600 transition-colors cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          Available Openings
+          <span id="badge-available-count" class="bg-blue-100 text-blue-700 text-xs font-extrabold px-2 py-0.5 rounded-full ml-1">0</span>
+        </button>
+
+        <button id="tab-applied-btn" class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-colors cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Applied Jobs
+          <span id="badge-applied-count" class="bg-slate-100 text-slate-600 text-xs font-extrabold px-2 py-0.5 rounded-full ml-1">0</span>
+        </button>
+      </div>
+
+      <!-- Quick Action: Export Applied -->
+      <div id="applied-actions" class="hidden items-center gap-2">
+        <button id="export-applied-btn" class="text-xs font-semibold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white border border-slate-200 shadow-2xs transition">
+          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Export List (JSON)
+        </button>
       </div>
     </div>
 
@@ -90,7 +129,7 @@
     <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-xs mb-6">
       <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-center">
         <!-- Search Input -->
-        <div class="md:col-span-5 relative">
+        <div class="md:col-span-6 relative">
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           </div>
@@ -105,23 +144,13 @@
         </div>
 
         <!-- Sort Filter -->
-        <div class="md:col-span-2">
+        <div class="md:col-span-3">
           <select id="sort-filter" class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:bg-white text-slate-800">
             <option value="cpc-desc">Amount: High to Low</option>
             <option value="cpc-asc">Amount: Low to High</option>
             <option value="title-asc">Role: A to Z</option>
             <option value="company-asc">Company: A to Z</option>
           </select>
-        </div>
-
-        <!-- Quick Filter Mode -->
-        <div class="md:col-span-2 flex items-center gap-1.5">
-          <button id="filter-all-btn" class="flex-1 py-2 text-xs font-bold rounded-lg border border-blue-600 bg-blue-600 text-white transition shadow-xs">
-            All
-          </button>
-          <button id="filter-cpc-btn" class="flex-1 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition">
-            CPC Only
-          </button>
         </div>
       </div>
 
@@ -146,10 +175,10 @@
         Page <span id="current-page" class="font-bold text-slate-900">1</span> of <span id="total-pages" class="font-bold text-slate-900">1</span>
       </div>
       <div class="flex items-center gap-1.5">
-        <button id="prev-page-btn" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition">
+        <button id="prev-page-btn" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer">
           ← Previous
         </button>
-        <button id="next-page-btn" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition">
+        <button id="next-page-btn" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer">
           Next →
         </button>
       </div>
@@ -160,13 +189,35 @@
   <!-- Footer -->
   <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500">
-      ⚡ Zero-Footprint Automated Suite • Synced directly with <code class="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded font-mono">jobs.json</code>
+      ⚡ Zero-Footprint Automated Suite • Local storage application tracker enabled
     </div>
   </footer>
 
+  <!-- Confirmation Modal for Clearing Local Storage -->
+  <div id="confirm-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden opacity-0 transition-opacity duration-200">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 transform transition-transform scale-95" id="modal-box">
+      <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-4">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+      </div>
+      <h3 class="text-base font-extrabold text-slate-900 text-center">Reset Applied History?</h3>
+      <p class="text-xs text-slate-500 text-center mt-1.5">
+        This will clear all tracked applications from your browser's local storage and move them back to the Available list.
+      </p>
+      <div class="grid grid-cols-2 gap-3 mt-6">
+        <button id="cancel-modal-btn" class="w-full py-2 px-3 text-xs font-semibold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition cursor-pointer">
+          Cancel
+        </button>
+        <button id="confirm-reset-btn" class="w-full py-2 px-3 text-xs font-bold rounded-lg bg-rose-600 text-white hover:bg-rose-700 transition cursor-pointer shadow-xs">
+          Yes, Reset All
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast notification -->
-  <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-lg opacity-0 transition-opacity duration-200 pointer-events-none z-50 flex items-center gap-2">
-    <span>Link copied to clipboard!</span>
+  <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-xl opacity-0 transition-opacity duration-200 pointer-events-none z-50 flex items-center gap-2">
+    <span id="toast-icon">✨</span>
+    <span id="toast-message">Notification</span>
   </div>
 
   <!-- Embedded fallback script (for double-click file:// opening) -->
@@ -174,61 +225,153 @@
 
   <!-- Main Application Logic -->
   <script>
+    const STORAGE_KEY = "__PORTAL_APPLIED_JOBS__";
     let allJobs = [];
+    let currentTab = "available"; // 'available' or 'applied'
     let filteredJobs = [];
     let currentPage = 1;
     const pageSize = 24;
-    let onlyPositiveCpc = false;
+
+    // Local Storage helpers
+    function getAppliedJobsMap() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {
+        console.warn("Could not read local storage:", e);
+      }
+      return {};
+    }
+
+    function saveAppliedJobsMap(map) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+      } catch (e) {
+        console.warn("Could not write to local storage:", e);
+      }
+    }
+
+    function markJobApplied(jobId) {
+      const job = allJobs.find(j => (j.id || j.slug) === jobId);
+      if (!job) return;
+
+      const map = getAppliedJobsMap();
+      map[jobId] = {
+        id: jobId,
+        title: job.title,
+        company_name: job.company_name,
+        apply_link: job.apply_link,
+        cpc_value: job.cpc_value,
+        cpa_value: job.cpa_value,
+        city: job.city,
+        state: job.state,
+        appliedAt: new Date().toISOString()
+      };
+      saveAppliedJobsMap(map);
+      updateBadgeCounts();
+      applyFilters();
+      showToast("🎉 Marked as Applied! Moved to Applied tab.", "✅");
+    }
+
+    function unmarkJobApplied(jobId) {
+      const map = getAppliedJobsMap();
+      if (map[jobId]) {
+        delete map[jobId];
+        saveAppliedJobsMap(map);
+        updateBadgeCounts();
+        applyFilters();
+        showToast("↩️ Restored back to Available Openings.", "🔄");
+      }
+    }
+
+    function clearAllAppliedStorage() {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        updateBadgeCounts();
+        applyFilters();
+        showToast("🧹 LocalStorage cleared! All jobs moved to Available.", "✨");
+      } catch (e) {}
+    }
 
     // Toast helper
-    function showToast(message) {
+    function showToast(message, icon = "✨") {
       const toast = document.getElementById("toast");
-      toast.querySelector("span").innerText = message;
+      document.getElementById("toast-icon").innerText = icon;
+      document.getElementById("toast-message").innerText = message;
       toast.classList.remove("opacity-0");
-      setTimeout(() => toast.classList.add("opacity-0"), 2000);
+      setTimeout(() => toast.classList.add("opacity-0"), 2400);
+    }
+
+    // Modal helpers
+    function openModal() {
+      const modal = document.getElementById("confirm-modal");
+      const box = document.getElementById("modal-box");
+      modal.classList.remove("hidden");
+      setTimeout(() => {
+        modal.classList.remove("opacity-0");
+        box.classList.remove("scale-95");
+        box.classList.add("scale-100");
+      }, 10);
+    }
+
+    function closeModal() {
+      const modal = document.getElementById("confirm-modal");
+      const box = document.getElementById("modal-box");
+      modal.classList.add("opacity-0");
+      box.classList.remove("scale-100");
+      box.classList.add("scale-95");
+      setTimeout(() => modal.classList.add("hidden"), 200);
     }
 
     // Load data
     async function loadJobsData() {
-      // 1. Try window.__JOBS_DATA__ from jobs_data.js (works with file:// directly)
       if (window.__JOBS_DATA__ && Array.isArray(window.__JOBS_DATA__) && window.__JOBS_DATA__.length > 0) {
         allJobs = window.__JOBS_DATA__;
       } else {
-        // 2. Fallback to fetch('jobs.json')
         try {
           const res = await fetch('jobs.json');
-          if (res.ok) {
-            allJobs = await res.json();
-          }
+          if (res.ok) allJobs = await res.json();
         } catch (e) {
-          console.warn("Could not load jobs.json via fetch:", e);
+          console.warn("Could not load jobs.json:", e);
         }
       }
-
       initPortal();
     }
 
+    function updateBadgeCounts() {
+      const appliedMap = getAppliedJobsMap();
+      const appliedCount = Object.keys(appliedMap).length;
+      const availableCount = Math.max(0, allJobs.length - appliedCount);
+
+      document.getElementById("stat-available-jobs").innerText = availableCount.toLocaleString();
+      document.getElementById("stat-applied-jobs").innerText = appliedCount.toLocaleString();
+      document.getElementById("badge-available-count").innerText = availableCount.toLocaleString();
+      document.getElementById("badge-applied-count").innerText = appliedCount.toLocaleString();
+    }
+
     function initPortal() {
-      // Populate city filter dropdown
       const citySet = new Set();
       let maxCpc = 0;
-      let positiveCpcCount = 0;
-      const companySet = new Set();
+      let totalCpc = 0;
+      let cpcItemsCount = 0;
 
       allJobs.forEach(job => {
         if (job.city) citySet.add(job.city.trim());
-        if (job.company_name) companySet.add(job.company_name.trim());
         const cpc = typeof job.cpc_value === 'number' ? job.cpc_value : 0;
         if (cpc > maxCpc) maxCpc = cpc;
-        if (cpc > 0) positiveCpcCount++;
+        if (cpc > 0) {
+          totalCpc += cpc;
+          cpcItemsCount++;
+        }
       });
 
-      // Update KPIs
-      document.getElementById("stat-total-jobs").innerText = allJobs.length.toLocaleString();
+      const avgCpc = cpcItemsCount > 0 ? (totalCpc / cpcItemsCount) : 0;
       document.getElementById("stat-highest-cpc").innerText = `$${maxCpc.toFixed(3)}`;
-      document.getElementById("stat-cpc-count").innerText = positiveCpcCount.toLocaleString();
-      document.getElementById("stat-companies").innerText = companySet.size.toLocaleString();
+      document.getElementById("stat-median-cpc").innerText = `$${avgCpc.toFixed(3)}`;
 
+      updateBadgeCounts();
+
+      // Populate cities dropdown
       const citySelect = document.getElementById("city-filter");
       const sortedCities = Array.from(citySet).sort();
       sortedCities.forEach(city => {
@@ -238,32 +381,60 @@
         citySelect.appendChild(opt);
       });
 
-      // Setup event listeners
+      // Tab Buttons
+      const tabAvailableBtn = document.getElementById("tab-available-btn");
+      const tabAppliedBtn = document.getElementById("tab-applied-btn");
+      const appliedActions = document.getElementById("applied-actions");
+
+      tabAvailableBtn.addEventListener("click", () => {
+        if (currentTab === "available") return;
+        currentTab = "available";
+        tabAvailableBtn.className = "flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 border-blue-600 text-blue-600 transition-colors cursor-pointer";
+        tabAppliedBtn.className = "flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-colors cursor-pointer";
+        appliedActions.classList.add("hidden");
+        appliedActions.classList.remove("flex");
+        applyFilters();
+      });
+
+      tabAppliedBtn.addEventListener("click", () => {
+        if (currentTab === "applied") return;
+        currentTab = "applied";
+        tabAppliedBtn.className = "flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 border-emerald-600 text-emerald-600 transition-colors cursor-pointer";
+        tabAvailableBtn.className = "flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-colors cursor-pointer";
+        appliedActions.classList.remove("hidden");
+        appliedActions.classList.add("flex");
+        applyFilters();
+      });
+
+      // Clear storage modal
+      document.getElementById("clear-storage-btn").addEventListener("click", openModal);
+      document.getElementById("cancel-modal-btn").addEventListener("click", closeModal);
+      document.getElementById("confirm-reset-btn").addEventListener("click", () => {
+        closeModal();
+        clearAllAppliedStorage();
+      });
+
+      // Export applied jobs
+      document.getElementById("export-applied-btn").addEventListener("click", () => {
+        const appliedMap = getAppliedJobsMap();
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(Object.values(appliedMap), null, 2));
+        const dlAnchor = document.createElement('a');
+        dlAnchor.setAttribute("href", dataStr);
+        dlAnchor.setAttribute("download", `applied_jobs_${new Date().toISOString().slice(0, 10)}.json`);
+        document.body.appendChild(dlAnchor);
+        dlAnchor.click();
+        dlAnchor.remove();
+      });
+
+      // Search & Filters
       document.getElementById("search-input").addEventListener("input", applyFilters);
       document.getElementById("city-filter").addEventListener("change", applyFilters);
       document.getElementById("sort-filter").addEventListener("change", applyFilters);
-
-      document.getElementById("filter-all-btn").addEventListener("click", () => {
-        onlyPositiveCpc = false;
-        document.getElementById("filter-all-btn").className = "flex-1 py-2 text-xs font-bold rounded-lg border border-blue-600 bg-blue-600 text-white transition shadow-xs";
-        document.getElementById("filter-cpc-btn").className = "flex-1 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition";
-        applyFilters();
-      });
-
-      document.getElementById("filter-cpc-btn").addEventListener("click", () => {
-        onlyPositiveCpc = true;
-        document.getElementById("filter-cpc-btn").className = "flex-1 py-2 text-xs font-bold rounded-lg border border-blue-600 bg-blue-600 text-white transition shadow-xs";
-        document.getElementById("filter-all-btn").className = "flex-1 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition";
-        applyFilters();
-      });
 
       document.getElementById("reset-filters").addEventListener("click", () => {
         document.getElementById("search-input").value = "";
         document.getElementById("city-filter").value = "";
         document.getElementById("sort-filter").value = "cpc-desc";
-        onlyPositiveCpc = false;
-        document.getElementById("filter-all-btn").className = "flex-1 py-2 text-xs font-bold rounded-lg border border-blue-600 bg-blue-600 text-white transition shadow-xs";
-        document.getElementById("filter-cpc-btn").className = "flex-1 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition";
         applyFilters();
       });
 
@@ -291,16 +462,22 @@
       const query = document.getElementById("search-input").value.trim().toLowerCase();
       const city = document.getElementById("city-filter").value.trim().toLowerCase();
       const sortMode = document.getElementById("sort-filter").value;
+      const appliedMap = getAppliedJobsMap();
 
       filteredJobs = allJobs.filter(job => {
-        if (onlyPositiveCpc && (!job.cpc_value || job.cpc_value <= 0)) {
-          return false;
-        }
+        const jobId = job.id || job.slug;
+        const isApplied = Boolean(appliedMap[jobId]);
 
+        // TAB FILTER: Available vs Applied
+        if (currentTab === "available" && isApplied) return false;
+        if (currentTab === "applied" && !isApplied) return false;
+
+        // City filter
         if (city && (!job.city || job.city.toLowerCase() !== city)) {
           return false;
         }
 
+        // Query filter
         if (query) {
           const title = (job.title || "").toLowerCase();
           const company = (job.company_name || "").toLowerCase();
@@ -319,16 +496,11 @@
         const cpcB = typeof b.cpc_value === 'number' ? b.cpc_value : 0;
 
         switch (sortMode) {
-          case 'cpc-desc':
-            return cpcB - cpcA;
-          case 'cpc-asc':
-            return cpcA - cpcB;
-          case 'title-asc':
-            return (a.title || "").localeCompare(b.title || "");
-          case 'company-asc':
-            return (a.company_name || "").localeCompare(b.company_name || "");
-          default:
-            return cpcB - cpcA;
+          case 'cpc-desc': return cpcB - cpcA;
+          case 'cpc-asc': return cpcA - cpcB;
+          case 'title-asc': return (a.title || "").localeCompare(b.title || "");
+          case 'company-asc': return (a.company_name || "").localeCompare(b.company_name || "");
+          default: return cpcB - cpcA;
         }
       });
 
@@ -343,17 +515,28 @@
       const totalPagesEl = document.getElementById("total-pages");
       const prevBtn = document.getElementById("prev-page-btn");
       const nextBtn = document.getElementById("next-page-btn");
+      const appliedMap = getAppliedJobsMap();
 
-      resultsCountEl.innerText = `Showing ${filteredJobs.length.toLocaleString()} matching jobs`;
+      resultsCountEl.innerText = `Showing ${filteredJobs.length.toLocaleString()} ${currentTab === 'available' ? 'available' : 'applied'} jobs`;
 
       if (filteredJobs.length === 0) {
-        container.innerHTML = `
-          <div class="col-span-full py-16 text-center bg-white rounded-xl border border-slate-200">
-            <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center text-xl mb-3">🔍</div>
-            <h3 class="text-sm font-bold text-slate-800">No matching jobs found</h3>
-            <p class="text-xs text-slate-500 mt-1">Try clearing your search term or selecting a different location.</p>
-          </div>
-        `;
+        if (currentTab === "applied") {
+          container.innerHTML = `
+            <div class="col-span-full py-16 text-center bg-white rounded-xl border border-slate-200">
+              <div class="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center text-2xl mb-3 shadow-inner">🎯</div>
+              <h3 class="text-sm font-extrabold text-slate-800">No applied jobs yet</h3>
+              <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Click "Apply Now" on any available opening to track your submitted applications here!</p>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <div class="col-span-full py-16 text-center bg-white rounded-xl border border-slate-200">
+              <div class="w-14 h-14 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center text-2xl mb-3">🔍</div>
+              <h3 class="text-sm font-extrabold text-slate-800">No matching jobs found</h3>
+              <p class="text-xs text-slate-500 mt-1">Try resetting your search query or city filter.</p>
+            </div>
+          `;
+        }
         currentPageEl.innerText = "1";
         totalPagesEl.innerText = "1";
         prevBtn.disabled = true;
@@ -372,6 +555,10 @@
 
       let html = "";
       paginatedJobs.forEach(job => {
+        const jobId = job.id || job.slug;
+        const isApplied = Boolean(appliedMap[jobId]);
+        const appliedInfo = appliedMap[jobId];
+
         const cpc = typeof job.cpc_value === 'number' && job.cpc_value > 0 ? job.cpc_value : 0;
         const cpa = typeof job.cpa_value === 'number' && job.cpa_value > 0 ? job.cpa_value : 0;
 
@@ -399,15 +586,31 @@
         const locationStr = [job.city, job.state, "India"].filter(Boolean).join(", ");
         const companyName = job.company_name || "Company Confidential";
 
+        let appliedTimeLabel = "";
+        if (isApplied && appliedInfo?.appliedAt) {
+          const date = new Date(appliedInfo.appliedAt);
+          appliedTimeLabel = `<div class="text-[11px] text-emerald-600 font-semibold flex items-center gap-1 mt-1">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+            Applied on ${date.toLocaleDateString()} at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </div>`;
+        }
+
         html += `
-          <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-xs hover:shadow-md hover:border-blue-300 transition-all flex flex-col justify-between group">
+          <div class="bg-white rounded-xl border ${isApplied ? 'border-emerald-200 bg-emerald-50/10' : 'border-slate-200'} p-5 shadow-xs hover:shadow-md hover:border-blue-300 transition-all flex flex-col justify-between group">
             <div>
               <!-- Top Row: Amount & Category -->
               <div class="flex items-center justify-between gap-2 mb-3">
                 ${amountBadge}
-                <span class="text-[11px] font-semibold text-slate-400 truncate max-w-[140px]">
-                  ${job.job_type ? job.job_type.toUpperCase() : 'FULL-TIME'}
-                </span>
+                ${isApplied ? `
+                  <span class="text-[11px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    APPLIED
+                  </span>
+                ` : `
+                  <span class="text-[11px] font-semibold text-slate-400 truncate max-w-[140px]">
+                    ${job.job_type ? job.job_type.toUpperCase() : 'FULL-TIME'}
+                  </span>
+                `}
               </div>
 
               <!-- Job Role / Title -->
@@ -416,7 +619,7 @@
               </h3>
 
               <!-- Company & Location -->
-              <div class="space-y-1 mb-4">
+              <div class="space-y-1 mb-3">
                 <div class="text-xs font-semibold text-slate-700 flex items-center gap-1.5 truncate">
                   <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                   <span class="truncate">${escapeHtml(companyName)}</span>
@@ -425,15 +628,30 @@
                   <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                   <span class="truncate">${escapeHtml(locationStr)}</span>
                 </div>
+                ${appliedTimeLabel}
               </div>
             </div>
 
-            <!-- Action Buttons: Apply & Copy -->
+            <!-- Action Controls -->
             <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
-              <a href="${job.apply_link}" target="_blank" rel="noopener noreferrer" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2 px-3.5 rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow-xs">
-                <span>Apply Now</span>
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-              </a>
+              ${isApplied ? `
+                <a href="${job.apply_link}" target="_blank" rel="noopener noreferrer" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2 px-3 rounded-lg text-center transition flex items-center justify-center gap-1.5 border border-slate-200">
+                  <span>Re-visit Job</span>
+                  <svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                </a>
+                <button onclick="unmarkJobApplied('${jobId}')" title="Move back to available" class="text-xs font-semibold py-2 px-3 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition cursor-pointer flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+                  <span>Restore</span>
+                </button>
+              ` : `
+                <button onclick="handleApplyClick('${jobId}', '${job.apply_link}')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2 px-3.5 rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer">
+                  <span>Apply Now</span>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+                <button onclick="markJobApplied('${jobId}')" title="Mark as applied without opening" class="bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 p-2 rounded-lg transition shrink-0 cursor-pointer">
+                  <svg class="w-4 h-4 text-slate-500 hover:text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                </button>
+              `}
               <button onclick="copyJobLink('${job.apply_link}')" title="Copy Apply Link" class="bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 p-2 rounded-lg transition shrink-0 cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
               </button>
@@ -445,11 +663,18 @@
       container.innerHTML = html;
     }
 
+    function handleApplyClick(jobId, applyLink) {
+      // 1. Open the job apply link in a new tab
+      window.open(applyLink, '_blank', 'noopener,noreferrer');
+      // 2. Mark as applied in local storage and move from Available to Applied
+      markJobApplied(jobId);
+    }
+
     function copyJobLink(url) {
       navigator.clipboard.writeText(url).then(() => {
-        showToast("Link copied to clipboard!");
+        showToast("Link copied to clipboard!", "📋");
       }).catch(() => {
-        showToast("Could not copy link");
+        showToast("Could not copy link", "⚠️");
       });
     }
 
@@ -468,4 +693,3 @@
   </script>
 </body>
 </html>
-

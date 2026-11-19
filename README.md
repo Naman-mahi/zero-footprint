@@ -24,14 +24,16 @@ all-bots/
 
 ### 1. 🌐 View & Apply via Web Portal (`index.html`)
 
-You can visually browse every job, see payout amounts, filter by role/city, and apply manually with 1-click:
+You can visually browse every job, see payout amounts, filter by role/city, track applications, and apply manually with 1-click:
 
 1. Double-click **`index.html`** in Windows Explorer (or right-click → **Open with Chrome / Edge / Brave**).
 2. Features available on the portal:
    - **Payout Badges:** View exact amounts (e.g., `💰 $0.160 CPC`, `💎 $3.00 CPA`).
-   - **Search & Filters:** Search by Job Role, Title, or Company; filter by City (Bengaluru, Hyderabad, Pune, Mumbai, etc.); or sort by highest amount.
-   - **Direct Apply:** Click **Apply Now** on any card to immediately launch the application.
-   - **Copy Link:** Click the copy icon to grab direct apply URLs.
+   - **LocalStorage Application Tracking:** When you click **Apply Now**, the job is automatically marked as applied and moved out of the *Available* grid into the **Applied Jobs** tab.
+   - **Applied Jobs Tab:** Dedicated tab to review all your submitted applications with timestamps and quick re-visit/restore buttons.
+   - **Reset Applied History Button:** Top header button to wipe local storage history and restore all jobs back to available.
+   - **Search & Filters:** Real-time search by Job Role or Company, filter by City, or sort by highest amount.
+   - **Export Option:** Export your applied jobs history as a JSON file anytime.
 
 *(Zero web server required: works straight out of the box via double-click).*
 
